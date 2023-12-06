@@ -13,8 +13,8 @@ import 'package:revelationsai/src/providers/user/current.dart';
 import 'package:revelationsai/src/utils/build_context_extensions.dart';
 import 'package:revelationsai/src/widgets/branding/logo.dart';
 
-class RegisterScreen extends HookConsumerWidget {
-  const RegisterScreen({super.key});
+class AuthScreen extends HookConsumerWidget {
+  const AuthScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -26,45 +26,28 @@ class RegisterScreen extends HookConsumerWidget {
     final TextEditingController passwordTextController = useTextEditingController();
     final passwordFocusNode = useFocusNode();
 
-    final TextEditingController confirmPasswordTextController = useTextEditingController();
-    final confirmPasswordFocusNode = useFocusNode();
-
-    final pendingRegister = useState<Future<void>?>(null);
-    final snapshot = useFuture(pendingRegister.value);
+    final pendingLogin = useState<Future<void>?>(null);
+    final snapshot = useFuture(pendingLogin.value);
     final alert = useState<Alert?>(null);
 
     final showPassword = useState(false);
-    final showConfirmPassword = useState(false);
 
     final isLoading = !snapshot.hasData && !snapshot.hasError && snapshot.connectionState == ConnectionState.waiting;
 
-    final handleSubmit = useCallback(
-      () async {
-        if (formKey.value.currentState?.validate() ?? false) {
-          pendingRegister.value = ref
-              .read(currentUserProvider.notifier)
-              .register(emailTextController.value.text, passwordTextController.value.text)
-              .then((value) {
-            alert.value = Alert(
-              message: "Check your email for a verification link.",
-              type: AlertType.success,
-            );
-          }).catchError((error) {
-            alert.value = Alert(
-              message: error.toString(),
-              type: AlertType.error,
-            );
-          });
-          await pendingRegister.value;
-        }
-      },
-      [
-        ref,
-        formKey.value,
-        emailTextController.value.text,
-        passwordTextController.value.text,
-      ],
-    );
+    final handleSubmit = useCallback(() async {
+      if (formKey.value.currentState?.validate() ?? false) {
+        pendingLogin.value = ref
+            .read(currentUserProvider.notifier)
+            .login(emailTextController.value.text, passwordTextController.value.text)
+            .catchError((error) {
+          alert.value = Alert(
+            message: error.toString(),
+            type: AlertType.error,
+          );
+        });
+        await pendingLogin.value;
+      }
+    }, [ref, formKey.value, emailTextController.value.text, passwordTextController.value.text]);
 
     final handleSocialLogin = useCallback((String provider) async {
       final url = "${API.url}/auth/$provider-mobile/authorize";
@@ -80,13 +63,13 @@ class RegisterScreen extends HookConsumerWidget {
         );
         return;
       }
-      pendingRegister.value = ref.read(currentUserProvider.notifier).loginWithToken(token).catchError((error) {
+      pendingLogin.value = ref.read(currentUserProvider.notifier).loginWithToken(token).catchError((error) {
         alert.value = Alert(
           message: error.toString(),
           type: AlertType.error,
         );
       });
-      await pendingRegister.value;
+      await pendingLogin.value;
     }, [ref]);
 
     useEffect(
@@ -131,7 +114,7 @@ class RegisterScreen extends HookConsumerWidget {
             ),
           ),
           Card(
-            elevation: 3,
+            elevation: 5,
             shape: const RoundedRectangleBorder(
               borderRadius: BorderRadius.only(
                 topLeft: Radius.circular(25),
@@ -205,7 +188,7 @@ class RegisterScreen extends HookConsumerWidget {
                                       width: 10,
                                     ),
                                     Text(
-                                      "Register with Apple",
+                                      "Login with Apple",
                                     ),
                                   ],
                                 ),
@@ -245,7 +228,7 @@ class RegisterScreen extends HookConsumerWidget {
                                     width: 10,
                                   ),
                                   Text(
-                                    "Register with Google",
+                                    "Login with Google",
                                   ),
                                 ],
                               ),
@@ -318,12 +301,24 @@ class RegisterScreen extends HookConsumerWidget {
                                 height: 10,
                               ),
                               TextFormField(
-                                autofillHints: const [AutofillHints.newPassword],
+                                autofillHints: const [AutofillHints.password],
                                 autocorrect: false,
                                 obscureText: !showPassword.value,
                                 keyboardType: TextInputType.visiblePassword,
                                 controller: passwordTextController,
                                 focusNode: passwordFocusNode,
+                                onFieldSubmitted: (value) {
+                                  passwordFocusNode.unfocus();
+                                },
+                                onTapOutside: (event) {
+                                  passwordFocusNode.unfocus();
+                                },
+                                validator: (value) {
+                                  if (value == null || value.isEmpty) {
+                                    return "Password is required";
+                                  }
+                                  return null;
+                                },
                                 decoration: InputDecoration(
                                   hintText: "Password",
                                   suffixIcon: IconButton(
@@ -336,57 +331,6 @@ class RegisterScreen extends HookConsumerWidget {
                                     ),
                                   ),
                                 ),
-                                onTapOutside: (event) {
-                                  passwordFocusNode.unfocus();
-                                },
-                                onFieldSubmitted: (value) {
-                                  passwordFocusNode.unfocus();
-                                  confirmPasswordFocusNode.requestFocus();
-                                },
-                                validator: (value) {
-                                  if (value == null || value.isEmpty) {
-                                    return "Password is required";
-                                  }
-                                  return null;
-                                },
-                              ),
-                              const SizedBox(
-                                height: 10,
-                              ),
-                              TextFormField(
-                                autofillHints: const [AutofillHints.newPassword],
-                                autocorrect: false,
-                                obscureText: !showConfirmPassword.value,
-                                keyboardType: TextInputType.visiblePassword,
-                                controller: confirmPasswordTextController,
-                                focusNode: confirmPasswordFocusNode,
-                                decoration: InputDecoration(
-                                  hintText: "Confirm Password",
-                                  suffixIcon: IconButton(
-                                    onPressed: () {
-                                      showConfirmPassword.value = !showConfirmPassword.value;
-                                    },
-                                    icon: FaIcon(
-                                      showConfirmPassword.value ? FontAwesomeIcons.eye : FontAwesomeIcons.eyeSlash,
-                                      size: 18,
-                                    ),
-                                  ),
-                                ),
-                                onTapOutside: (event) {
-                                  confirmPasswordFocusNode.unfocus();
-                                },
-                                onFieldSubmitted: (value) {
-                                  confirmPasswordFocusNode.unfocus();
-                                },
-                                validator: (value) {
-                                  if (value == null || value.isEmpty) {
-                                    return "Confirm Password is required";
-                                  }
-                                  if (value != passwordTextController.value.text) {
-                                    return "Passwords do not match";
-                                  }
-                                  return null;
-                                },
                               ),
                               const SizedBox(
                                 height: 10,
@@ -408,7 +352,7 @@ class RegisterScreen extends HookConsumerWidget {
                                         handleSubmit();
                                       },
                                       child: const Text(
-                                        "Register with Email",
+                                        "Login with Email",
                                       ),
                                     ),
                                   ),
@@ -421,19 +365,37 @@ class RegisterScreen extends HookConsumerWidget {
                       const SizedBox(
                         height: 10,
                       ),
-                      GestureDetector(
-                        onTap: () {
-                          context.go('/auth/login');
-                        },
-                        child: Text(
-                          "Already have an account?",
-                          style: context.textTheme.bodySmall?.copyWith(
-                            color: context.brightness == Brightness.light
-                                ? context.primaryColor.withOpacity(0.6)
-                                : context.secondaryColor,
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          GestureDetector(
+                            onTap: () {
+                              context.go('/auth/register');
+                            },
+                            child: Text(
+                              "Don't have an account?",
+                              style: context.textTheme.bodySmall?.copyWith(
+                                color: context.brightness == Brightness.light
+                                    ? context.primaryColor.withOpacity(0.6)
+                                    : context.secondaryColor,
+                              ),
+                            ),
                           ),
-                        ),
-                      )
+                          GestureDetector(
+                            onTap: () {
+                              context.go('/auth/forgot-password');
+                            },
+                            child: Text(
+                              "Forgot password?",
+                              style: context.textTheme.bodySmall?.copyWith(
+                                color: context.brightness == Brightness.light
+                                    ? context.primaryColor.withOpacity(0.6)
+                                    : context.secondaryColor,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
                     ],
                   ),
                 ),
