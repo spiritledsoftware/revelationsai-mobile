@@ -69,11 +69,8 @@ class RouterListenable extends _$RouterListenable implements Listenable {
     if (isSplash) {
       final redirect = state.uri.queryParameters["redirect"] ?? chatPath;
       debugPrint("Redirecting to $redirect");
-      return _isAuth ? redirect : "/auth/login";
+      return _isAuth ? redirect : "/auth";
     }
-
-    final isForgotPassword = state.uri.path.startsWith("/auth/forgot-password");
-    if (isForgotPassword) return null;
 
     final isLoggingIn = state.uri.path.startsWith("/auth");
     if (isLoggingIn) return _isAuth ? chatPath : null;

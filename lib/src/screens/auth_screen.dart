@@ -1,13 +1,9 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:flutter_web_auth_2/flutter_web_auth_2.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:revelationsai/src/constants/api.dart';
+import 'package:revelationsai/src/constants/website.dart';
 import 'package:revelationsai/src/models/alert.dart';
 import 'package:revelationsai/src/providers/user/current.dart';
 import 'package:revelationsai/src/utils/build_context_extensions.dart';
@@ -18,39 +14,14 @@ class AuthScreen extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final formKey = useRef(GlobalKey<FormState>());
-
-    final TextEditingController emailTextController = useTextEditingController();
-    final emailFocusNode = useFocusNode();
-
-    final TextEditingController passwordTextController = useTextEditingController();
-    final passwordFocusNode = useFocusNode();
-
     final pendingLogin = useState<Future<void>?>(null);
     final snapshot = useFuture(pendingLogin.value);
     final alert = useState<Alert?>(null);
 
-    final showPassword = useState(false);
-
     final isLoading = !snapshot.hasData && !snapshot.hasError && snapshot.connectionState == ConnectionState.waiting;
 
-    final handleSubmit = useCallback(() async {
-      if (formKey.value.currentState?.validate() ?? false) {
-        pendingLogin.value = ref
-            .read(currentUserProvider.notifier)
-            .login(emailTextController.value.text, passwordTextController.value.text)
-            .catchError((error) {
-          alert.value = Alert(
-            message: error.toString(),
-            type: AlertType.error,
-          );
-        });
-        await pendingLogin.value;
-      }
-    }, [ref, formKey.value, emailTextController.value.text, passwordTextController.value.text]);
-
-    final handleSocialLogin = useCallback((String provider) async {
-      final url = "${API.url}/auth/$provider-mobile/authorize";
+    final handleLogin = useCallback(() async {
+      const url = "${Website.authUrl}/login?mobile=true";
       final authResult = await FlutterWebAuth2.authenticate(
         url: url,
         callbackUrlScheme: "revelationsai",
@@ -115,6 +86,7 @@ class AuthScreen extends HookConsumerWidget {
           ),
           Card(
             elevation: 5,
+            margin: EdgeInsets.zero,
             shape: const RoundedRectangleBorder(
               borderRadius: BorderRadius.only(
                 topLeft: Radius.circular(25),
@@ -124,6 +96,7 @@ class AuthScreen extends HookConsumerWidget {
             child: SingleChildScrollView(
               child: SafeArea(
                 child: Container(
+                  width: context.width,
                   padding: const EdgeInsets.only(
                     left: 20,
                     right: 20,
@@ -159,36 +132,37 @@ class AuthScreen extends HookConsumerWidget {
                                   ),
                                 )
                               : const SizedBox(),
-                      if (Platform.isIOS) ...[
-                        Flex(
-                          direction: Axis.horizontal,
+                      Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 30,
+                        ),
+                        child: Row(
                           children: [
                             Expanded(
                               child: ElevatedButton(
+                                onPressed: () async => await handleLogin(),
                                 style: ElevatedButton.styleFrom(
+                                  padding: const EdgeInsets.all(15),
+                                  backgroundColor: context.secondaryColor,
                                   shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(5),
-                                  ),
-                                  padding: const EdgeInsets.only(
-                                    top: 15,
-                                    bottom: 15,
+                                    borderRadius: BorderRadius.circular(15),
                                   ),
                                 ),
-                                onPressed: () async {
-                                  handleSocialLogin("apple");
-                                },
-                                child: const Row(
-                                  mainAxisSize: MainAxisSize.min,
+                                child: Row(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
-                                    FaIcon(
-                                      FontAwesomeIcons.apple,
+                                    Icon(
+                                      Icons.login,
+                                      color: context.colorScheme.onSecondary,
+                                      size: 30,
                                     ),
-                                    SizedBox(
-                                      width: 10,
-                                    ),
+                                    const SizedBox(width: 10),
                                     Text(
-                                      "Login with Apple",
+                                      "Login",
+                                      style: context.textTheme.titleLarge?.copyWith(
+                                        color: context.colorScheme.onSecondary,
+                                        fontWeight: FontWeight.bold,
+                                      ),
                                     ),
                                   ],
                                 ),
@@ -196,205 +170,6 @@ class AuthScreen extends HookConsumerWidget {
                             ),
                           ],
                         ),
-                        const SizedBox(
-                          height: 10,
-                        ),
-                      ],
-                      Flex(
-                        direction: Axis.horizontal,
-                        children: [
-                          Expanded(
-                            child: ElevatedButton(
-                              style: ElevatedButton.styleFrom(
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(5),
-                                ),
-                                padding: const EdgeInsets.only(
-                                  top: 15,
-                                  bottom: 15,
-                                ),
-                              ),
-                              onPressed: () async {
-                                handleSocialLogin("google");
-                              },
-                              child: const Row(
-                                mainAxisSize: MainAxisSize.min,
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  FaIcon(
-                                    FontAwesomeIcons.google,
-                                  ),
-                                  SizedBox(
-                                    width: 10,
-                                  ),
-                                  Text(
-                                    "Login with Google",
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(
-                        height: 10,
-                      ),
-                      Flex(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        direction: Axis.horizontal,
-                        children: [
-                          Expanded(
-                            child: Container(
-                              height: 1,
-                              color: context.colorScheme.onBackground.withOpacity(0.5),
-                            ),
-                          ),
-                          const SizedBox(
-                            width: 10,
-                          ),
-                          const Text(
-                            "OR",
-                          ),
-                          const SizedBox(
-                            width: 10,
-                          ),
-                          Expanded(
-                            child: Container(
-                              height: 1,
-                              color: context.colorScheme.onBackground.withOpacity(0.5),
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(
-                        height: 10,
-                      ),
-                      Form(
-                        key: formKey.value,
-                        child: AutofillGroup(
-                          child: Column(
-                            children: [
-                              TextFormField(
-                                autofillHints: const [AutofillHints.email],
-                                autocorrect: false,
-                                keyboardType: TextInputType.emailAddress,
-                                controller: emailTextController,
-                                focusNode: emailFocusNode,
-                                decoration: const InputDecoration(
-                                  hintText: "Email",
-                                ),
-                                onTapOutside: (event) {
-                                  emailFocusNode.unfocus();
-                                },
-                                onFieldSubmitted: (value) {
-                                  emailFocusNode.unfocus();
-                                  passwordFocusNode.requestFocus();
-                                },
-                                validator: (value) {
-                                  if (value == null || value.isEmpty) {
-                                    return "Email is required";
-                                  }
-                                  return null;
-                                },
-                              ),
-                              const SizedBox(
-                                height: 10,
-                              ),
-                              TextFormField(
-                                autofillHints: const [AutofillHints.password],
-                                autocorrect: false,
-                                obscureText: !showPassword.value,
-                                keyboardType: TextInputType.visiblePassword,
-                                controller: passwordTextController,
-                                focusNode: passwordFocusNode,
-                                onFieldSubmitted: (value) {
-                                  passwordFocusNode.unfocus();
-                                },
-                                onTapOutside: (event) {
-                                  passwordFocusNode.unfocus();
-                                },
-                                validator: (value) {
-                                  if (value == null || value.isEmpty) {
-                                    return "Password is required";
-                                  }
-                                  return null;
-                                },
-                                decoration: InputDecoration(
-                                  hintText: "Password",
-                                  suffixIcon: IconButton(
-                                    onPressed: () {
-                                      showPassword.value = !showPassword.value;
-                                    },
-                                    icon: FaIcon(
-                                      showPassword.value ? FontAwesomeIcons.eye : FontAwesomeIcons.eyeSlash,
-                                      size: 18,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(
-                                height: 10,
-                              ),
-                              Row(
-                                children: [
-                                  Expanded(
-                                    child: ElevatedButton(
-                                      style: ElevatedButton.styleFrom(
-                                        shape: RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.circular(5),
-                                        ),
-                                        padding: const EdgeInsets.only(
-                                          top: 15,
-                                          bottom: 15,
-                                        ),
-                                      ),
-                                      onPressed: () async {
-                                        handleSubmit();
-                                      },
-                                      child: const Text(
-                                        "Login with Email",
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                      const SizedBox(
-                        height: 10,
-                      ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          GestureDetector(
-                            onTap: () {
-                              context.go('/auth/register');
-                            },
-                            child: Text(
-                              "Don't have an account?",
-                              style: context.textTheme.bodySmall?.copyWith(
-                                color: context.brightness == Brightness.light
-                                    ? context.primaryColor.withOpacity(0.6)
-                                    : context.secondaryColor,
-                              ),
-                            ),
-                          ),
-                          GestureDetector(
-                            onTap: () {
-                              context.go('/auth/forgot-password');
-                            },
-                            child: Text(
-                              "Forgot password?",
-                              style: context.textTheme.bodySmall?.copyWith(
-                                color: context.brightness == Brightness.light
-                                    ? context.primaryColor.withOpacity(0.6)
-                                    : context.secondaryColor,
-                              ),
-                            ),
-                          ),
-                        ],
                       ),
                     ],
                   ),
