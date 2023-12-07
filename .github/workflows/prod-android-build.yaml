@@ -58,16 +58,13 @@ jobs:
       - id: install_dependencies
         name: Install dependencies
         run: flutter pub get
-        working-directory: mobile
       - id: generate_code
         name: Generate code
         run: dart run build_runner build --delete-conflicting-outputs
-        working-directory: mobile
       - id: generate_keystore
         name: Generate Keystore
         run: |
           echo $ENCODED_ANDROID_KEYSTORE | base64 --decode > android/app/keystore.jks
-        working-directory: mobile
       - id: generate_keystore_properties
         name: Generate Keystore Properties
         run: |
@@ -75,7 +72,6 @@ jobs:
           echo "keyPassword=$ANDROID_KEY_PASSWORD" >> android/key.properties
           echo "keyAlias=$ANDROID_KEY_ALIAS" >> android/key.properties
           echo "storeFile=keystore.jks" >> android/key.properties
-        working-directory: mobile
       - id: build_appbundle
         name: Build App Bundle for Android
         run: |
@@ -87,12 +83,11 @@ jobs:
             --dart-define CHAT_API_URL=$CHAT_API_URL \
             --dart-define REVENUECAT_PLAY_STORE_API_KEY=$REVENUECAT_PLAY_STORE_API_KEY \
             --dart-define NEW_RELIC_ANDROID_APP_TOKEN=$NEW_RELIC_ANDROID_APP_TOKEN
-        working-directory: mobile
       - name: Archive Obfuscation Mapping
         uses: actions/upload-artifact@v2
         with:
           name: android-obfuscation-mapping
-          path: mobile/build/android/debug-info/*.symbols
+          path: build/android/debug-info/*.symbols
       - name: Create google cloud service account key file
         run: echo ${{ secrets.ENCODED_GOOGLE_CLOUD_SVC_ACCOUNT_JSON }} | base64 --decode > google-cloud-key.json
       - name: Upload to Google Play
@@ -100,6 +95,6 @@ jobs:
         with:
           serviceAccountJson: google-cloud-key.json
           packageName: com.passgoco.revelationsai
-          releaseFiles: mobile/build/app/outputs/bundle/release/app-release.aab
+          releaseFiles: build/app/outputs/bundle/release/app-release.aab
           track: production
           changesNotSentForReview: ${{ inputs.changesNotSentForReview }}
