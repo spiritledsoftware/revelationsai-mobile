@@ -24,10 +24,12 @@ import 'package:revelationsai/src/widgets/chat/message.dart';
 
 class ChatScreen extends HookConsumerWidget {
   final String? initChatId;
+  final String? initQuery;
 
   const ChatScreen({
     super.key,
     this.initChatId,
+    this.initQuery,
   });
 
   @override
@@ -132,6 +134,20 @@ class ChatScreen extends HookConsumerWidget {
       chatHook.chatId.value = initChatId;
       return () {};
     }, [initChatId]);
+
+    useEffect(() {
+      if (initQuery != null) {
+        chatHook.append(
+          ChatMessage(
+            id: nanoid(),
+            content: initQuery!,
+            createdAt: DateTime.now(),
+            role: Role.user,
+          ),
+        );
+      }
+      return () {};
+    }, [initQuery]);
 
     useEffect(() {
       ref.read(singleChatProvider(chatHook.chatId.value).future).then((value) {

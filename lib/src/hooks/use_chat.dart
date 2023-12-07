@@ -156,18 +156,19 @@ Future<ChatMessage> getStreamedResponse({
           if (appendFutures.isNotEmpty) await appendFutures.last;
 
           // split chunk into words
-          final words = value.split(' ').where((element) => element.isNotEmpty).toList();
+          final words = value.split(' ').toList(growable: false);
           for (int i = 0; i < words.length; i++) {
             await Future.delayed(
-              const Duration(milliseconds: 8),
+              const Duration(milliseconds: 5),
               () {
-                reply = reply.copyWith(content: "${reply.content} ${words[i]}");
+                final addSpace = i != 0;
+                reply = reply.copyWith(content: "${reply.content}${addSpace ? " " : ""}${words[i]}");
                 messages.value = [
                   ...chatRequest.messages,
                   reply,
                 ];
                 if (hapticFeedback) {
-                  HapticFeedback.lightImpact();
+                  HapticFeedback.mediumImpact();
                 }
               },
             );

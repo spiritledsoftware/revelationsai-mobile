@@ -52,7 +52,11 @@ class RAIApp extends HookConsumerWidget {
         switch (message.data['task']) {
           case 'daily-devo':
             final id = message.data['id'] ?? '';
-            context.go('/?redirect=${Uri.encodeComponent('/devotions/$id')}');
+            Future(() => context.go('/?redirect=${Uri.encodeComponent('/devotions/$id')}'));
+            break;
+          case "chat-query":
+            final query = message.data['query'] ?? '';
+            Future(() => context.go('/?redirect=${Uri.encodeComponent('/chat?query=$query')}'));
             break;
           default:
             break;
@@ -66,7 +70,11 @@ class RAIApp extends HookConsumerWidget {
         switch (message.data['task']) {
           case 'daily-devo':
             final id = message.data['id'] ?? '';
-            context.go('/?redirect=${Uri.encodeComponent('/devotions/$id')}');
+            Future(() => context.go('/?redirect=${Uri.encodeComponent('/devotions/$id')}'));
+            break;
+          case "chat-query":
+            final query = message.data['query'] ?? '';
+            Future(() => context.go('/?redirect=${Uri.encodeComponent('/chat?query=$query')}'));
             break;
           default:
             break;

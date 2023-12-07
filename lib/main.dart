@@ -30,6 +30,7 @@ Future<void> main() async {
   ).then((_) {
     FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
     FirebaseMessaging.instance.subscribeToTopic('daily-devo');
+    FirebaseMessaging.instance.subscribeToTopic('chat-query');
   });
 
   await MobileAds.instance.initialize();
@@ -50,6 +51,10 @@ Future<void> main() async {
       case 'daily-devo':
         final id = initMessage.data['id'] ?? '';
         initLocation = '/?redirect=${Uri.encodeComponent('/devotions/$id')}';
+        break;
+      case "chat-query":
+        final query = initMessage.data['query'] ?? '';
+        initLocation = '/?redirect=${Uri.encodeComponent('/chat?query=$query')}';
         break;
       default:
         break;

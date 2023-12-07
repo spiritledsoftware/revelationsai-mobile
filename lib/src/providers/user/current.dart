@@ -41,8 +41,16 @@ class CurrentUser extends _$CurrentUser {
         throw Exception('No auth token found');
       }
 
-      return await _loginWithToken(savedSession);
+      final userInfo = await _loginWithToken(savedSession);
+      try {
+        final refreshedSession = await UserService.getRefreshedToken(savedSession);
+        return userInfo.copyWith(session: refreshedSession);
+      } catch (e) {
+        debugPrint("Failed to refresh token: $e");
+        return userInfo;
+      }
     } catch (e) {
+      debugPrint("Failed to login with saved token: $e");
       if (e is RAIHttpException && e.isUnauthorized) {
         await _sharedPreferences.remove(_sharedPrefsKey);
       }
@@ -142,6 +150,7 @@ class CurrentUser extends _$CurrentUser {
   }
 
   Future<void> logout() async {
+    _sharedPreferences.remove(_sharedPrefsKey);
     state = AsyncValue.error(Exception("Not logged in"), StackTrace.current);
   }
 

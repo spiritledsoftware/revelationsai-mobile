@@ -18,11 +18,11 @@ class SplashScreen extends HookConsumerWidget {
 
     useEffect(() {
       debugPrint("SplashScreen: useEffect redirectPath=$redirectPath, isLoading=${routerListenable.isLoading}");
-      if (redirectPath != null && !routerListenable.isLoading) {
-        context.go(redirectPath!);
+      if (redirectPath != null && !routerListenable.isLoading && routerListenable.hasValue) {
+        Future(() => context.go(redirectPath!));
       }
       return () {};
-    }, [redirectPath, routerListenable.isLoading]);
+    }, [redirectPath, routerListenable.isLoading, routerListenable.hasValue]);
 
     return Scaffold(
       backgroundColor: context.colorScheme.background,

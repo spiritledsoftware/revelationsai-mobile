@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:revelationsai/src/models/chat.dart';
 import 'package:revelationsai/src/models/pagination.dart';
-import 'package:revelationsai/src/providers/chat/messages.dart';
 import 'package:revelationsai/src/providers/chat/repositories.dart';
-import 'package:revelationsai/src/providers/chat/single.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'pages.g.dart';
@@ -19,7 +17,6 @@ class ChatsPages extends _$ChatsPages {
   @override
   FutureOr<List<List<Chat>>> build() async {
     _loadingLogic();
-    _persistenceLogic();
 
     return await ref.chats
         .getPage(PaginatedEntitiesRequestOptions(
@@ -112,30 +109,6 @@ class ChatsPages extends _$ChatsPages {
       } else {
         _isLoadingInitial = false;
         _isLoadingNextPage = false;
-      }
-    });
-  }
-
-  void _persistenceLogic() {
-    ref.listenSelf((previous, next) async {
-      if (next.hasValue && previous?.value != next.value) {
-        for (final chatsPage in next.value!) {
-          for (final chat in chatsPage) {
-            Future.wait([
-              ref.read(singleChatProvider(chat.id).future),
-              ref.read(chatMessagesProvider(chat.id).future),
-            ]);
-          }
-        }
-
-        final savedChats = await ref.chats.getAllLocal();
-        final chatsPagesFlat = next.value!.expand((element) => element);
-        for (final savedChat in savedChats) {
-          if (!chatsPagesFlat.any((element) => element.id == savedChat.id)) {
-            ref.chats.deleteLocal(savedChat.id);
-            ref.chatMessages.deleteLocalByChatId(savedChat.id);
-          }
-        }
       }
     });
   }
