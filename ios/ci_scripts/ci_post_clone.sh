@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # The default execution directory of this script is the ci_scripts directory.
-cd $CI_PRIMARY_REPOSITORY_PATH/mobile # change working directory to the root of your cloned repo.
+cd $CI_PRIMARY_REPOSITORY_PATH # change working directory to the root of your cloned repo.
 
 DOMAIN_PREFIX=""
 DOMAIN_NAME="revelationsai.com"
