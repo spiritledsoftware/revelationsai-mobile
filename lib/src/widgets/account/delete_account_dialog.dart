@@ -53,7 +53,7 @@ class DeleteAccountDialog extends HookConsumerWidget {
             ).then((value) async {
               await currentUserNotifier.logout();
             }).then((value) {
-              context.go("/auth/login");
+              context.go("/auth");
             });
             await future.value;
           },

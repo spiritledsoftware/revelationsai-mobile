@@ -21,7 +21,7 @@ class AuthScreen extends HookConsumerWidget {
     final isLoading = !snapshot.hasData && !snapshot.hasError && snapshot.connectionState == ConnectionState.waiting;
 
     final handleLogin = useCallback(() async {
-      const url = "${Website.authUrl}/login?mobile=true";
+      const url = "${Website.authUrl}/sign-in?mobile=true";
       final authResult = await FlutterWebAuth2.authenticate(
         url: url,
         callbackUrlScheme: "revelationsai",
