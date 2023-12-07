@@ -6,7 +6,6 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:revelationsai/src/hooks/use_chat.dart';
 import 'package:revelationsai/src/models/chat.dart';
 import 'package:revelationsai/src/providers/chat/current_id.dart';
-import 'package:revelationsai/src/providers/chat/pages.dart';
 import 'package:revelationsai/src/providers/chat/single.dart';
 import 'package:revelationsai/src/providers/user/preferences.dart';
 import 'package:revelationsai/src/screens/chat/chat_modal.dart';
@@ -134,7 +133,6 @@ class ChatActionMenuButton extends HookConsumerWidget {
                   ),
                   PopupMenuItem(
                     onTap: () {
-                      ref.read(chatsPagesProvider.notifier).refresh();
                       showModalBottomSheet(
                         elevation: 20,
                         isScrollControlled: true,

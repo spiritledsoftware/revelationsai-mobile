@@ -11,11 +11,13 @@ if [[ "$CI_PULL_REQUEST_NUMBER" != "" ]]; then
 fi
 
 WEBSITE_URL="https://${DOMAIN_PREFIX}${DOMAIN_NAME}"
+AUTH_URL="https://auth.${DOMAIN_PREFIX}${DOMAIN_NAME}"
 API_URL="https://api.${DOMAIN_PREFIX}${DOMAIN_NAME}"
 CHAT_API_URL="https://chat.api.${DOMAIN_PREFIX}${DOMAIN_NAME}"
 
 echo "Working with the following environment variables:"
 echo "WEBSITE_URL: $WEBSITE_URL"
+echo "AUTH_URL: $AUTH_URL"
 echo "API_URL: $API_URL"
 echo "CHAT_API_URL: $CHAT_API_URL"
 
@@ -35,6 +37,7 @@ flutter pub run build_runner build --delete-conflicting-outputs
 # Execute flutter build config command.
 flutter build ios --config-only \
   --dart-define "WEBSITE_URL=$WEBSITE_URL" \
+  --dart-define "AUTH_URL=$AUTH_URL" \
   --dart-define "API_URL=$API_URL" \
   --dart-define "CHAT_API_URL=$CHAT_API_URL" \
   --dart-define "REVENUECAT_APP_STORE_API_KEY=$REVENUECAT_APP_STORE_API_KEY" \

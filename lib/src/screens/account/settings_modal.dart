@@ -202,7 +202,7 @@ class SettingsModal extends HookConsumerWidget {
                 leading: const Icon(Icons.logout),
                 title: const Text('Logout'),
                 onTap: () async {
-                  await ref.read(currentUserProvider.notifier).logout().then((value) => context.go("/auth/login"));
+                  await ref.read(currentUserProvider.notifier).logout().then((value) => context.go("/auth"));
                 },
               ),
               ListTile(

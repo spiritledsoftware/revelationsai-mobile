@@ -36,6 +36,14 @@ class MessageActionsDialog extends HookConsumerWidget {
     final isMounted = useIsMounted();
     final copied = useState(false);
 
+    useEffect(() {
+      if (message.role == Role.assistant) {
+        ref.read(aiResponseReactionsProvider(message.uuid).notifier).refresh();
+        ref.read(aiResponseReactionsProvider(message.uuid).notifier).refresh();
+      }
+      return () {};
+    }, [message.uuid, message.role]);
+
     return Dialog(
       backgroundColor: context.colorScheme.background,
       child: Column(

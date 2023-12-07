@@ -7,8 +7,6 @@ import 'package:intl/intl.dart';
 import 'package:revelationsai/src/constants/visual_density.dart';
 import 'package:revelationsai/src/hooks/use_screenshot_controller.dart';
 import 'package:revelationsai/src/models/chat/message.dart';
-import 'package:revelationsai/src/providers/ai_response/reaction.dart';
-import 'package:revelationsai/src/providers/ai_response/source_document.dart';
 import 'package:revelationsai/src/providers/user/preferences.dart';
 import 'package:revelationsai/src/utils/build_context_extensions.dart';
 import 'package:revelationsai/src/widgets/account/user_avatar.dart';
@@ -44,10 +42,6 @@ class Message extends HookConsumerWidget {
     final showMessageDialog = useCallback(() {
       if (!isLoading) {
         if (hapticFeedback) HapticFeedback.mediumImpact();
-        if (message.role == Role.assistant) {
-          ref.read(aiResponseSourceDocumentsProvider(message.uuid).notifier).refresh();
-          ref.read(aiResponseReactionsProvider(message.uuid).notifier).refresh();
-        }
         showDialog(
           barrierColor:
               context.brightness == Brightness.dark ? Colors.black.withOpacity(0.9) : Colors.black.withOpacity(0.8),

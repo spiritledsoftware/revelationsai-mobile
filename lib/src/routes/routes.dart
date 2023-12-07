@@ -1,14 +1,10 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:revelationsai/src/providers/user/current.dart';
 import 'package:revelationsai/src/screens/about_screen.dart';
 import 'package:revelationsai/src/screens/account/account_screen.dart';
 import 'package:revelationsai/src/screens/account/upgrade_screen.dart';
-import 'package:revelationsai/src/screens/auth/forgot_password.dart';
-import 'package:revelationsai/src/screens/auth/login_screen.dart';
-import 'package:revelationsai/src/screens/auth/register_screen.dart';
+import 'package:revelationsai/src/screens/auth_screen.dart';
 import 'package:revelationsai/src/screens/chat/chat_screen.dart';
 import 'package:revelationsai/src/screens/devotion/devotion_screen.dart';
 import 'package:revelationsai/src/screens/images/all_images_screen.dart';
@@ -84,61 +80,70 @@ List<RouteBase> routes = [
     },
   ),
   GoRoute(
-    path: "/auth/callback",
-    builder: (context, state) {
-      if (state.uri.queryParameters.containsKey('token')) {
-        final token = state.uri.queryParameters['token'];
-        ProviderScope.containerOf(context).read(currentUserProvider.notifier).loginWithToken(token!);
+    path: "/auth",
+    redirect: (context, state) {
+      if (state.uri.path == "/auth") {
+        return "/auth/sign-in";
       }
-      return const SplashScreen();
+      return null;
     },
-  ),
-  GoRoute(
-    path: "/auth/forgot-password",
-    builder: (context, state) {
-      return ForgotPasswordScreen(
-        token: state.uri.queryParameters['token'],
-      );
-    },
-    pageBuilder: (context, state) {
-      return buildPageWithDefaultTransition(
-        context: context,
-        state: state,
-        child: ForgotPasswordScreen(
-          token: state.uri.queryParameters['token'],
-        ),
-      );
-    },
-  ),
-  GoRoute(
-    path: "/auth/login",
-    builder: (context, state) {
-      return LoginScreen(
-        resetPassword: state.uri.queryParameters['resetPassword'] == 'true',
-      );
-    },
-    pageBuilder: (context, state) {
-      return buildPageWithDefaultTransition(
-        context: context,
-        state: state,
-        child: LoginScreen(
-          resetPassword: state.uri.queryParameters['resetPassword'] == 'true',
-        ),
-      );
-    },
-  ),
-  GoRoute(
-    path: "/auth/register",
-    builder: (context, state) {
-      return const RegisterScreen();
-    },
-    pageBuilder: (context, state) {
-      return buildPageWithDefaultTransition(
-        context: context,
-        state: state,
-        child: const RegisterScreen(),
-      );
-    },
+    routes: [
+      GoRoute(
+        path: "sign-in",
+        builder: (context, state) {
+          return AuthScreen(
+            initType: AuthType.signIn,
+            resetPassword: state.uri.queryParameters['resetPassword'] == 'true',
+          );
+        },
+        pageBuilder: (context, state) {
+          return buildPageWithDefaultTransition(
+            context: context,
+            state: state,
+            child: AuthScreen(
+              initType: AuthType.signIn,
+              resetPassword: state.uri.queryParameters['resetPassword'] == 'true',
+            ),
+          );
+        },
+      ),
+      GoRoute(
+        path: "sign-up",
+        builder: (context, state) {
+          return const AuthScreen(
+            initType: AuthType.signUp,
+          );
+        },
+        pageBuilder: (context, state) {
+          return buildPageWithDefaultTransition(
+            context: context,
+            state: state,
+            child: const AuthScreen(
+              initType: AuthType.signUp,
+            ),
+          );
+        },
+      ),
+      GoRoute(
+        path: "forgot-password",
+        builder: (context, state) {
+          return AuthScreen(
+            initType: AuthType.forgotPassword,
+            resetToken: state.uri.queryParameters['token'],
+          );
+        },
+        pageBuilder: (context, state) {
+          return buildPageWithDefaultTransition(
+            context: context,
+            state: state,
+            child: AuthScreen(
+              initType: AuthType.forgotPassword,
+              resetToken: state.uri.queryParameters['token'],
+            ),
+          );
+        },
+      ),
+    ],
   ),
   ShellRoute(
     navigatorKey: GlobalKey<NavigatorState>(),
@@ -156,13 +161,17 @@ List<RouteBase> routes = [
       GoRoute(
         path: "/chat",
         builder: (context, state) {
-          return const ChatScreen();
+          return ChatScreen(
+            initQuery: state.uri.queryParameters['query'],
+          );
         },
         pageBuilder: (context, state) {
           return buildPageWithDefaultTransition(
             context: context,
             state: state,
-            child: const ChatScreen(),
+            child: ChatScreen(
+              initQuery: state.uri.queryParameters['query'],
+            ),
           );
         },
         routes: [

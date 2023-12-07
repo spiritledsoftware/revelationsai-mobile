@@ -13,7 +13,6 @@ import 'package:revelationsai/src/models/devotion/reaction.dart';
 import 'package:revelationsai/src/models/source_document.dart';
 import 'package:revelationsai/src/providers/devotion/current_id.dart';
 import 'package:revelationsai/src/providers/devotion/image.dart';
-import 'package:revelationsai/src/providers/devotion/pages.dart';
 import 'package:revelationsai/src/providers/devotion/reaction.dart';
 import 'package:revelationsai/src/providers/devotion/reaction_count.dart';
 import 'package:revelationsai/src/providers/devotion/repositories.dart';
@@ -161,7 +160,6 @@ class DevotionScreen extends HookConsumerWidget {
         actions: [
           IconButton(
             onPressed: () {
-              ref.read(devotionsPagesProvider.notifier).refresh();
               if (currentUserPrefs.hapticFeedback) {
                 HapticFeedback.mediumImpact();
               }

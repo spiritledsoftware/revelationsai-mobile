@@ -11,27 +11,28 @@ class TabsScaffold extends HookConsumerWidget {
 
   const TabsScaffold({super.key, required this.child});
 
-  int _calculateCurrentIndex(context) {
-    String path = GoRouter.of(context).routeInformationProvider.value.uri.path;
-
-    if (path.startsWith("/chat")) {
-      return 0;
-    } else if (path.startsWith("/images")) {
-      return 1;
-    } else if (path.startsWith("/devotions")) {
-      return 2;
-    } else if (path.startsWith("/account") || path.startsWith("/upgrade")) {
-      return 3;
-    } else {
-      return 0;
-    }
-  }
-
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final currentUserPrefs = ref.watch(currentUserPreferencesProvider).requireValue;
 
     final hapticFeedbackEnabled = currentUserPrefs.hapticFeedback;
+
+    int calculateCurrentIndex() {
+      String path = GoRouter.of(context).routeInformationProvider.value.uri.path;
+      debugPrint("Current path: $path");
+
+      if (path.startsWith("/chat")) {
+        return 0;
+      } else if (path.startsWith("/images")) {
+        return 1;
+      } else if (path.startsWith("/devotions")) {
+        return 2;
+      } else if (path.startsWith("/account") || path.startsWith("/upgrade")) {
+        return 3;
+      } else {
+        return 0;
+      }
+    }
 
     return Scaffold(
       body: child,
@@ -65,7 +66,7 @@ class TabsScaffold extends HookConsumerWidget {
           backgroundColor: context.theme.bottomNavigationBarTheme.backgroundColor,
           selectedItemColor: context.theme.bottomNavigationBarTheme.selectedItemColor,
           unselectedItemColor: context.theme.bottomNavigationBarTheme.unselectedItemColor,
-          currentIndex: _calculateCurrentIndex(context),
+          currentIndex: calculateCurrentIndex(),
           onTap: (value) {
             switch (value) {
               case 0:
