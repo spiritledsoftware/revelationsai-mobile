@@ -321,7 +321,7 @@ class ChatScreen extends HookConsumerWidget {
                           message: message,
                           isCurrentResponse: chatHook.currentResponseId.value == message.id,
                           isLoading: chatHook.loading.value,
-                          isLastMessage: index == chatHook.messages.value.length - 1,
+                          isLastMessage: index == 1,
                         );
                       },
                     ),
