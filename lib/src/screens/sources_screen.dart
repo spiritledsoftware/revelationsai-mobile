@@ -79,7 +79,7 @@ class SourcesScreen extends HookConsumerWidget {
         },
         loading: () => Center(
           child: SpinKitSpinningLines(
-            color: context.colorScheme.primary,
+            color: context.secondaryColor,
           ),
         ),
         error: (error, stackTrace) => Center(child: Text(error.toString())),
