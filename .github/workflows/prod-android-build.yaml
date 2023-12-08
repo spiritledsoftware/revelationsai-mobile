@@ -18,7 +18,8 @@ on:
         default: false
 
 env:
-  FLUTTER_VERSION_CODE: ${{ github.run_number }}
+  # Need to add 132 to the run number due to other runs on the original monorepo
+  FLUTTER_VERSION_CODE: ${{ github.run_number + 132}}
 
   WEBSITE_URL: https://revelationsai.com
   AUTH_URL: https://auth.revelationsai.com
