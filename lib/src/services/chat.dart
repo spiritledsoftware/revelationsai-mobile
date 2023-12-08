@@ -194,6 +194,8 @@ class ChatService {
         .expand(
           (element) => element,
         )
+        .toList()
+        .reversed
         .toList();
   }
 }
