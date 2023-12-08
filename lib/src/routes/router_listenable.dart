@@ -52,7 +52,7 @@ class RouterListenable extends _$RouterListenable implements Listenable {
 
     if (this.state.isLoading) {
       debugPrint("Router is loading");
-      return isSplash ? null : "/?redirect=${Uri.encodeComponent(state.uri.path)}";
+      return isSplash ? null : "/?redirect=${Uri.encodeComponent("${state.uri.path}?${state.uri.query}")}";
     }
 
     debugPrint("Router initialized, removing splash screen...");
