@@ -130,6 +130,11 @@ class ChatScreen extends HookConsumerWidget {
       });
     }, [ref, chatHook.chatId.value, chatHook.loading.value, isMounted]);
 
+    final messagesReversed = useMemoized(
+      () => chatHook.messages.value.reversed.toList(),
+      [chatHook.messages.value],
+    );
+
     useEffect(() {
       chatHook.chatId.value = initChatId;
       return () {};
@@ -305,7 +310,7 @@ class ChatScreen extends HookConsumerWidget {
                       ),
                       shrinkWrap: true,
                       reverse: true,
-                      itemCount: chatHook.messages.value.length + 1,
+                      itemCount: messagesReversed.length + 1,
                       itemBuilder: (context, index) {
                         if (index == 0) {
                           return const SizedBox(
@@ -313,9 +318,7 @@ class ChatScreen extends HookConsumerWidget {
                           );
                         }
 
-                        final messages = chatHook.messages.value;
-                        final message = messages[index - 1];
-
+                        final message = messagesReversed[index - 1];
                         return Message(
                           chatId: chatHook.chatId.value,
                           message: message,

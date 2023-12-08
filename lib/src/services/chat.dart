@@ -120,8 +120,10 @@ class ChatService {
     required String chatId,
   }) async {
     final messagesPage = await UserMessageService.searchForUserMessages(
-      paginationOptions: const PaginatedEntitiesRequestOptions(
-        limit: 100,
+      paginationOptions: PaginatedEntitiesRequestOptions(
+        limit: double.maxFinite.toInt(),
+        orderBy: "createdAt",
+        order: OrderType.asc,
       ),
       query: Query(
         AND: [
@@ -147,8 +149,10 @@ class ChatService {
         );
 
         final responsesPage = await AiResponseService.searchForAiResponses(
-          paginationOptions: const PaginatedEntitiesRequestOptions(
-            limit: 100,
+          paginationOptions: PaginatedEntitiesRequestOptions(
+            limit: double.maxFinite.toInt(),
+            orderBy: "createdAt",
+            order: OrderType.asc,
           ),
           query: Query(
             AND: [
@@ -174,7 +178,7 @@ class ChatService {
             );
 
         return [
-          replies.firstOrNull ??
+          replies.lastOrNull ??
               ChatMessage(
                 id: nanoid(),
                 uuid: const Uuid().v4(),
