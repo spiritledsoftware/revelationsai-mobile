@@ -71,7 +71,8 @@ jobs:
         env:
           RUN_NUM: ${{ github.run_number }}
         run: |
-          echo ::set-env name=FLUTTER_VERSION_CODE::$(($RUN_NUM+132))
+          FLUTTER_VERSION_CODE=$(($RUN_NUM+132))
+          echo "FLUTTER_VERSION_CODE=$FLUTTER_VERSION_CODE" >> $GITHUB_ENV
           echo $FLUTTER_VERSION_CODE
       - id: build_appbundle
         name: Build App Bundle for Android
