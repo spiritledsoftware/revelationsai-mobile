@@ -251,7 +251,11 @@ class AuthScreen extends HookConsumerWidget {
                         horizontal: 16,
                         vertical: 8,
                       ),
-                      margin: const EdgeInsets.only(bottom: 30),
+                      margin: const EdgeInsets.only(
+                        left: 20,
+                        right: 20,
+                        bottom: 30,
+                      ),
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(15),
                         color: alert.value!.type == AlertType.error ? Colors.red : Colors.green,
@@ -269,7 +273,9 @@ class AuthScreen extends HookConsumerWidget {
                     Container(
                       height: 40,
                       width: 40,
-                      margin: const EdgeInsets.only(bottom: 30),
+                      margin: const EdgeInsets.only(
+                        bottom: 30,
+                      ),
                       child: SpinKitSpinningLines(
                         color: context.secondaryColor,
                         size: 40,
