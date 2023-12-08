@@ -18,9 +18,6 @@ on:
         default: false
 
 env:
-  # Need to add 132 to the run number due to other runs on the original monorepo
-  FLUTTER_VERSION_CODE: ${{ github.run_number + 132}}
-
   WEBSITE_URL: https://revelationsai.com
   AUTH_URL: https://auth.revelationsai.com
   API_URL: https://api.revelationsai.com
@@ -73,6 +70,12 @@ jobs:
           echo "keyPassword=$ANDROID_KEY_PASSWORD" >> android/key.properties
           echo "keyAlias=$ANDROID_KEY_ALIAS" >> android/key.properties
           echo "storeFile=keystore.jks" >> android/key.properties
+      - name: Set Flutter Version Code
+        env:
+          RUN_NUM: ${{ github.run_number }}
+        run: |
+          echo ::set-env name=FLUTTER_VERSION_CODE::$(($RUN_NUM+132))
+          echo $FLUTTER_VERSION_CODE
       - id: build_appbundle
         name: Build App Bundle for Android
         run: |
