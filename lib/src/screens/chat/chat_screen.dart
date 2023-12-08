@@ -402,6 +402,7 @@ class ChatScreen extends HookConsumerWidget {
                                     },
                                     autocorrect: true,
                                     textCapitalization: TextCapitalization.sentences,
+                                    keyboardType: TextInputType.multiline,
                                     decoration: InputDecoration(
                                       contentPadding: const EdgeInsets.symmetric(
                                         vertical: 10,

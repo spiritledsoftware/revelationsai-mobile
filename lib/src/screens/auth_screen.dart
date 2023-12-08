@@ -83,18 +83,16 @@ class AuthScreen extends HookConsumerWidget {
     );
 
     final handleSignIn = useCallback(() async {
-      if (formKey.value.currentState?.validate() ?? false) {
-        pendingFuture.value = ref
-            .read(currentUserProvider.notifier)
-            .login(emailTextController.value.text, passwordTextController.value.text)
-            .catchError((error) {
-          alert.value = Alert(
-            message: error.toString(),
-            type: AlertType.error,
-          );
-        });
-        await pendingFuture.value;
-      }
+      pendingFuture.value = ref
+          .read(currentUserProvider.notifier)
+          .login(emailTextController.value.text, passwordTextController.value.text)
+          .catchError((error) {
+        alert.value = Alert(
+          message: error.toString(),
+          type: AlertType.error,
+        );
+      });
+      await pendingFuture.value;
     }, [ref, formKey.value, emailTextController.value.text, passwordTextController.value.text]);
 
     final handleResetPassword = useCallback(
@@ -163,11 +161,11 @@ class AuthScreen extends HookConsumerWidget {
     );
 
     final handleSocialSignIn = useCallback((String provider) async {
-      final url = "${API.url}/auth/$provider-mobile/authorize";
       final authResult = await FlutterWebAuth2.authenticate(
-        url: url,
+        url: "${API.url}/auth/$provider-mobile/authorize",
         callbackUrlScheme: "revelationsai",
       );
+
       final token = Uri.parse(authResult).queryParameters['token'];
       if (token == null) {
         alert.value = Alert(
@@ -176,6 +174,7 @@ class AuthScreen extends HookConsumerWidget {
         );
         return;
       }
+
       pendingFuture.value = ref.read(currentUserProvider.notifier).loginWithToken(token).catchError((error) {
         alert.value = Alert(
           message: error.toString(),
@@ -228,84 +227,99 @@ class AuthScreen extends HookConsumerWidget {
     return Scaffold(
       body: Stack(
         children: [
-          SizedBox(
-            height: context.height * 0.5,
-            width: context.width,
-            child: const Center(
-              child: Logo(
-                width: 300,
+          SafeArea(
+            child: SizedBox(
+              height: context.height * 0.3,
+              width: context.width,
+              child: const Center(
+                child: Logo(
+                  width: 300,
+                ),
               ),
             ),
           ),
-          Column(
-            mainAxisSize: MainAxisSize.max,
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: [
-              if (alert.value != null) ...[
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 8,
-                  ),
-                  margin: const EdgeInsets.only(bottom: 30),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(15),
-                    color: alert.value!.type == AlertType.error ? Colors.red : Colors.green,
-                  ),
-                  child: Text(
-                    alert.value!.message,
-                    style: TextStyle(
-                      color: context.colorScheme.onError,
-                    ),
-                    maxLines: 3,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                )
-              ] else if (isLoading) ...[
-                Container(
-                  height: 40,
-                  width: 40,
-                  margin: const EdgeInsets.only(bottom: 30),
-                  child: SpinKitSpinningLines(
-                    color: context.secondaryColor,
-                    size: 40,
-                  ),
-                ),
-              ],
-              Container(
-                decoration: BoxDecoration(
-                  color: context.brightness == Brightness.light
-                      ? context.colorScheme.background
-                      : context.colorScheme.primary.withOpacity(0.4),
-                  borderRadius: const BorderRadius.only(
-                    topLeft: Radius.circular(25),
-                    topRight: Radius.circular(25),
-                  ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: context.colorScheme.shadow.withOpacity(0.1),
-                      blurRadius: 5,
-                      offset: const Offset(0, -5),
+          Align(
+            alignment: Alignment.bottomCenter,
+            child: SingleChildScrollView(
+              physics: const ClampingScrollPhysics(),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (alert.value != null) ...[
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 8,
+                      ),
+                      margin: const EdgeInsets.only(bottom: 30),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(15),
+                        color: alert.value!.type == AlertType.error ? Colors.red : Colors.green,
+                      ),
+                      child: Text(
+                        alert.value!.message,
+                        style: TextStyle(
+                          color: context.colorScheme.onError,
+                        ),
+                        maxLines: 3,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    )
+                  ] else if (isLoading) ...[
+                    Container(
+                      height: 40,
+                      width: 40,
+                      margin: const EdgeInsets.only(bottom: 30),
+                      child: SpinKitSpinningLines(
+                        color: context.secondaryColor,
+                        size: 40,
+                      ),
                     ),
                   ],
-                ),
-                child: SingleChildScrollView(
-                  child: SafeArea(
-                    child: Container(
-                      padding: const EdgeInsets.only(
-                        left: 20,
-                        right: 20,
-                        bottom: 30,
+                  Container(
+                    padding: const EdgeInsets.only(
+                      top: 40,
+                      left: 20,
+                      right: 20,
+                      bottom: 10,
+                    ),
+                    decoration: BoxDecoration(
+                      color: context.brightness == Brightness.light
+                          ? context.colorScheme.background
+                          : context.colorScheme.surface,
+                      borderRadius: const BorderRadius.only(
+                        topLeft: Radius.circular(25),
+                        topRight: Radius.circular(25),
                       ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: context.colorScheme.shadow.withOpacity(0.1),
+                          blurRadius: 5,
+                          offset: const Offset(0, -5),
+                        ),
+                      ],
+                    ),
+                    child: SafeArea(
+                      top: false,
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         mainAxisAlignment: MainAxisAlignment.center,
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
                           if (type.value == AuthType.forgotPassword && resetToken == null) ...[
-                            Text(
-                              "Enter your email address and we'll send you a link to reset your password.",
-                              style: context.textTheme.bodySmall,
+                            Padding(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 30,
+                              ),
+                              child: Text(
+                                "Enter your email address and we'll send you a link to reset your password.",
+                                textAlign: TextAlign.center,
+                                style: context.textTheme.bodyMedium?.copyWith(
+                                  color: context.brightness == Brightness.light
+                                      ? context.primaryColor.withOpacity(0.6)
+                                      : context.secondaryColor,
+                                ),
+                              ),
                             ),
                             const SizedBox(
                               height: 20,
@@ -430,7 +444,9 @@ class AuthScreen extends HookConsumerWidget {
                                 children: [
                                   if (type.value != AuthType.forgotPassword || resetToken == null) ...[
                                     TextFormField(
-                                      autofillHints: const [AutofillHints.email],
+                                      autofillHints: const [
+                                        AutofillHints.email,
+                                      ],
                                       autocorrect: false,
                                       keyboardType: TextInputType.emailAddress,
                                       controller: emailTextController,
@@ -458,7 +474,11 @@ class AuthScreen extends HookConsumerWidget {
                                   ],
                                   if (type.value != AuthType.forgotPassword || resetToken != null) ...[
                                     TextFormField(
-                                      autofillHints: const [AutofillHints.password],
+                                      autofillHints: [
+                                        type.value == AuthType.signUp
+                                            ? AutofillHints.newPassword
+                                            : AutofillHints.password,
+                                      ],
                                       autocorrect: false,
                                       obscureText: !showPassword.value,
                                       keyboardType: TextInputType.visiblePassword,
@@ -500,7 +520,9 @@ class AuthScreen extends HookConsumerWidget {
                                   if (type.value == AuthType.signUp ||
                                       (type.value == AuthType.forgotPassword && resetToken != null)) ...[
                                     TextFormField(
-                                      autofillHints: const [AutofillHints.password],
+                                      autofillHints: const [
+                                        AutofillHints.newPassword,
+                                      ],
                                       autocorrect: false,
                                       obscureText: !showConfirmPassword.value,
                                       keyboardType: TextInputType.visiblePassword,
@@ -551,12 +573,17 @@ class AuthScreen extends HookConsumerWidget {
                                             ),
                                           ),
                                           onPressed: () async {
-                                            if (type.value == AuthType.signUp) {
-                                              await handleSignUp();
-                                            } else if (type.value == AuthType.forgotPassword) {
-                                              await handleResetPassword();
-                                            } else {
-                                              await handleSignIn();
+                                            emailFocusNode.unfocus();
+                                            passwordFocusNode.unfocus();
+                                            confirmPasswordFocusNode.unfocus();
+                                            if (formKey.value.currentState?.validate() ?? false) {
+                                              if (type.value == AuthType.signUp) {
+                                                await handleSignUp();
+                                              } else if (type.value == AuthType.forgotPassword) {
+                                                await handleResetPassword();
+                                              } else {
+                                                await handleSignIn();
+                                              }
                                             }
                                           },
                                           child: Text(
@@ -618,9 +645,9 @@ class AuthScreen extends HookConsumerWidget {
                       ),
                     ),
                   ),
-                ),
+                ],
               ),
-            ],
+            ),
           ),
         ],
       ),
