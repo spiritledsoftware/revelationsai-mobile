@@ -75,7 +75,7 @@ class RouterListenable extends _$RouterListenable implements Listenable {
     final isLoggingIn = state.uri.path.startsWith("/auth");
     if (isLoggingIn) return _isAuth ? chatPath : null;
 
-    if (isChatBase && currentChatId != null) {
+    if (isChatBase && currentChatId != null && state.uri.queryParameters["query"] == null) {
       debugPrint("Redirecting to $chatPath");
       return chatPath;
     }
