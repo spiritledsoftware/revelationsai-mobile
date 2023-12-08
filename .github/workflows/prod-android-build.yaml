@@ -47,9 +47,6 @@ jobs:
         with:
           channel: "stable"
           cache: true
-      - id: flutter_doctor
-        name: Run Flutter Doctor
-        run: flutter doctor -v
       - id: checkout
         name: Checkout
         uses: actions/checkout@v3
