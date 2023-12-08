@@ -313,8 +313,8 @@ class ChatScreen extends HookConsumerWidget {
                           );
                         }
 
-                        final messagesReversed = chatHook.messages.value.reversed.toList();
-                        ChatMessage message = messagesReversed[index - 1];
+                        final messages = chatHook.messages.value;
+                        final message = messages[index - 1];
 
                         return Message(
                           chatId: chatHook.chatId.value,
