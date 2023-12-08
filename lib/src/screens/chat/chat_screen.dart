@@ -333,8 +333,9 @@ class ChatScreen extends HookConsumerWidget {
                     Center(
                       child: ChatSuggestions(
                         onTap: (suggestionString) {
-                          if (currentUserPreferences.hapticFeedback) HapticFeedback.mediumImpact();
-
+                          if (currentUserPreferences.hapticFeedback) {
+                            HapticFeedback.mediumImpact();
+                          }
                           chatHook.append(
                             ChatMessage(
                               id: nanoid(),
@@ -358,7 +359,9 @@ class ChatScreen extends HookConsumerWidget {
                             padding: const EdgeInsets.symmetric(vertical: 5),
                             child: IconButton(
                               onPressed: () {
-                                if (currentUserPreferences.hapticFeedback) HapticFeedback.mediumImpact();
+                                if (currentUserPreferences.hapticFeedback) {
+                                  HapticFeedback.mediumImpact();
+                                }
                                 scrollToEnd();
                               },
                               style: IconButton.styleFrom(

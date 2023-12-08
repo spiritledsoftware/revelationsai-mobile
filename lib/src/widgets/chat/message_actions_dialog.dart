@@ -91,14 +91,18 @@ class MessageActionsDialog extends HookConsumerWidget {
                   children: [
                     IconButton(
                       onPressed: () {
-                        if (hapticFeedback) HapticFeedback.mediumImpact();
+                        if (hapticFeedback) {
+                          HapticFeedback.mediumImpact();
+                        }
                         Clipboard.setData(
                           ClipboardData(
                             text: markdownToText(message.content),
                           ),
                         ).then((value) {
                           if (isMounted()) {
-                            if (hapticFeedback) HapticFeedback.mediumImpact();
+                            if (hapticFeedback) {
+                              HapticFeedback.mediumImpact();
+                            }
                             copied.value = true;
                           }
                         });
@@ -125,7 +129,9 @@ class MessageActionsDialog extends HookConsumerWidget {
                         if (screenshotController == null) {
                           return;
                         }
-                        if (hapticFeedback) HapticFeedback.mediumImpact();
+                        if (hapticFeedback) {
+                          HapticFeedback.mediumImpact();
+                        }
                         final image = await screenshotController!.capture();
                         if (image == null) {
                           return;
@@ -149,7 +155,9 @@ class MessageActionsDialog extends HookConsumerWidget {
                     if (message.role == Role.assistant) ...[
                       IconButton(
                         onPressed: () {
-                          if (hapticFeedback) HapticFeedback.mediumImpact();
+                          if (hapticFeedback) {
+                            HapticFeedback.mediumImpact();
+                          }
                           reactionsNotifier!.createReaction(
                             reactionType: AiResponseReactionType.LIKE,
                           );
@@ -175,7 +183,9 @@ class MessageActionsDialog extends HookConsumerWidget {
                       ),
                       IconButton(
                         onPressed: () {
-                          if (hapticFeedback) HapticFeedback.mediumImpact();
+                          if (hapticFeedback) {
+                            HapticFeedback.mediumImpact();
+                          }
                           showDialog(
                             context: context,
                             builder: (context) {

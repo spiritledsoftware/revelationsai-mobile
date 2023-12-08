@@ -62,7 +62,9 @@ class ChatActionMenuButton extends HookConsumerWidget {
                 borderRadius: BorderRadius.circular(25),
               ),
               onOpened: () {
-                if (currentUserPreferences.hapticFeedback) HapticFeedback.mediumImpact();
+                if (currentUserPreferences.hapticFeedback) {
+                  HapticFeedback.mediumImpact();
+                }
               },
               itemBuilder: (context) {
                 return [

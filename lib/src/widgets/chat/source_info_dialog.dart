@@ -228,7 +228,9 @@ class SourceInfoPreview extends HookConsumerWidget {
                             children: [
                               IconButton(
                                 onPressed: () {
-                                  if (hapticFeedback) HapticFeedback.mediumImpact();
+                                  if (hapticFeedback) {
+                                    HapticFeedback.mediumImpact();
+                                  }
                                   if (copied.value) return;
                                   Clipboard.setData(
                                     ClipboardData(
@@ -236,7 +238,9 @@ class SourceInfoPreview extends HookConsumerWidget {
                                     ),
                                   ).then((value) {
                                     if (isMounted()) {
-                                      if (hapticFeedback) HapticFeedback.mediumImpact();
+                                      if (hapticFeedback) {
+                                        HapticFeedback.mediumImpact();
+                                      }
                                       copied.value = true;
                                     }
                                   });
@@ -260,7 +264,9 @@ class SourceInfoPreview extends HookConsumerWidget {
                               ),
                               IconButton(
                                 onPressed: () {
-                                  if (hapticFeedback) HapticFeedback.mediumImpact();
+                                  if (hapticFeedback) {
+                                    HapticFeedback.mediumImpact();
+                                  }
                                   Share.shareUri(
                                     Uri.parse(sourceDocument.url),
                                   );
