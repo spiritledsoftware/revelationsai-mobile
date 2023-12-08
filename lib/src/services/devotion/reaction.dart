@@ -9,8 +9,9 @@ import 'package:revelationsai/src/utils/http_helpers.dart';
 class DevotionReactionService {
   static Future<PaginatedEntitiesResponseData<DevotionReaction>> getDevotionReactions({
     required String id,
-    PaginatedEntitiesRequestOptions paginationOptions = const PaginatedEntitiesRequestOptions(),
+    PaginatedEntitiesRequestOptions? paginationOptions,
   }) async {
+    paginationOptions ??= PaginatedEntitiesRequestOptions.defaults();
     Response res = await get(
       Uri.parse('${API.url}/devotions/$id/reactions?${paginationOptions.searchQuery}'),
       headers: <String, String>{

@@ -9,10 +9,10 @@ import 'package:revelationsai/src/utils/http_helpers.dart';
 
 class UserMessageService {
   static Future<PaginatedEntitiesResponseData<UserMessage>> getUserMessages({
-    PaginatedEntitiesRequestOptions paginationOptions =
-        const PaginatedEntitiesRequestOptions(),
+    PaginatedEntitiesRequestOptions? paginationOptions,
     required String session,
   }) async {
+    paginationOptions ??= PaginatedEntitiesRequestOptions.defaults();
     Response res = await get(
       Uri.parse('${API.url}/user-messages?${paginationOptions.searchQuery}'),
       headers: <String, String>{
@@ -51,13 +51,12 @@ class UserMessageService {
     return UserMessage.fromJson(data);
   }
 
-  static Future<PaginatedEntitiesResponseData<UserMessage>>
-      searchForUserMessages({
-    PaginatedEntitiesRequestOptions paginationOptions =
-        const PaginatedEntitiesRequestOptions(),
+  static Future<PaginatedEntitiesResponseData<UserMessage>> searchForUserMessages({
+    PaginatedEntitiesRequestOptions? paginationOptions,
     required Query query,
     required String session,
   }) async {
+    paginationOptions ??= PaginatedEntitiesRequestOptions.defaults();
     Response res = await post(
       Uri.parse(
         '${API.url}/user-messages/search?${paginationOptions.searchQuery}',

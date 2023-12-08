@@ -8,9 +8,10 @@ import 'package:revelationsai/src/utils/http_helpers.dart';
 
 class DataSourceService {
   static Future<PaginatedEntitiesResponseData<DataSource>> getDataSources({
-    PaginatedEntitiesRequestOptions options = const PaginatedEntitiesRequestOptions(),
+    PaginatedEntitiesRequestOptions? options,
     required String session,
   }) async {
+    options ??= PaginatedEntitiesRequestOptions.defaults();
     final response = await http.get(
       Uri.parse('${API.url}/data-sources?${options.searchQuery}'),
       headers: <String, String>{

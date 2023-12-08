@@ -10,8 +10,9 @@ class AiResponseReactionService {
   static Future<PaginatedEntitiesResponseData<AiResponseReaction>> getAiResponseReactions({
     required String id,
     required String session,
-    PaginatedEntitiesRequestOptions paginationOptions = const PaginatedEntitiesRequestOptions(),
+    PaginatedEntitiesRequestOptions? paginationOptions,
   }) async {
+    paginationOptions ??= PaginatedEntitiesRequestOptions.defaults();
     Response res = await get(
       Uri.parse('${API.url}/ai-responses/$id/reactions?${paginationOptions.searchQuery}'),
       headers: <String, String>{

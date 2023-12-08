@@ -15,9 +15,10 @@ import '../models/chat.dart';
 
 class ChatService {
   static Future<PaginatedEntitiesResponseData<Chat>> getChats({
-    PaginatedEntitiesRequestOptions paginationOptions = const PaginatedEntitiesRequestOptions(),
+    PaginatedEntitiesRequestOptions? paginationOptions,
     required String session,
   }) async {
+    paginationOptions ??= PaginatedEntitiesRequestOptions.defaults();
     Response res = await get(
       Uri.parse('${API.url}/chats?${paginationOptions.searchQuery}'),
       headers: <String, String>{
@@ -118,12 +119,12 @@ class ChatService {
   static Future<List<ChatMessage>> getChatMessages({
     required String session,
     required String chatId,
+    PaginatedEntitiesRequestOptions? paginationOptions,
   }) async {
+    paginationOptions ??= PaginatedEntitiesRequestOptions(page: 1, limit: 100);
     final messagesPage = await UserMessageService.searchForUserMessages(
-      paginationOptions: PaginatedEntitiesRequestOptions(
-        limit: double.maxFinite.toInt(),
-        orderBy: "createdAt",
-        order: OrderType.asc,
+      paginationOptions: paginationOptions.copyWith(
+        limit: (paginationOptions.limit / 2).floor(),
       ),
       query: Query(
         AND: [
@@ -149,10 +150,8 @@ class ChatService {
         );
 
         final responsesPage = await AiResponseService.searchForAiResponses(
-          paginationOptions: PaginatedEntitiesRequestOptions(
-            limit: double.maxFinite.toInt(),
-            orderBy: "createdAt",
-            order: OrderType.asc,
+          paginationOptions: paginationOptions!.copyWith(
+            limit: (paginationOptions.limit / 2).ceil(),
           ),
           query: Query(
             AND: [

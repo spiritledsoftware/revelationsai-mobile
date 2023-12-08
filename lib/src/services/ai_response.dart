@@ -10,10 +10,10 @@ import 'package:revelationsai/src/utils/http_helpers.dart';
 
 class AiResponseService {
   static Future<PaginatedEntitiesResponseData<AiResponse>> getAiResponses({
-    PaginatedEntitiesRequestOptions paginationOptions =
-        const PaginatedEntitiesRequestOptions(),
+    PaginatedEntitiesRequestOptions? paginationOptions,
     required String session,
   }) async {
+    paginationOptions ??= PaginatedEntitiesRequestOptions.defaults();
     Response res = await get(
       Uri.parse('${API.url}/ai-responses?${paginationOptions.searchQuery}'),
       headers: <String, String>{
@@ -52,13 +52,12 @@ class AiResponseService {
     return AiResponse.fromJson(data);
   }
 
-  static Future<PaginatedEntitiesResponseData<AiResponse>>
-      searchForAiResponses({
-    PaginatedEntitiesRequestOptions paginationOptions =
-        const PaginatedEntitiesRequestOptions(),
+  static Future<PaginatedEntitiesResponseData<AiResponse>> searchForAiResponses({
+    PaginatedEntitiesRequestOptions? paginationOptions,
     required Query query,
     required String session,
   }) async {
+    paginationOptions ??= PaginatedEntitiesRequestOptions.defaults();
     Response res = await post(
       Uri.parse(
         '${API.url}/ai-responses/search?${paginationOptions.searchQuery}',
@@ -97,8 +96,6 @@ class AiResponseService {
     }
 
     final data = jsonDecode(utf8.decode(res.bodyBytes));
-    return (data as List<dynamic>)
-        .map((e) => SourceDocument.fromJson(e as Map<String, dynamic>))
-        .toList();
+    return (data as List<dynamic>).map((e) => SourceDocument.fromJson(e as Map<String, dynamic>)).toList();
   }
 }

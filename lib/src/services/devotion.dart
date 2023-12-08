@@ -11,8 +11,9 @@ export 'devotion/image.dart' show DevotionImageService;
 
 class DevotionService {
   static Future<PaginatedEntitiesResponseData<Devotion>> getDevotions({
-    PaginatedEntitiesRequestOptions paginationOptions = const PaginatedEntitiesRequestOptions(),
+    PaginatedEntitiesRequestOptions? paginationOptions,
   }) async {
+    paginationOptions ??= PaginatedEntitiesRequestOptions.defaults();
     Response res = await get(
       Uri.parse('${API.url}/devotions?${paginationOptions.searchQuery}'),
       headers: <String, String>{

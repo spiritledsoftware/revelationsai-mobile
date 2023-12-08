@@ -7,15 +7,13 @@ import 'package:revelationsai/src/models/pagination.dart';
 import 'package:revelationsai/src/utils/http_helpers.dart';
 
 class DevotionImageService {
-  static Future<PaginatedEntitiesResponseData<DevotionImage>>
-      getDevotionImages({
+  static Future<PaginatedEntitiesResponseData<DevotionImage>> getDevotionImages({
     required String id,
-    PaginatedEntitiesRequestOptions paginationOptions =
-        const PaginatedEntitiesRequestOptions(),
+    PaginatedEntitiesRequestOptions? paginationOptions,
   }) async {
+    paginationOptions ??= PaginatedEntitiesRequestOptions.defaults();
     Response res = await get(
-      Uri.parse(
-          '${API.url}/devotions/$id/images?${paginationOptions.searchQuery}'),
+      Uri.parse('${API.url}/devotions/$id/images?${paginationOptions.searchQuery}'),
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
       },

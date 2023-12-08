@@ -116,7 +116,9 @@ class DevotionRepository {
   }
 
   Future<Devotion> getLatest() async {
-    return await getPage(const PaginatedEntitiesRequestOptions(page: 1, limit: 1)).then((value) => value.first);
+    return await getPage(
+      PaginatedEntitiesRequestOptions(page: 1, limit: 1, orderBy: "createdAt", order: OrderType.desc),
+    ).then((value) => value.first);
   }
 }
 

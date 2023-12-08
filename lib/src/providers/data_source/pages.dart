@@ -53,7 +53,9 @@ class DataSourcesPages extends _$DataSourcesPages {
   Future<List<List<DataSource>>> refresh() async {
     final futures = <Future<List<DataSource>>>[];
     for (int i = 1; i <= _page; i++) {
-      futures.add(ref.dataSources.getPage(PaginatedEntitiesRequestOptions(page: i, limit: pageSize)));
+      futures.add(ref.dataSources.getPage(
+        PaginatedEntitiesRequestOptions(page: i, limit: pageSize),
+      ));
     }
     return await Future.wait(futures).then((value) async {
       state = AsyncData(value);

@@ -8,9 +8,10 @@ import 'package:revelationsai/src/utils/http_helpers.dart';
 
 class UserGeneratedImageService {
   static Future<PaginatedEntitiesResponseData<UserGeneratedImage>> getUserGeneratedImages({
-    PaginatedEntitiesRequestOptions paginationOptions = const PaginatedEntitiesRequestOptions(),
+    PaginatedEntitiesRequestOptions? paginationOptions,
     required String session,
   }) async {
+    paginationOptions ??= PaginatedEntitiesRequestOptions.defaults();
     final res = await http.get(
       Uri.parse('${API.url}/generated-images?${paginationOptions.searchQuery}'),
       headers: <String, String>{

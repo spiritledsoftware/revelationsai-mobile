@@ -8,33 +8,35 @@ enum OrderType {
   desc,
 }
 
-class PaginatedEntitiesRequestOptions {
-  final int page;
-  final int limit;
+@freezed
+class PaginatedEntitiesRequestOptions with _$PaginatedEntitiesRequestOptions {
+  const PaginatedEntitiesRequestOptions._();
 
-  // Order by field in T
-  final String orderBy;
+  factory PaginatedEntitiesRequestOptions({
+    required int page,
+    required int limit,
+    @Default("createdAt") String orderBy,
+    @Default(OrderType.desc) OrderType order,
+  }) = _PaginatedEntitiesRequestOptions;
 
-  final OrderType order;
-
-  const PaginatedEntitiesRequestOptions({
-    this.page = 1,
-    this.limit = 10,
-    this.orderBy = "createdAt",
-    this.order = OrderType.desc,
-  });
+  factory PaginatedEntitiesRequestOptions.defaults() => PaginatedEntitiesRequestOptions(
+        page: 1,
+        limit: 25,
+        orderBy: 'createdAt',
+        order: OrderType.desc,
+      );
 
   String get searchQuery {
-    return "page=${Uri.encodeComponent(
-      page.toString(),
-    )}&limit=${Uri.encodeComponent(
-      limit.toString(),
-    )}&orderBy=${Uri.encodeComponent(
-      orderBy,
-    )}&order=${Uri.encodeComponent(
-      order.name,
-    )}";
+    return <String>[
+      'page=$page',
+      'limit=$limit',
+      'orderBy=$orderBy',
+      'order=${order.toString().split('.').last}',
+    ].join('&');
   }
+
+  factory PaginatedEntitiesRequestOptions.fromJson(Map<String, dynamic> json) =>
+      _$PaginatedEntitiesRequestOptionsFromJson(json);
 }
 
 @Freezed(genericArgumentFactories: true)

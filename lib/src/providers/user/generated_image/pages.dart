@@ -73,7 +73,9 @@ class UserGeneratedImagesPages extends _$UserGeneratedImagesPages {
   Future<List<List<UserGeneratedImage>>> refresh() async {
     final futures = <Future<List<UserGeneratedImage>>>[];
     for (int i = 1; i <= _page; i++) {
-      futures.add(ref.userGeneratedImages.refreshPage(PaginatedEntitiesRequestOptions(page: i, limit: pageSize)));
+      futures.add(ref.userGeneratedImages.refreshPage(
+        PaginatedEntitiesRequestOptions(page: i, limit: pageSize),
+      ));
     }
     return await Future.wait(futures).then((value) async {
       state = AsyncData(value);

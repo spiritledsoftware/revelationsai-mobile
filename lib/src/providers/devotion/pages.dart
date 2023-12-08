@@ -54,7 +54,10 @@ class DevotionsPages extends _$DevotionsPages {
   Future<List<List<Devotion>>> refresh() async {
     final futures = <Future<List<Devotion>>>[];
     for (int i = 1; i <= _page; i++) {
-      futures.add(ref.devotions.refreshPage(PaginatedEntitiesRequestOptions(page: i, limit: pageSize)));
+      futures.add(ref.devotions.refreshPage(PaginatedEntitiesRequestOptions(
+        page: i,
+        limit: pageSize,
+      )));
     }
     return await Future.wait(futures).then((value) async {
       state = AsyncData(value);
