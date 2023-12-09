@@ -150,9 +150,6 @@ class ChatService {
         );
 
         final responsesPage = await AiResponseService.searchForAiResponses(
-          paginationOptions: paginationOptions!.copyWith(
-            limit: (paginationOptions.limit / 2).ceil(),
-          ),
           query: Query(
             AND: [
               Query(
