@@ -121,13 +121,10 @@ class ChatRepository {
   }
 
   Future<List<Chat>> getPage(PaginatedEntitiesRequestOptions options) async {
-    if (await _isar.chats.count() >= (options.page * options.limit)) {
-      return await _queryBuilderForPageOptions(options)
-          .offset((options.page - 1) * options.limit)
-          .limit(options.limit)
-          .findAll();
-    }
-    return await _fetchPage(options);
+    return await _queryBuilderForPageOptions(options)
+        .offset((options.page - 1) * options.limit)
+        .limit(options.limit)
+        .findAll();
   }
 
   Future<List<Chat>> refreshPage(PaginatedEntitiesRequestOptions options) async {
@@ -157,19 +154,15 @@ class ChatMessagesRepository {
   }
 
   Future<List<ChatMessage>> getPageByChatId(String chatId, PaginatedEntitiesRequestOptions options) async {
-    final local = await _getLocalByChatId(chatId);
-    if (local.length >= (options.page * options.limit)) {
-      return await _isar.chatMessages
-          .where()
-          .chatIdEqualTo(chatId)
-          .sortByCreatedAtDesc()
-          .thenByRoleDesc()
-          .offset((options.page - 1) * options.limit)
-          .limit(options.limit)
-          .findAll()
-          .then((value) => value.reversed.toList());
-    }
-    return await _fetchPageByChatId(chatId, options);
+    return await _isar.chatMessages
+        .where()
+        .chatIdEqualTo(chatId)
+        .sortByCreatedAtDesc()
+        .thenByRoleDesc()
+        .offset((options.page - 1) * options.limit)
+        .limit(options.limit)
+        .findAll()
+        .then((value) => value.reversed.toList());
   }
 
   Future<List<ChatMessage>> _fetchPageByChatId(String chatId, PaginatedEntitiesRequestOptions options) async {

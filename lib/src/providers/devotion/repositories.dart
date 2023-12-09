@@ -102,13 +102,10 @@ class DevotionRepository {
   }
 
   Future<List<Devotion>> getPage(PaginatedEntitiesRequestOptions options) async {
-    if (await _isar.devotions.count() >= (options.page * options.limit)) {
-      return await _queryBuilderForPageOptions(options)
-          .offset((options.page - 1) * options.limit)
-          .limit(options.limit)
-          .findAll();
-    }
-    return await _fetchPage(options);
+    return await _queryBuilderForPageOptions(options)
+        .offset((options.page - 1) * options.limit)
+        .limit(options.limit)
+        .findAll();
   }
 
   Future<List<Devotion>> refreshPage(PaginatedEntitiesRequestOptions options) async {
