@@ -63,6 +63,7 @@ class ChatScreen extends HookConsumerWidget {
         },
       ),
     );
+    final chatMessagesNotifier = ref.watch(chatMessagesProvider(chatHook.chatId.value).notifier);
 
     final scrollToEnd = useCallback(() {
       if (scrollController.hasClients) {
@@ -124,7 +125,7 @@ class ChatScreen extends HookConsumerWidget {
         if (isMounted()) {
           chat.value = value[0] as Chat?;
           if (!chatHook.loading.value) {
-            chatHook.messages.value = value[1] as List<ChatMessage>;
+            chatHook.messages.value = (value[1] as List<List<ChatMessage>>).expand((element) => element).toList();
           }
         }
       });
@@ -174,7 +175,7 @@ class ChatScreen extends HookConsumerWidget {
       if (!chatHook.loading.value) {
         isLoadingChat.value = true;
         ref.read(chatMessagesProvider(chatHook.chatId.value).future).then((value) {
-          if (isMounted()) chatHook.messages.value = value;
+          if (isMounted()) chatHook.messages.value = value.expand((element) => element).toList();
         }).catchError((error) {
           debugPrint("Failed to get chat messages: $error");
           ScaffoldMessenger.of(context).showSnackBar(
@@ -255,9 +256,14 @@ class ChatScreen extends HookConsumerWidget {
           if (scrollController.position.outOfRange) {
             return;
           }
-
           if (scrollController.offset <= scrollController.position.minScrollExtent) {
             if (isMounted()) scrollableEndIsInView.value = true;
+          } else if (scrollController.offset >= scrollController.position.maxScrollExtent &&
+              !chatMessagesNotifier.isLoadingNextPage() &&
+              chatMessagesNotifier.hasNextPage()) {
+            chatMessagesNotifier.fetchNextPage().then((value) {
+              if (isMounted()) chatHook.messages.value.addAll(value);
+            });
           } else {
             if (isMounted()) scrollableEndIsInView.value = false;
           }
@@ -305,12 +311,28 @@ class ChatScreen extends HookConsumerWidget {
                       ),
                       shrinkWrap: true,
                       reverse: true,
-                      itemCount: chatHook.messages.value.length + 1,
+                      itemCount: chatHook.messages.value.length + 2,
                       itemBuilder: (context, index) {
                         if (index == 0) {
                           return const SizedBox(
                             height: 65,
                           );
+                        }
+
+                        if (index == chatHook.messages.value.length + 1) {
+                          if (chatMessagesNotifier.isLoadingNextPage()) {
+                            return const SizedBox(
+                              height: 30,
+                              width: 30,
+                              child: Center(
+                                child: SpinKitSpinningLines(
+                                  color: Colors.white,
+                                  size: 30,
+                                ),
+                              ),
+                            );
+                          }
+                          return const SizedBox();
                         }
 
                         final message = chatHook.messages.value[chatHook.messages.value.length - index];
