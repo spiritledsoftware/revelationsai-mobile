@@ -7,7 +7,7 @@ part 'messages.g.dart';
 
 @Riverpod(keepAlive: true)
 class ChatMessages extends _$ChatMessages {
-  static const int pageSize = 50;
+  static const int pageSize = 20;
 
   int _page = 1;
   bool _isLoadingInitial = true;
