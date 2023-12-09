@@ -124,7 +124,7 @@ class ChatService {
     paginationOptions ??= PaginatedEntitiesRequestOptions(page: 1, limit: 100);
     final messagesPage = await UserMessageService.searchForUserMessages(
       paginationOptions: paginationOptions.copyWith(
-        limit: (paginationOptions.limit / 2).floor(),
+        limit: (paginationOptions.limit / 2).ceil(),
       ),
       query: Query(
         AND: [
