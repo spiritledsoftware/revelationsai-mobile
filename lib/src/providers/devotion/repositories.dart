@@ -68,7 +68,7 @@ class DevotionRepository {
   }
 
   Future<void> deleteManyLocal(List<String> ids) async {
-    await _isar.writeTxn(() => _isar.devotions.deleteAll(ids.map((e) => fastHash(e)).toList()));
+    await _isar.writeTxn(() async => await _isar.devotions.deleteAll(ids.map((e) => fastHash(e)).toList()));
   }
 
   Future<List<Devotion>> getAllLocal() async {

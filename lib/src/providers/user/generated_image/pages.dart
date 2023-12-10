@@ -20,22 +20,42 @@ class UserGeneratedImagesPages extends _$UserGeneratedImagesPages {
     _loadingLogic();
     _persistenceLogic();
 
-    return await ref.userGeneratedImages
-        .getPage(PaginatedEntitiesRequestOptions(page: _page, limit: pageSize))
-        .then((value) {
-      if (state.hasValue) {
-        // replace pages previous content with new content
-        return [
-          ...state.value!.sublist(0, _page - 1),
-          value,
-          if (state.value!.length > _page + 1) ...state.value!.sublist(_page + 1, state.value!.length),
-        ];
-      } else {
-        return [
-          value,
-        ];
+    return await ref.userGeneratedImages.getPageLocal(_getPaginationOptions()).then((value) {
+      if (value.length < pageSize) {
+        ref.userGeneratedImages.getPageRemote(_getPaginationOptions()).then((value) {
+          state = AsyncData(_insertPageIntoState(value, replace: true));
+        });
       }
+      return _insertPageIntoState(value);
     });
+  }
+
+  List<List<UserGeneratedImage>> _insertPageIntoState(
+    List<UserGeneratedImage> userGeneratedImages, {
+    bool replace = false,
+  }) {
+    final previousState = state;
+    if (previousState.hasValue) {
+      if (replace) {
+        previousState.value!.removeAt(_page - 1);
+      }
+      return previousState.value!
+        ..insert(
+          _page - 1,
+          userGeneratedImages,
+        );
+    } else {
+      return [
+        userGeneratedImages,
+      ];
+    }
+  }
+
+  PaginatedEntitiesRequestOptions _getPaginationOptions() {
+    return PaginatedEntitiesRequestOptions(
+      page: _page,
+      limit: pageSize,
+    );
   }
 
   bool hasNextPage() {
@@ -73,7 +93,7 @@ class UserGeneratedImagesPages extends _$UserGeneratedImagesPages {
   Future<List<List<UserGeneratedImage>>> refresh() async {
     final futures = <Future<List<UserGeneratedImage>>>[];
     for (int i = 1; i <= _page; i++) {
-      futures.add(ref.userGeneratedImages.refreshPage(
+      futures.add(ref.userGeneratedImages.getPageRemote(
         PaginatedEntitiesRequestOptions(page: i, limit: pageSize),
       ));
     }

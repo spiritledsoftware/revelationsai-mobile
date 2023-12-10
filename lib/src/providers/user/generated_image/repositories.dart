@@ -70,6 +70,10 @@ class UserGeneratedImageRepository {
     });
   }
 
+  Future<void> deleteManyLocal(List<String> ids) async {
+    await _isar.writeTxn(() async => await _isar.userGeneratedImages.deleteAll(ids.map(fastHash).toList()));
+  }
+
   Future<void> deleteRemote(String id) async {
     return await UserGeneratedImageService.deleteUserGeneratedImage(id: id, session: _session).then((value) async {
       if (await _hasLocal(id)) {
@@ -90,28 +94,22 @@ class UserGeneratedImageRepository {
     return await _isar.userGeneratedImages.where().findAll();
   }
 
-  Future<List<UserGeneratedImage>> _fetchPage(PaginatedEntitiesRequestOptions options) async {
+  Future<List<UserGeneratedImage>> getPageLocal(PaginatedEntitiesRequestOptions options) async {
+    return await _isar.userGeneratedImages
+        .where()
+        .sortByCreatedAtDesc()
+        .offset((options.page - 1) * options.limit)
+        .limit(options.limit)
+        .findAll();
+  }
+
+  Future<List<UserGeneratedImage>> getPageRemote(PaginatedEntitiesRequestOptions options) async {
     return await UserGeneratedImageService.getUserGeneratedImages(session: _session, paginationOptions: options)
         .then((value) async {
+      await deleteManyLocal(await getPageLocal(options).then((value) => value.map((e) => e.id).toList()));
       await _saveMany(value.entities);
       return value.entities;
     });
-  }
-
-  Future<List<UserGeneratedImage>> getPage(PaginatedEntitiesRequestOptions options) async {
-    if (await _isar.userGeneratedImages.count() >= (options.page * options.limit)) {
-      return await _isar.userGeneratedImages
-          .where()
-          .sortByCreatedAtDesc()
-          .offset((options.page - 1) * options.limit)
-          .limit(options.limit)
-          .findAll();
-    }
-    return await _fetchPage(options);
-  }
-
-  Future<List<UserGeneratedImage>> refreshPage(PaginatedEntitiesRequestOptions options) async {
-    return await _fetchPage(options);
   }
 }
 
