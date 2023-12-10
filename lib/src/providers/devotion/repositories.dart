@@ -107,6 +107,7 @@ class DevotionRepository {
 
   Future<List<Devotion>> getPageRemote(PaginatedEntitiesRequestOptions options) async {
     return await DevotionService.getDevotions(paginationOptions: options).then((value) async {
+      await deleteManyLocal(await getPageLocal(options).then((value) => value.map((e) => e.id).toList()));
       await _saveMany(value.entities);
       return value.entities;
     });
