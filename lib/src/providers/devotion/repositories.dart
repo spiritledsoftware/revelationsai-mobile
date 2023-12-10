@@ -67,15 +67,12 @@ class DevotionRepository {
     await _isar.writeTxn(() => _isar.devotions.delete(fastHash(id)));
   }
 
-  Future<List<Devotion>> getAllLocal() async {
-    return await _isar.devotions.where().findAll();
+  Future<void> deleteManyLocal(List<String> ids) async {
+    await _isar.writeTxn(() => _isar.devotions.deleteAll(ids.map((e) => fastHash(e)).toList()));
   }
 
-  Future<List<Devotion>> _fetchPage(PaginatedEntitiesRequestOptions options) async {
-    return await DevotionService.getDevotions(paginationOptions: options).then((value) async {
-      await _saveMany(value.entities);
-      return value.entities;
-    });
+  Future<List<Devotion>> getAllLocal() async {
+    return await _isar.devotions.where().findAll();
   }
 
   QueryBuilder<Devotion, Devotion, QAfterSortBy> _queryBuilderForPageOptions(PaginatedEntitiesRequestOptions options) {
@@ -101,19 +98,22 @@ class DevotionRepository {
     }
   }
 
-  Future<List<Devotion>> getPage(PaginatedEntitiesRequestOptions options) async {
+  Future<List<Devotion>> getPageLocal(PaginatedEntitiesRequestOptions options) async {
     return await _queryBuilderForPageOptions(options)
         .offset((options.page - 1) * options.limit)
         .limit(options.limit)
         .findAll();
   }
 
-  Future<List<Devotion>> refreshPage(PaginatedEntitiesRequestOptions options) async {
-    return await _fetchPage(options);
+  Future<List<Devotion>> getPageRemote(PaginatedEntitiesRequestOptions options) async {
+    return await DevotionService.getDevotions(paginationOptions: options).then((value) async {
+      await _saveMany(value.entities);
+      return value.entities;
+    });
   }
 
   Future<Devotion> getLatest() async {
-    return await getPage(
+    return await getPageLocal(
       PaginatedEntitiesRequestOptions(page: 1, limit: 1, orderBy: "createdAt", order: OrderType.desc),
     ).then((value) => value.first);
   }

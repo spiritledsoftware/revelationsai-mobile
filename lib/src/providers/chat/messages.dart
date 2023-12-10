@@ -21,32 +21,56 @@ class ChatMessages extends _$ChatMessages {
       return [<ChatMessage>[]];
     }
 
-    return await ref.chatMessages
-        .getPageByChatId(chatId, PaginatedEntitiesRequestOptions(page: _page, limit: pageSize))
-        .then((value) {
-      if (state.hasValue) {
-        // replace pages previous content with new content
-        return [
-          ...state.value!.sublist(0, _page - 1),
-          value,
-          if (state.value!.length > _page + 1) ...state.value!.sublist(_page + 1, state.value!.length),
-        ];
-      } else {
-        return [
-          value,
-        ];
+    return await ref.chatMessages.getPageByChatIdLocal(chatId, _getPaginationOptions()).then((value) {
+      if (value.length < pageSize) {
+        ref.chatMessages.getPageByChatIdRemote(chatId, _getPaginationOptions()).then((value) {
+          state = AsyncData(_insertPageIntoState(value, replace: true));
+        });
       }
+      return _insertPageIntoState(value);
     });
   }
 
+  PaginatedEntitiesRequestOptions _getPaginationOptions() {
+    return PaginatedEntitiesRequestOptions(
+      page: _page,
+      limit: pageSize,
+      orderBy: "createdAt",
+      order: OrderType.desc,
+    );
+  }
+
+  List<List<ChatMessage>> _insertPageIntoState(List<ChatMessage> messages, {bool replace = false}) {
+    final previousState = state;
+    if (previousState.hasValue) {
+      if (replace) {
+        previousState.value!.removeAt(previousState.value!.length - (_page - 1));
+      }
+      return previousState.value!
+        ..insert(
+          previousState.value!.length - (_page - 1), // insert at the beginning
+          messages,
+        );
+    } else {
+      return [
+        messages,
+      ];
+    }
+  }
+
   bool hasNextPage() {
-    return (state.value?.last.length ?? 0) >= pageSize;
+    return (state.value?.firstOrNull?.length ?? 0) >= pageSize;
   }
 
   Future<List<ChatMessage>> fetchNextPage() async {
-    _page++;
-    ref.invalidateSelf();
-    return await future.then((value) => value.last);
+    try {
+      _page++;
+      ref.invalidateSelf();
+      return await future.then((value) => value.last);
+    } catch (e) {
+      _page--;
+      rethrow;
+    }
   }
 
   Future<void> reset() async {
@@ -63,9 +87,9 @@ class ChatMessages extends _$ChatMessages {
       return messages;
     }
     final futures = <Future<List<ChatMessage>>>[];
-    for (int i = 1; i <= _page; i++) {
+    for (int i = _page; i >= 1; i--) {
       futures.add(
-        ref.chatMessages.refreshPageByChatId(
+        ref.chatMessages.getPageByChatIdRemote(
           chatId!,
           PaginatedEntitiesRequestOptions(
             page: i,

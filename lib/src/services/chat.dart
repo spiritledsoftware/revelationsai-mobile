@@ -125,6 +125,8 @@ class ChatService {
     final messagesPage = await UserMessageService.searchForUserMessages(
       paginationOptions: paginationOptions.copyWith(
         limit: (paginationOptions.limit / 2).ceil(),
+        orderBy: "createdAt",
+        order: OrderType.desc,
       ),
       query: Query(
         AND: [
@@ -150,6 +152,12 @@ class ChatService {
         );
 
         final responsesPage = await AiResponseService.searchForAiResponses(
+          paginationOptions: PaginatedEntitiesRequestOptions(
+            page: 1,
+            limit: 10,
+            orderBy: "createdAt",
+            order: OrderType.desc,
+          ),
           query: Query(
             AND: [
               Query(
@@ -191,8 +199,6 @@ class ChatService {
         .expand(
           (element) => element,
         )
-        .toList()
-        .reversed
         .toList();
   }
 }

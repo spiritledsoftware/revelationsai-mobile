@@ -63,7 +63,26 @@ class ChatScreen extends HookConsumerWidget {
         },
       ),
     );
-    final chatMessagesNotifier = ref.watch(chatMessagesProvider(chatHook.chatId.value).notifier);
+
+    final watchedChat = ref.watch(singleChatProvider(chatHook.chatId.value));
+    useEffect(() {
+      if (watchedChat is AsyncData<Chat>) {
+        if (isMounted()) {
+          chat.value = watchedChat.value;
+        }
+      }
+      return () {};
+    }, [watchedChat]);
+
+    final watchedChatMessages = ref.watch(chatMessagesProvider(chatHook.chatId.value));
+    useEffect(() {
+      if (watchedChatMessages is AsyncData<List<List<ChatMessage>>>) {
+        if (isMounted() && !chatHook.loading.value) {
+          chatHook.messages.value = watchedChatMessages.value.expand((element) => element).toList();
+        }
+      }
+      return () {};
+    }, [watchedChatMessages]);
 
     final scrollToEnd = useCallback(() {
       if (scrollController.hasClients) {
@@ -121,15 +140,8 @@ class ChatScreen extends HookConsumerWidget {
       await Future.wait([
         ref.read(singleChatProvider(chatHook.chatId.value).notifier).refresh(),
         ref.read(chatMessagesProvider(chatHook.chatId.value).notifier).refresh(),
-      ]).then((value) {
-        if (isMounted()) {
-          chat.value = value[0] as Chat?;
-          if (!chatHook.loading.value) {
-            chatHook.messages.value = (value[1] as List<List<ChatMessage>>).expand((element) => element).toList();
-          }
-        }
-      });
-    }, [ref, chatHook.chatId.value, chatHook.loading.value, isMounted]);
+      ]);
+    }, [ref, chatHook.chatId.value]);
 
     useEffect(() {
       chatHook.chatId.value = initChatId;
@@ -152,7 +164,9 @@ class ChatScreen extends HookConsumerWidget {
 
     useEffect(() {
       ref.read(singleChatProvider(chatHook.chatId.value).future).then((value) {
-        if (isMounted()) chat.value = value;
+        if (isMounted()) {
+          chat.value = value;
+        }
       }).catchError((error) {
         debugPrint("Failed to get chat: $error");
         ScaffoldMessenger.of(context).showSnackBar(
@@ -175,7 +189,9 @@ class ChatScreen extends HookConsumerWidget {
       if (!chatHook.loading.value) {
         isLoadingChat.value = true;
         ref.read(chatMessagesProvider(chatHook.chatId.value).future).then((value) {
-          if (isMounted()) chatHook.messages.value = value.expand((element) => element).toList();
+          if (isMounted()) {
+            chatHook.messages.value = value.expand((element) => element).toList();
+          }
         }).catchError((error) {
           debugPrint("Failed to get chat messages: $error");
           ScaffoldMessenger.of(context).showSnackBar(
@@ -243,43 +259,59 @@ class ChatScreen extends HookConsumerWidget {
             animationDuration: const Duration(milliseconds: 200),
           ).show(context);
         }).whenComplete(() {
-          if (isMounted()) alert.value = null;
+          if (isMounted()) {
+            alert.value = null;
+          }
         });
       }
       return () {};
     }, [alert.value]);
 
     useEffect(() {
-      debugPrint("ChatScreen: scrollController.hasClients: ${scrollController.hasClients}");
-      if (scrollController.hasClients) {
-        scrollController.addListener(() {
-          if (scrollController.position.outOfRange) {
-            return;
-          }
-          if (scrollController.offset <= scrollController.position.minScrollExtent) {
-            if (isMounted()) scrollableEndIsInView.value = true;
-          } else if (scrollController.offset >= scrollController.position.maxScrollExtent &&
-              !chatMessagesNotifier.isLoadingNextPage() &&
-              chatMessagesNotifier.hasNextPage()) {
-            chatMessagesNotifier.fetchNextPage().then((value) {
-              if (isMounted()) chatHook.messages.value.addAll(value);
-            });
-          } else {
-            if (isMounted()) scrollableEndIsInView.value = false;
-          }
-        });
-      } else {
-        if (isMounted()) scrollableEndIsInView.value = true;
-      }
-      return () {};
-    }, [scrollController.hasClients]);
-
-    useEffect(() {
       chatHook.inputController.addListener(() {
-        if (isMounted()) input.value = chatHook.inputController.text;
+        if (isMounted()) {
+          input.value = chatHook.inputController.text;
+        }
       });
       return () {};
     }, [chatHook.inputController]);
+
+    void scrollClosure() {
+      if (scrollController.position.outOfRange) {
+        return;
+      }
+
+      final chatMessagesNotifier = ref.read(chatMessagesProvider(chatHook.chatId.value).notifier);
+      if (scrollController.offset <= scrollController.position.minScrollExtent) {
+        if (isMounted()) {
+          scrollableEndIsInView.value = true;
+        }
+      } else if (scrollController.offset >= scrollController.position.maxScrollExtent &&
+          chatMessagesNotifier.hasNextPage() &&
+          !chatMessagesNotifier.isLoadingNextPage()) {
+        chatMessagesNotifier.fetchNextPage().then((value) {
+          if (isMounted()) {
+            chatHook.messages.value.addAll(value);
+          }
+        });
+      } else {
+        if (isMounted()) {
+          scrollableEndIsInView.value = false;
+        }
+      }
+    }
+
+    useEffect(() {
+      debugPrint("ChatScreen: scrollController.hasClients: ${scrollController.hasClients}");
+      if (scrollController.hasClients) {
+        scrollController.addListener(scrollClosure);
+      } else {
+        if (isMounted()) {
+          scrollableEndIsInView.value = true;
+        }
+      }
+      return () {};
+    }, [scrollController.hasClients]);
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: context.isDarkMode ? SystemUiOverlayStyle.light : SystemUiOverlayStyle.dark,
@@ -320,14 +352,27 @@ class ChatScreen extends HookConsumerWidget {
                         }
 
                         if (index == chatHook.messages.value.length + 1) {
+                          final chatMessagesNotifier = ref.read(chatMessagesProvider(chatHook.chatId.value).notifier);
                           if (chatMessagesNotifier.isLoadingNextPage()) {
-                            return const SizedBox(
+                            return SizedBox(
                               height: 30,
                               width: 30,
                               child: Center(
                                 child: SpinKitSpinningLines(
-                                  color: Colors.white,
+                                  color: context.colorScheme.onBackground,
                                   size: 30,
+                                ),
+                              ),
+                            );
+                          }
+                          if (chatMessagesNotifier.hasNextPage()) {
+                            return SizedBox(
+                              height: 30,
+                              width: 30,
+                              child: Center(
+                                child: Icon(
+                                  Icons.arrow_upward,
+                                  color: context.colorScheme.onBackground,
                                 ),
                               ),
                             );

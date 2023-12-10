@@ -18,19 +18,26 @@ class DataSourcesPages extends _$DataSourcesPages {
     _loadingLogic();
 
     return await ref.dataSources.getPage(PaginatedEntitiesRequestOptions(page: _page, limit: pageSize)).then((value) {
-      if (state.hasValue) {
-        // replace pages previous content with new content
-        return [
-          ...state.value!.sublist(0, _page - 1),
-          value,
-          if (state.value!.length > _page + 1) ...state.value!.sublist(_page + 1, state.value!.length),
-        ];
-      } else {
-        return [
-          value,
-        ];
-      }
+      return _insertPageIntoState(value);
     });
+  }
+
+  List<List<DataSource>> _insertPageIntoState(List<DataSource> dataSources, {bool replace = false}) {
+    final previousState = state;
+    if (previousState.hasValue) {
+      if (replace) {
+        previousState.value!.removeAt(_page - 1);
+      }
+      return previousState.value!
+        ..insert(
+          _page - 1,
+          dataSources,
+        );
+    } else {
+      return [
+        dataSources,
+      ];
+    }
   }
 
   bool hasNextPage() {
@@ -38,9 +45,14 @@ class DataSourcesPages extends _$DataSourcesPages {
   }
 
   Future<void> fetchNextPage() async {
-    _page++;
-    ref.invalidateSelf();
-    await future;
+    try {
+      _page++;
+      ref.invalidateSelf();
+      await future;
+    } catch (e) {
+      _page--;
+      rethrow;
+    }
   }
 
   Future<void> reset() async {

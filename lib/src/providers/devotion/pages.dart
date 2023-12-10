@@ -18,20 +18,39 @@ class DevotionsPages extends _$DevotionsPages {
   FutureOr<List<List<Devotion>>> build() async {
     _loadingLogic();
 
-    return await ref.devotions.getPage(PaginatedEntitiesRequestOptions(page: _page, limit: pageSize)).then((value) {
-      if (state.hasValue) {
-        // replace pages previous content with new content
-        return [
-          ...state.value!.sublist(0, _page - 1),
-          value,
-          if (state.value!.length > _page + 1) ...state.value!.sublist(_page + 1, state.value!.length),
-        ];
-      } else {
-        return [
-          value,
-        ];
+    return await ref.devotions.getPageLocal(_getPaginationOptions()).then((value) {
+      if (value.length < pageSize) {
+        ref.devotions.getPageRemote(_getPaginationOptions()).then((value) {
+          state = AsyncData(_insertPageIntoState(value, replace: true));
+        });
       }
+      return _insertPageIntoState(value);
     });
+  }
+
+  PaginatedEntitiesRequestOptions _getPaginationOptions() {
+    return PaginatedEntitiesRequestOptions(
+      page: _page,
+      limit: pageSize,
+    );
+  }
+
+  List<List<Devotion>> _insertPageIntoState(List<Devotion> devotions, {bool replace = false}) {
+    final previousState = state;
+    if (previousState.hasValue) {
+      if (replace) {
+        previousState.value!.removeAt(_page - 1);
+      }
+      return previousState.value!
+        ..insert(
+          _page - 1,
+          devotions,
+        );
+    } else {
+      return [
+        devotions,
+      ];
+    }
   }
 
   bool hasNextPage() {
@@ -39,9 +58,14 @@ class DevotionsPages extends _$DevotionsPages {
   }
 
   Future<void> fetchNextPage() async {
-    _page++;
-    ref.invalidateSelf();
-    await future;
+    try {
+      _page++;
+      ref.invalidateSelf();
+      await future;
+    } catch (e) {
+      _page--;
+      rethrow;
+    }
   }
 
   Future<void> reset() async {
@@ -54,7 +78,7 @@ class DevotionsPages extends _$DevotionsPages {
   Future<List<List<Devotion>>> refresh() async {
     final futures = <Future<List<Devotion>>>[];
     for (int i = 1; i <= _page; i++) {
-      futures.add(ref.devotions.refreshPage(PaginatedEntitiesRequestOptions(
+      futures.add(ref.devotions.getPageRemote(PaginatedEntitiesRequestOptions(
         page: i,
         limit: pageSize,
       )));

@@ -18,27 +18,41 @@ class ChatsPages extends _$ChatsPages {
   FutureOr<List<List<Chat>>> build() async {
     _loadingLogic();
 
-    return await ref.chats
-        .getPage(PaginatedEntitiesRequestOptions(
+    return await ref.chats.getPageLocal(_getPaginationOptions()).then((value) {
+      if (value.length < pageSize) {
+        ref.chats.getPageRemote(_getPaginationOptions()).then((value) {
+          state = AsyncData(_insertPageIntoState(value, replace: true));
+        });
+      }
+      return _insertPageIntoState(value);
+    });
+  }
+
+  List<List<Chat>> _insertPageIntoState(List<Chat> chats, {bool replace = false}) {
+    final previousState = state;
+    if (previousState.hasValue) {
+      if (replace) {
+        previousState.value!.removeAt(_page - 1);
+      }
+      return previousState.value!
+        ..insert(
+          _page - 1,
+          chats,
+        );
+    } else {
+      return [
+        chats,
+      ];
+    }
+  }
+
+  PaginatedEntitiesRequestOptions _getPaginationOptions() {
+    return PaginatedEntitiesRequestOptions(
       page: _page,
       limit: pageSize,
       orderBy: "updatedAt",
       order: OrderType.desc,
-    ))
-        .then((value) {
-      if (state.hasValue) {
-        // replace pages previous content with new content
-        return [
-          ...state.value!.sublist(0, _page - 1),
-          value,
-          if (state.value!.length > _page + 1) ...state.value!.sublist(_page + 1, state.value!.length),
-        ];
-      } else {
-        return [
-          value,
-        ];
-      }
-    });
+    );
   }
 
   bool hasNextPage() {
@@ -46,9 +60,14 @@ class ChatsPages extends _$ChatsPages {
   }
 
   Future<void> fetchNextPage() async {
-    _page++;
-    ref.invalidateSelf();
-    await future;
+    try {
+      _page++;
+      ref.invalidateSelf();
+      await future;
+    } catch (error) {
+      _page--;
+      rethrow;
+    }
   }
 
   Future<void> reset() async {
@@ -76,7 +95,7 @@ class ChatsPages extends _$ChatsPages {
   Future<List<List<Chat>>> refresh() async {
     final futures = <Future<List<Chat>>>[];
     for (int i = 1; i <= _page; i++) {
-      futures.add(ref.chats.refreshPage(PaginatedEntitiesRequestOptions(
+      futures.add(ref.chats.getPageRemote(PaginatedEntitiesRequestOptions(
         page: i,
         limit: pageSize,
         orderBy: "updatedAt",
