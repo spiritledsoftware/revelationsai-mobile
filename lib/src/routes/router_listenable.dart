@@ -67,13 +67,13 @@ class RouterListenable extends _$RouterListenable implements Listenable {
     final chatPath = "$chatBasePath/${currentChatId ?? ""}";
 
     if (isSplash) {
-      final redirect = state.uri.queryParameters["redirect"] ?? chatPath;
+      final redirect = state.uri.queryParameters["redirect"] ?? "/home";
       debugPrint("Redirecting to $redirect");
       return _isAuth ? redirect : "/auth/sign-in";
     }
 
     final isLoggingIn = state.uri.path.startsWith("/auth");
-    if (isLoggingIn) return _isAuth ? chatPath : null;
+    if (isLoggingIn) return _isAuth ? "/home" : null;
 
     if (isChatBase && currentChatId != null && state.uri.queryParameters["query"] == null) {
       debugPrint("Redirecting to $chatPath");

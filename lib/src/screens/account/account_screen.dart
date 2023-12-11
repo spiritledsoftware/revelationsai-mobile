@@ -1,18 +1,16 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:revelationsai/src/constants/colors.dart';
 import 'package:revelationsai/src/constants/visual_density.dart';
 import 'package:revelationsai/src/providers/user/current.dart';
 import 'package:revelationsai/src/providers/user/preferences.dart';
-import 'package:revelationsai/src/screens/account/settings_modal.dart';
 import 'package:revelationsai/src/utils/build_context_extensions.dart';
 import 'package:revelationsai/src/widgets/account/change_password_dialog.dart';
+import 'package:revelationsai/src/widgets/account/delete_account_dialog.dart';
 import 'package:revelationsai/src/widgets/account/edit_email_dialog.dart';
 import 'package:revelationsai/src/widgets/account/rename_dialog.dart';
 import 'package:revelationsai/src/widgets/account/user_avatar.dart';
@@ -30,39 +28,15 @@ class AccountScreen extends HookConsumerWidget {
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: context.isDarkMode ? SystemUiOverlayStyle.light : SystemUiOverlayStyle.dark,
       child: Scaffold(
-        floatingActionButtonLocation: FloatingActionButtonLocation.miniEndTop,
-        floatingActionButton: Container(
-          padding: const EdgeInsets.all(5),
-          decoration: BoxDecoration(
-            color: RAIColors.secondary,
-            borderRadius: BorderRadius.circular(10),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.2),
-                blurRadius: 10,
-                offset: const Offset(0, 5),
-              ),
-            ],
-          ),
-          child: IconButton(
-            onPressed: () {
-              if (hapticFeedbackEnabled) HapticFeedback.mediumImpact();
-              showModalBottomSheet(
-                elevation: 20,
-                isScrollControlled: true,
-                context: context,
-                builder: (_) => const FractionallySizedBox(
-                  heightFactor: 0.90,
-                  widthFactor: 1,
-                  child: SettingsModal(),
-                ),
-              );
-            },
-            icon: const FaIcon(
-              FontAwesomeIcons.gear,
-              color: Colors.white,
-            ),
-          ),
+        floatingActionButtonLocation: FloatingActionButtonLocation.miniStartTop,
+        floatingActionButton: FloatingActionButton.small(
+          onPressed: () {
+            if (hapticFeedbackEnabled) {
+              HapticFeedback.mediumImpact();
+            }
+            context.go("/home");
+          },
+          child: const Icon(Icons.arrow_back),
         ),
         body: Stack(
           children: [
@@ -419,6 +393,89 @@ class AccountScreen extends HookConsumerWidget {
                         child: const Text("Upgrade"),
                       ),
                     ],
+                  ),
+                  const SizedBox(
+                    height: 40,
+                  ),
+                  ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(
+                        vertical: 15,
+                        horizontal: 40,
+                      ),
+                      shape: const RoundedRectangleBorder(
+                        borderRadius: BorderRadius.all(
+                          Radius.circular(10),
+                        ),
+                      ),
+                    ),
+                    onPressed: () async {
+                      await ref.read(currentUserProvider.notifier).logout().then((value) => context.go("/auth"));
+                    },
+                    child: SizedBox(
+                      width: context.width * 0.5,
+                      child: const Row(
+                        mainAxisSize: MainAxisSize.max,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(Icons.logout),
+                          SizedBox(
+                            width: 10,
+                          ),
+                          Text('Logout'),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(
+                    height: 20,
+                  ),
+                  ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.red.shade300.withOpacity(0.3),
+                      padding: const EdgeInsets.symmetric(
+                        vertical: 15,
+                        horizontal: 40,
+                      ),
+                      shape: const RoundedRectangleBorder(
+                        borderRadius: BorderRadius.all(
+                          Radius.circular(10),
+                        ),
+                      ),
+                    ),
+                    onPressed: () async {
+                      // display confirmation dialog
+                      await showDialog(
+                        barrierDismissible: false,
+                        context: context,
+                        builder: (context) {
+                          return const DeleteAccountDialog();
+                        },
+                      );
+                    },
+                    child: SizedBox(
+                      width: context.width * 0.5,
+                      child: Row(
+                        mainAxisSize: MainAxisSize.max,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            CupertinoIcons.trash,
+                            color: Colors.red.shade500,
+                          ),
+                          const SizedBox(
+                            width: 10,
+                          ),
+                          Text(
+                            'Delete Account',
+                            textAlign: TextAlign.center,
+                            style: context.textTheme.titleMedium?.copyWith(
+                              color: Colors.red.shade500,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
                   ),
                 ],
               ),

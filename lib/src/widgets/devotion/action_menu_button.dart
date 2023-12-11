@@ -8,6 +8,7 @@ import 'package:revelationsai/src/models/devotion/reaction.dart';
 import 'package:revelationsai/src/providers/devotion/reaction.dart';
 import 'package:revelationsai/src/providers/devotion/reaction_count.dart';
 import 'package:revelationsai/src/providers/user/preferences.dart';
+import 'package:revelationsai/src/screens/devotion/devotion_modal.dart';
 import 'package:revelationsai/src/utils/build_context_extensions.dart';
 import 'package:revelationsai/src/widgets/devotion/reaction_comment_dialog.dart';
 import 'package:share_plus/share_plus.dart';
@@ -32,7 +33,7 @@ class DevotionActionMenuButton extends HookConsumerWidget {
       position: PopupMenuPosition.under,
       offset: const Offset(0, 15),
       color: (context.brightness == Brightness.light ? Colors.grey.shade200 : context.colorScheme.primary)
-          .withOpacity(0.95),
+          .withOpacity(0.97),
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.all(
           Radius.circular(15),
@@ -45,6 +46,41 @@ class DevotionActionMenuButton extends HookConsumerWidget {
       },
       itemBuilder: (context) => [
         PopupMenuItem(
+          onTap: () {
+            if (currentUserPrefs.hapticFeedback) {
+              HapticFeedback.mediumImpact();
+            }
+            showModalBottomSheet(
+              elevation: 20,
+              isScrollControlled: true,
+              context: context,
+              builder: (_) => const FractionallySizedBox(
+                widthFactor: 1.0,
+                heightFactor: 0.90,
+                child: DevotionModal(),
+              ),
+            );
+          },
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                CupertinoIcons.clock,
+                color: context.colorScheme.onBackground,
+              ),
+              const SizedBox(
+                width: 10,
+              ),
+              Text(
+                "History",
+                style: TextStyle(
+                  color: context.colorScheme.onBackground,
+                ),
+              ),
+            ],
+          ),
+        ),
+        PopupMenuItem(
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -56,7 +92,7 @@ class DevotionActionMenuButton extends HookConsumerWidget {
                 width: 10,
               ),
               Text(
-                "${reactionCounts.value[DevotionReactionType.LIKE]}",
+                "${reactionCounts.value[DevotionReactionType.LIKE]} Likes",
                 style: TextStyle(
                   color: context.colorScheme.onBackground,
                 ),
@@ -107,7 +143,7 @@ class DevotionActionMenuButton extends HookConsumerWidget {
                 width: 10,
               ),
               Text(
-                "${(reactionCounts.value[DevotionReactionType.DISLIKE])}",
+                "${(reactionCounts.value[DevotionReactionType.DISLIKE])} Dislikes",
                 style: TextStyle(
                   color: context.colorScheme.onBackground,
                 ),
@@ -174,7 +210,7 @@ class DevotionActionMenuButton extends HookConsumerWidget {
         ),
       ],
       icon: Icon(
-        Icons.thumbs_up_down,
+        Icons.more_vert,
         color: context.colorScheme.onSecondary,
       ),
     );

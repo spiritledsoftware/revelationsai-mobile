@@ -7,6 +7,7 @@ import 'package:revelationsai/src/screens/account/upgrade_screen.dart';
 import 'package:revelationsai/src/screens/auth_screen.dart';
 import 'package:revelationsai/src/screens/chat/chat_screen.dart';
 import 'package:revelationsai/src/screens/devotion/devotion_screen.dart';
+import 'package:revelationsai/src/screens/home_screen.dart';
 import 'package:revelationsai/src/screens/images/all_images_screen.dart';
 import 'package:revelationsai/src/screens/images/image_screen.dart';
 import 'package:revelationsai/src/screens/sources_screen.dart';
@@ -158,6 +159,19 @@ List<RouteBase> routes = [
       );
     },
     routes: [
+      GoRoute(
+        path: "/home",
+        builder: (context, state) {
+          return const HomeScreen();
+        },
+        pageBuilder: (context, state) {
+          return buildPageWithDefaultTransition(
+            context: context,
+            state: state,
+            child: const HomeScreen(),
+          );
+        },
+      ),
       GoRoute(
         path: "/chat",
         builder: (context, state) {

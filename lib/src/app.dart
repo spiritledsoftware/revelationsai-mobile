@@ -1,3 +1,4 @@
+import 'package:another_flushbar/flushbar.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
@@ -48,24 +49,6 @@ class RAIApp extends HookConsumerWidget {
     );
 
     useEffect(() {
-      FirebaseMessaging.onMessage.listen((message) {
-        switch (message.data['task']) {
-          case 'daily-devo':
-            final id = message.data['id'] ?? '';
-            Future(() => context.go('/?redirect=${Uri.encodeComponent('/devotions/$id')}'));
-            break;
-          case "chat-query":
-            final query = message.data['query'] ?? '';
-            Future(() => context.go('/?redirect=${Uri.encodeComponent('/chat?query=$query')}'));
-            break;
-          default:
-            break;
-        }
-      });
-      return () {};
-    }, [FirebaseMessaging.onMessage]);
-
-    useEffect(() {
       FirebaseMessaging.onMessageOpenedApp.listen((message) {
         switch (message.data['task']) {
           case 'daily-devo':
@@ -82,6 +65,50 @@ class RAIApp extends HookConsumerWidget {
       });
       return () {};
     }, [FirebaseMessaging.onMessageOpenedApp]);
+
+    useEffect(() {
+      FirebaseMessaging.onMessage.listen((message) {
+        switch (message.data['task']) {
+          case 'daily-devo':
+            final id = message.data['id'] ?? '';
+            Flushbar(
+              title: message.notification?.title ?? '',
+              message: message.notification?.body ?? '',
+              duration: const Duration(seconds: 8),
+              isDismissible: true,
+              flushbarPosition: FlushbarPosition.TOP,
+              flushbarStyle: FlushbarStyle.GROUNDED,
+              padding: const EdgeInsets.all(30),
+              dismissDirection: FlushbarDismissDirection.VERTICAL,
+              animationDuration: const Duration(milliseconds: 200),
+              onTap: (flushbar) {
+                context.go('/?redirect=${Uri.encodeComponent('/devotions/$id')}');
+              },
+            ).show(context);
+            break;
+          case "chat-query":
+            final query = message.data['query'] ?? '';
+            Flushbar(
+              title: message.notification?.title ?? '',
+              message: message.notification?.body ?? '',
+              duration: const Duration(seconds: 8),
+              isDismissible: true,
+              flushbarPosition: FlushbarPosition.TOP,
+              flushbarStyle: FlushbarStyle.GROUNDED,
+              padding: const EdgeInsets.all(30),
+              dismissDirection: FlushbarDismissDirection.VERTICAL,
+              animationDuration: const Duration(milliseconds: 200),
+              onTap: (flushbar) {
+                context.go('/?redirect=${Uri.encodeComponent('/chat?query=$query')}');
+              },
+            ).show(context);
+            break;
+          default:
+            break;
+        }
+      });
+      return () {};
+    }, [FirebaseMessaging.onMessage]);
 
     return _EagerlyInitializedProviders(
       child: MaterialApp.router(

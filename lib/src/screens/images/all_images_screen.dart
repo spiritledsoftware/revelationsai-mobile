@@ -8,6 +8,7 @@ import 'package:revelationsai/src/providers/user/current.dart';
 import 'package:revelationsai/src/providers/user/generated_image/pages.dart';
 import 'package:revelationsai/src/providers/user/preferences.dart';
 import 'package:revelationsai/src/utils/build_context_extensions.dart';
+import 'package:revelationsai/src/widgets/colored_safe_area.dart';
 import 'package:revelationsai/src/widgets/generated_image/create_image_dialog.dart';
 import 'package:revelationsai/src/widgets/network_image.dart';
 import 'package:revelationsai/src/widgets/refresh_indicator.dart';
@@ -28,142 +29,155 @@ class AllImagesScreen extends HookConsumerWidget {
     }, []);
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text("Generated Images"),
-        actions: [
-          IconButton(
-            visualDensity: VisualDensity.compact,
-            onPressed: () {
-              context.go("/upgrade");
-            },
-            style: IconButton.styleFrom(
-              shape: CircleBorder(
-                side: BorderSide(
-                  color: context.colorScheme.onPrimary.withOpacity(0.4),
-                ),
-              ),
-              backgroundColor:
-                  currentUser.remainingGeneratedImages < 1 ? context.colorScheme.error.withOpacity(0.2) : null,
-            ),
-            icon: Text(
-              "${currentUser.remainingGeneratedImages > 10 ? ">10" : currentUser.remainingGeneratedImages}",
-              style: context.textTheme.bodyMedium?.copyWith(
-                color: context.colorScheme.onPrimary,
-              ),
-            ),
-          ),
-          IconButton(
-            onPressed: () async {
-              if (currentUserPrefs.hapticFeedback) {
-                HapticFeedback.mediumImpact();
-              }
-              if (currentUser.remainingGeneratedImages < 1) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(
-                      "You have no remaining generated images. Please upgrade your account.",
+      body: ColoredSafeArea(
+        color: context.colorScheme.primary,
+        child: NestedScrollView(
+          headerSliverBuilder: (context, innerBoxIsScrolled) {
+            return [
+              SliverAppBar(
+                snap: true,
+                floating: true,
+                centerTitle: false,
+                backgroundColor: context.colorScheme.primary,
+                title: const Text("Generated Images"),
+                actions: [
+                  IconButton(
+                    visualDensity: VisualDensity.compact,
+                    onPressed: () {
+                      context.go("/upgrade");
+                    },
+                    style: IconButton.styleFrom(
+                      shape: CircleBorder(
+                        side: BorderSide(
+                          color: context.colorScheme.onPrimary.withOpacity(0.4),
+                        ),
+                      ),
+                      backgroundColor:
+                          currentUser.remainingGeneratedImages < 1 ? context.colorScheme.error.withOpacity(0.2) : null,
+                    ),
+                    icon: Text(
+                      "${currentUser.remainingGeneratedImages > 10 ? ">10" : currentUser.remainingGeneratedImages}",
                       style: context.textTheme.bodyMedium?.copyWith(
-                        color: context.colorScheme.onError,
+                        color: context.colorScheme.onPrimary,
                       ),
                     ),
-                    backgroundColor: context.colorScheme.error,
                   ),
-                );
-                context.go("/upgrade");
-                return;
-              }
-              await showDialog(
-                barrierDismissible: false,
-                context: context,
-                builder: (context) {
-                  return const CreateImageDialog();
-                },
-              );
-            },
-            icon: const Icon(Icons.add),
-          ),
-        ],
-      ),
-      body: images.when(
-        data: (data) {
-          final imagesFlat = data.expand((element) => element).toList();
-          if (imagesFlat.isEmpty) {
-            return const Center(
-              child: Text("No images found"),
-            );
-          }
-
-          return RAIRefreshIndicator(
-            onRefresh: () async {
-              await imagesNotifier.refresh();
-            },
-            child: ListView(
-              physics: const AlwaysScrollableScrollPhysics(),
-              children: [
-                GridView.builder(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: context.isTablet ? 4 : 3,
-                    crossAxisSpacing: 5,
-                    mainAxisSpacing: 5,
-                  ),
-                  itemCount: imagesFlat.length,
-                  itemBuilder: (context, index) {
-                    final image = imagesFlat[index];
-                    return GestureDetector(
-                      onTap: () {
-                        context.go("/images/${image.id}");
-                      },
-                      child: RAINetworkImage(
-                        imageUrl: image.url,
-                        fallbackText: "Failed",
-                      ),
-                    );
-                  },
-                ),
-                if (imagesNotifier.hasNextPage()) ...[
-                  ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      shape: const BeveledRectangleBorder(),
-                    ),
+                  IconButton(
                     onPressed: () async {
-                      if (imagesNotifier.isLoadingNextPage()) {
+                      if (currentUserPrefs.hapticFeedback) {
+                        HapticFeedback.mediumImpact();
+                      }
+                      if (currentUser.remainingGeneratedImages < 1) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(
+                              "You have no remaining generated images. Please upgrade your account.",
+                              style: context.textTheme.bodyMedium?.copyWith(
+                                color: context.colorScheme.onError,
+                              ),
+                            ),
+                            backgroundColor: context.colorScheme.error,
+                          ),
+                        );
+                        context.go("/upgrade");
                         return;
                       }
-                      await imagesNotifier.fetchNextPage();
+                      await showDialog(
+                        barrierDismissible: false,
+                        context: context,
+                        builder: (context) {
+                          return const CreateImageDialog();
+                        },
+                      );
                     },
-                    child: imagesNotifier.isLoadingNextPage()
-                        ? SizedBox(
-                            height: 20,
-                            width: 20,
-                            child: SpinKitSpinningLines(
-                              color: context.secondaryColor,
-                              size: 20,
-                            ),
-                          )
-                        : const Text("Load more"),
+                    icon: const Icon(Icons.add),
                   ),
                 ],
-              ],
-            ),
-          );
-        },
-        error: (error, stackTrace) {
-          return Center(
-            child: Text(
-              error.toString(),
-              style: TextStyle(
-                color: context.colorScheme.error,
               ),
-            ),
-          );
-        },
-        loading: () {
-          return Center(
-            child: SpinKitSpinningLines(color: context.secondaryColor),
-          );
-        },
+            ];
+          },
+          body: images.when(
+            data: (data) {
+              final imagesFlat = data.expand((element) => element).toList();
+              if (imagesFlat.isEmpty) {
+                return const Center(
+                  child: Text("No images found"),
+                );
+              }
+
+              return RAIRefreshIndicator(
+                onRefresh: () async {
+                  await imagesNotifier.refresh();
+                },
+                child: ListView(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  children: [
+                    GridView.builder(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: context.isTablet ? 4 : 3,
+                        crossAxisSpacing: 5,
+                        mainAxisSpacing: 5,
+                      ),
+                      itemCount: imagesFlat.length,
+                      itemBuilder: (context, index) {
+                        final image = imagesFlat[index];
+                        return GestureDetector(
+                          onTap: () {
+                            context.go("/images/${image.id}");
+                          },
+                          child: RAINetworkImage(
+                            imageUrl: image.url,
+                            fallbackText: "Failed",
+                          ),
+                        );
+                      },
+                    ),
+                    if (imagesNotifier.hasNextPage()) ...[
+                      ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          shape: const BeveledRectangleBorder(),
+                        ),
+                        onPressed: () async {
+                          if (imagesNotifier.isLoadingNextPage()) {
+                            return;
+                          }
+                          await imagesNotifier.fetchNextPage();
+                        },
+                        child: imagesNotifier.isLoadingNextPage()
+                            ? SizedBox(
+                                height: 20,
+                                width: 20,
+                                child: SpinKitSpinningLines(
+                                  color: context.secondaryColor,
+                                  size: 20,
+                                ),
+                              )
+                            : const Text("Load more"),
+                      ),
+                    ],
+                  ],
+                ),
+              );
+            },
+            error: (error, stackTrace) {
+              return Center(
+                child: Text(
+                  error.toString(),
+                  style: TextStyle(
+                    color: context.colorScheme.error,
+                  ),
+                ),
+              );
+            },
+            loading: () {
+              return Center(
+                child: SpinKitSpinningLines(color: context.secondaryColor),
+              );
+            },
+          ),
+        ),
       ),
     );
   }

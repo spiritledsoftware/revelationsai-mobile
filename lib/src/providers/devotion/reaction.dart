@@ -1,4 +1,5 @@
 import 'package:revelationsai/src/models/devotion/reaction.dart';
+import 'package:revelationsai/src/providers/devotion/pages.dart';
 import 'package:revelationsai/src/providers/devotion/reaction_count.dart';
 import 'package:revelationsai/src/providers/devotion/repositories.dart';
 import 'package:revelationsai/src/providers/user/current.dart';
@@ -13,8 +14,7 @@ class DevotionReactions extends _$DevotionReactions {
 
   @override
   FutureOr<List<DevotionReaction>> build(String? devotionId) async {
-    _id = devotionId ?? (await ref.devotions.getLatest()).id;
-
+    _id = devotionId ?? await ref.watch(devotionsPagesProvider.selectAsync((data) => data.first.first.id));
     return await ref.devotionReactions.getByDevotionId(_id);
   }
 

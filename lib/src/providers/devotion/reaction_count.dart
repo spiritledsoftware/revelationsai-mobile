@@ -1,4 +1,5 @@
 import 'package:revelationsai/src/models/devotion/reaction.dart';
+import 'package:revelationsai/src/providers/devotion/pages.dart';
 import 'package:revelationsai/src/providers/devotion/repositories.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -6,11 +7,12 @@ part 'reaction_count.g.dart';
 
 @riverpod
 class DevotionReactionCounts extends _$DevotionReactionCounts {
+  late String _id;
+
   @override
   FutureOr<Map<DevotionReactionType, int>> build(String? id) async {
-    id ??= (await ref.devotions.getLatest()).id;
-
-    return await ref.devotionReactions.getCountsForDevotionId(id);
+    _id = id ?? await ref.watch(devotionsPagesProvider.selectAsync((data) => data.first.first.id));
+    return await ref.devotionReactions.getCountsForDevotionId(_id);
   }
 
   void increment(DevotionReactionType type) {
@@ -32,7 +34,7 @@ class DevotionReactionCounts extends _$DevotionReactionCounts {
   }
 
   Future<Map<DevotionReactionType, int>> refresh() async {
-    final counts = await ref.devotionReactions.refreshCountsForDevotionId(id!);
+    final counts = await ref.devotionReactions.refreshCountsForDevotionId(_id);
     state = AsyncValue.data(counts);
     return counts;
   }

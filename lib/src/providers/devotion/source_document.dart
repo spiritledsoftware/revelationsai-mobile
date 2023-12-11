@@ -1,4 +1,5 @@
 import 'package:revelationsai/src/models/source_document.dart';
+import 'package:revelationsai/src/providers/devotion/pages.dart';
 import 'package:revelationsai/src/providers/devotion/repositories.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -10,8 +11,7 @@ class DevotionSourceDocuments extends _$DevotionSourceDocuments {
 
   @override
   FutureOr<List<SourceDocument>> build(String? devotionId) async {
-    _id = devotionId ?? (await ref.devotions.getLatest()).id;
-
+    _id = devotionId ?? await ref.watch(devotionsPagesProvider.selectAsync((data) => data.first.first.id));
     return ref.devotionSourceDocuments.getByDevotionId(_id);
   }
 

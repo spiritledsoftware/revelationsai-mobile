@@ -1,10 +1,8 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_app_badger/flutter_app_badger.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:revelationsai/src/constants/visual_density.dart';
@@ -13,16 +11,15 @@ import 'package:revelationsai/src/models/devotion/reaction.dart';
 import 'package:revelationsai/src/models/source_document.dart';
 import 'package:revelationsai/src/providers/devotion/current_id.dart';
 import 'package:revelationsai/src/providers/devotion/image.dart';
+import 'package:revelationsai/src/providers/devotion/pages.dart';
 import 'package:revelationsai/src/providers/devotion/reaction.dart';
 import 'package:revelationsai/src/providers/devotion/reaction_count.dart';
-import 'package:revelationsai/src/providers/devotion/repositories.dart';
 import 'package:revelationsai/src/providers/devotion/single.dart';
 import 'package:revelationsai/src/providers/devotion/source_document.dart';
-import 'package:revelationsai/src/providers/user/preferences.dart';
-import 'package:revelationsai/src/screens/devotion/devotion_modal.dart';
 import 'package:revelationsai/src/utils/advertisement.dart';
 import 'package:revelationsai/src/utils/build_context_extensions.dart';
 import 'package:revelationsai/src/utils/capitalization.dart';
+import 'package:revelationsai/src/widgets/colored_safe_area.dart';
 import 'package:revelationsai/src/widgets/devotion/action_menu_button.dart';
 import 'package:revelationsai/src/widgets/network_image.dart';
 import 'package:revelationsai/src/widgets/refresh_indicator.dart';
@@ -38,8 +35,6 @@ class DevotionScreen extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final currentUserPrefs = ref.watch(currentUserPreferencesProvider).requireValue;
-
     final isMounted = useIsMounted();
     final loading = useState(false);
     final devotion = useState<Devotion?>(null);
@@ -111,8 +106,8 @@ class DevotionScreen extends HookConsumerWidget {
         Future(() {
           ref.read(currentDevotionIdProvider.notifier).updateId(devo.id);
         });
-        ref.devotions.getLatest().then((value) {
-          if (value.id == devo.id) {
+        ref.read(devotionsPagesProvider.future).then((value) {
+          if (value.first.first.id == devo.id) {
             debugPrint("DevotionScreen: useEffect: User is viewing latest devo, resetting badge count");
             FlutterAppBadger.isAppBadgeSupported().then((value) {
               if (value) {
@@ -126,264 +121,243 @@ class DevotionScreen extends HookConsumerWidget {
     }, [devotion.value]);
 
     return Scaffold(
-      appBar: AppBar(
-        automaticallyImplyLeading: false,
-        centerTitle: true,
-        title: loading.value || devotion.value == null
-            ? Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Text("Loading Devotion"),
-                  const SizedBox(
-                    width: 15,
-                  ),
-                  SpinKitSpinningLines(
-                    color: context.appBarTheme.foregroundColor ?? context.colorScheme.onBackground,
-                    size: 20,
-                  )
-                ],
-              )
-            : Column(
-                children: [
-                  Text(
-                    devotion.value!.topic.toTitleCase(),
-                  ),
-                  Text(
-                    DateFormat.yMd().format(devotion.value!.createdAt.toLocal()),
-                    style: context.textTheme.labelLarge?.copyWith(
-                      color: context.colorScheme.onPrimary,
-                    ),
-                  ),
-                ],
-              ),
-        actions: [
-          IconButton(
-            onPressed: () {
-              if (currentUserPrefs.hapticFeedback) {
-                HapticFeedback.mediumImpact();
-              }
-              showModalBottomSheet(
-                elevation: 20,
-                isScrollControlled: true,
-                context: context,
-                builder: (_) => const FractionallySizedBox(
-                  widthFactor: 1.0,
-                  heightFactor: 0.90,
-                  child: DevotionModal(),
-                ),
-              );
-            },
-            icon: const FaIcon(FontAwesomeIcons.clock),
-          ),
-        ],
-      ),
-      floatingActionButtonAnimator: FloatingActionButtonAnimator.scaling,
-      floatingActionButtonLocation: FloatingActionButtonLocation.miniStartTop,
-      floatingActionButton: loading.value || devotion.value == null
-          ? null
-          : FloatingActionButton(
-              onPressed: null, // delegate to popup menu
-              foregroundColor: context.colorScheme.onSecondary,
-              backgroundColor: context.secondaryColor,
-              shape: const RoundedRectangleBorder(
-                borderRadius: BorderRadius.all(
-                  Radius.circular(15),
-                ),
-              ),
-              child: DevotionActionMenuButton(
-                devotion: devotion,
-                reactionCounts: reactionCounts,
-                isMounted: isMounted,
-              ),
-            ),
-      body: loading.value || devotion.value == null
-          ? Center(
-              child: SpinKitSpinningLines(
-                color: context.secondaryColor,
-                size: 40,
-              ),
-            )
-          : Container(
-              padding: const EdgeInsets.only(
-                left: 10,
-                right: 10,
-              ),
-              child: RAIRefreshIndicator(
-                onRefresh: () async {
-                  await refreshDevoData();
-                },
-                child: ListView(
-                  physics: const AlwaysScrollableScrollPhysics(),
-                  scrollDirection: Axis.vertical,
-                  shrinkWrap: true,
-                  children: [
-                    Container(
-                      margin: const EdgeInsets.only(top: 20),
-                      alignment: Alignment.center,
-                      child: SelectableText(
-                        devotion.value!.bibleReading.split(" - ").first,
-                        style: const TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(
-                      height: 5,
-                    ),
-                    SelectableText(
-                      devotion.value!.bibleReading.split(" - ").last,
-                    ),
-                    Container(
-                      margin: const EdgeInsets.only(top: 20),
-                      alignment: Alignment.center,
-                      child: const SelectableText(
-                        "Summary",
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ),
-                    SelectableText(
-                      devotion.value!.summary,
-                    ),
-                    Container(
-                      margin: const EdgeInsets.only(top: 20),
-                      alignment: Alignment.center,
-                      child: const SelectableText(
-                        "Reflection",
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ),
-                    SelectableText(
-                      devotion.value!.reflection!,
-                    ),
-                    Container(
-                      margin: const EdgeInsets.only(
-                        top: 20,
-                      ),
-                      alignment: Alignment.center,
-                      child: const SelectableText(
-                        "Prayer",
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ),
-                    SelectableText(
-                      devotion.value!.prayer!,
-                    ),
-                    if (images.value.isNotEmpty) ...[
-                      Container(
-                        margin: const EdgeInsets.only(
-                          top: 20,
-                        ),
-                        alignment: Alignment.center,
-                        child: const Text(
-                          "Generated Image(s)",
-                          style: TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                      ),
-                      Container(
-                        margin: const EdgeInsets.only(
-                          top: 10,
-                        ),
-                        alignment: Alignment.center,
-                        child: Text(
-                          images.value[0].caption ?? "No caption",
-                          style: const TextStyle(
-                            fontSize: 12,
-                          ),
-                        ),
-                      ),
-                      Wrap(
-                        alignment: WrapAlignment.center,
-                        spacing: 10,
-                        runSpacing: 10,
-                        children: images.value
-                            .map(
-                              (e) => RAINetworkImage(
-                                imageUrl: e.url,
-                                fallbackText: "Image",
-                              ),
-                            )
-                            .toList(),
-                      )
-                    ],
-                    Container(
-                      margin: const EdgeInsets.only(bottom: 20),
-                      child: ExpansionTile(
-                        title: const Text(
-                          "Sources",
-                          style: TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
+      body: ColoredSafeArea(
+        color: context.colorScheme.primary,
+        child: NestedScrollView(
+          headerSliverBuilder: (context, innerBoxIsScrolled) {
+            return [
+              SliverAppBar(
+                automaticallyImplyLeading: false,
+                snap: true,
+                floating: true,
+                backgroundColor: context.colorScheme.primary,
+                title: loading.value || devotion.value == null
+                    ? Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        mainAxisSize: MainAxisSize.min,
                         children: [
-                          ListView.builder(
-                            shrinkWrap: true,
-                            padding: EdgeInsets.zero,
-                            physics: const NeverScrollableScrollPhysics(),
-                            itemCount: sourceDocs.value.length,
-                            itemBuilder: (context, index) {
-                              final sourceDoc = sourceDocs.value[index];
-                              return Link(
-                                key: ValueKey(sourceDocs.value[index].id),
-                                uri: Uri.parse(
-                                  sourceDocs.value[index].metadata['url'],
-                                ),
-                                target: LinkTarget.blank,
-                                builder: (context, followLink) => ListTile(
-                                  dense: true,
-                                  visualDensity: RAIVisualDensity.tightest,
-                                  leading: const Icon(
-                                    CupertinoIcons.link,
-                                    size: 15,
-                                  ),
-                                  title: Text(
-                                    sourceDoc.name,
-                                    maxLines: 2,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: const TextStyle(
-                                      fontSize: 12,
-                                    ),
-                                  ),
-                                  subtitle: Text(
-                                    sourceDoc.isWebpage
-                                        ? sourceDoc.hasTitle
-                                            ? sourceDoc.title!
-                                            : sourceDoc.url
-                                        : sourceDoc.isFile
-                                            ? 'Page(s): ${sourceDoc.pageNumbers?.keys.join(", ")}'
-                                            : sourceDoc.url,
-                                    overflow: TextOverflow.ellipsis,
-                                    maxLines: 2,
-                                    style: const TextStyle(
-                                      fontSize: 12,
-                                    ),
-                                  ),
-                                  onTap: followLink,
-                                ),
-                              );
-                            },
+                          const Text("Loading Devotion"),
+                          const SizedBox(
+                            width: 15,
+                          ),
+                          SpinKitSpinningLines(
+                            color: context.appBarTheme.foregroundColor ?? context.colorScheme.onBackground,
+                            size: 20,
+                          )
+                        ],
+                      )
+                    : Column(
+                        children: [
+                          Text(
+                            devotion.value!.topic.toTitleCase(),
+                          ),
+                          Text(
+                            DateFormat.yMd().format(devotion.value!.createdAt.toLocal()),
+                            style: context.textTheme.labelLarge?.copyWith(
+                              color: context.colorScheme.onPrimary,
+                            ),
                           ),
                         ],
                       ),
-                    ),
-                  ],
-                ),
+                actions: [
+                  DevotionActionMenuButton(
+                    devotion: devotion,
+                    reactionCounts: reactionCounts,
+                    isMounted: isMounted,
+                  ),
+                ],
               ),
-            ),
+            ];
+          },
+          body: loading.value || devotion.value == null
+              ? Center(
+                  child: SpinKitSpinningLines(
+                    color: context.secondaryColor,
+                    size: 40,
+                  ),
+                )
+              : Container(
+                  padding: const EdgeInsets.only(
+                    left: 10,
+                    right: 10,
+                  ),
+                  child: RAIRefreshIndicator(
+                    onRefresh: () async {
+                      await refreshDevoData();
+                    },
+                    child: ListView(
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      scrollDirection: Axis.vertical,
+                      shrinkWrap: true,
+                      children: [
+                        Container(
+                          margin: const EdgeInsets.only(top: 20),
+                          alignment: Alignment.center,
+                          child: SelectableText(
+                            devotion.value!.bibleReading.split(" - ").first,
+                            style: const TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(
+                          height: 5,
+                        ),
+                        SelectableText(
+                          devotion.value!.bibleReading.split(" - ").last,
+                        ),
+                        Container(
+                          margin: const EdgeInsets.only(top: 20),
+                          alignment: Alignment.center,
+                          child: const SelectableText(
+                            "Summary",
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ),
+                        SelectableText(
+                          devotion.value!.summary,
+                        ),
+                        Container(
+                          margin: const EdgeInsets.only(top: 20),
+                          alignment: Alignment.center,
+                          child: const SelectableText(
+                            "Reflection",
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ),
+                        SelectableText(
+                          devotion.value!.reflection!,
+                        ),
+                        Container(
+                          margin: const EdgeInsets.only(
+                            top: 20,
+                          ),
+                          alignment: Alignment.center,
+                          child: const SelectableText(
+                            "Prayer",
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ),
+                        SelectableText(
+                          devotion.value!.prayer!,
+                        ),
+                        if (images.value.isNotEmpty) ...[
+                          Container(
+                            margin: const EdgeInsets.only(
+                              top: 20,
+                            ),
+                            alignment: Alignment.center,
+                            child: const Text(
+                              "Generated Image(s)",
+                              style: TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ),
+                          Container(
+                            margin: const EdgeInsets.only(
+                              top: 10,
+                            ),
+                            alignment: Alignment.center,
+                            child: Text(
+                              images.value[0].caption ?? "No caption",
+                              style: const TextStyle(
+                                fontSize: 12,
+                              ),
+                            ),
+                          ),
+                          Wrap(
+                            alignment: WrapAlignment.center,
+                            spacing: 10,
+                            runSpacing: 10,
+                            children: images.value
+                                .map(
+                                  (e) => RAINetworkImage(
+                                    imageUrl: e.url,
+                                    fallbackText: "Image",
+                                  ),
+                                )
+                                .toList(),
+                          )
+                        ],
+                        Container(
+                          margin: const EdgeInsets.only(bottom: 20),
+                          child: ExpansionTile(
+                            title: const Text(
+                              "Sources",
+                              style: TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                            children: [
+                              ListView.builder(
+                                shrinkWrap: true,
+                                padding: EdgeInsets.zero,
+                                physics: const NeverScrollableScrollPhysics(),
+                                itemCount: sourceDocs.value.length,
+                                itemBuilder: (context, index) {
+                                  final sourceDoc = sourceDocs.value[index];
+                                  return Link(
+                                    key: ValueKey(sourceDocs.value[index].id),
+                                    uri: Uri.parse(
+                                      sourceDocs.value[index].metadata['url'],
+                                    ),
+                                    target: LinkTarget.blank,
+                                    builder: (context, followLink) => ListTile(
+                                      dense: true,
+                                      visualDensity: RAIVisualDensity.tightest,
+                                      leading: const Icon(
+                                        CupertinoIcons.link,
+                                        size: 15,
+                                      ),
+                                      title: Text(
+                                        sourceDoc.name,
+                                        maxLines: 2,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: const TextStyle(
+                                          fontSize: 12,
+                                        ),
+                                      ),
+                                      subtitle: Text(
+                                        sourceDoc.isWebpage
+                                            ? sourceDoc.hasTitle
+                                                ? sourceDoc.title!
+                                                : sourceDoc.url
+                                            : sourceDoc.isFile
+                                                ? 'Page(s): ${sourceDoc.pageNumbers?.keys.join(", ")}'
+                                                : sourceDoc.url,
+                                        overflow: TextOverflow.ellipsis,
+                                        maxLines: 2,
+                                        style: const TextStyle(
+                                          fontSize: 12,
+                                        ),
+                                      ),
+                                      onTap: followLink,
+                                    ),
+                                  );
+                                },
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+        ),
+      ),
     );
   }
 }

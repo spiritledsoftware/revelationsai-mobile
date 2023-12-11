@@ -12,7 +12,7 @@ import 'package:revelationsai/src/models/user/request.dart';
 import 'package:revelationsai/src/providers/user/current.dart';
 import 'package:revelationsai/src/providers/user/preferences.dart';
 import 'package:revelationsai/src/utils/build_context_extensions.dart';
-import 'package:revelationsai/src/widgets/account/delete_account_dialog.dart';
+import 'package:revelationsai/src/widgets/account/user_avatar.dart';
 import 'package:revelationsai/src/widgets/branding/circular_logo.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:url_launcher/url_launcher_string.dart';
@@ -199,28 +199,13 @@ class SettingsModal extends HookConsumerWidget {
                 },
               ),
               ListTile(
-                leading: const Icon(Icons.logout),
-                title: const Text('Logout'),
-                onTap: () async {
-                  await ref.read(currentUserProvider.notifier).logout().then((value) => context.go("/auth"));
-                },
-              ),
-              ListTile(
-                textColor: Colors.red.shade400,
-                leading: Icon(
-                  Icons.delete_forever_outlined,
-                  color: Colors.red.shade400,
+                leading: const Icon(Icons.person),
+                title: const Text('Manage Account'),
+                trailing: const UserAvatar(
+                  radius: 16,
                 ),
-                title: const Text('Delete Account'),
-                onTap: () async {
-                  // display confirmation dialog
-                  await showDialog(
-                    barrierDismissible: false,
-                    context: context,
-                    builder: (context) {
-                      return const DeleteAccountDialog();
-                    },
-                  );
+                onTap: () {
+                  context.go("/account");
                 },
               ),
             ],

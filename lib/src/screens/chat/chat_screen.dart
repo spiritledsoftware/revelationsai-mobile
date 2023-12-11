@@ -149,7 +149,7 @@ class ChatScreen extends HookConsumerWidget {
     }, [initChatId]);
 
     useEffect(() {
-      if (initQuery != null) {
+      if (initQuery != null && initQuery!.isNotEmpty) {
         chatHook.append(
           ChatMessage(
             id: nanoid(),

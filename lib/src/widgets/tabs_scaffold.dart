@@ -21,13 +21,13 @@ class TabsScaffold extends HookConsumerWidget {
       String path = GoRouter.of(context).routeInformationProvider.value.uri.path;
       debugPrint("Current path: $path");
 
-      if (path.startsWith("/chat")) {
+      if (path.startsWith("/home") || path.startsWith("/account") || path.startsWith("/upgrade")) {
         return 0;
-      } else if (path.startsWith("/images")) {
+      } else if (path.startsWith("/chat")) {
         return 1;
-      } else if (path.startsWith("/devotions")) {
+      } else if (path.startsWith("/images")) {
         return 2;
-      } else if (path.startsWith("/account") || path.startsWith("/upgrade")) {
+      } else if (path.startsWith("/devotions")) {
         return 3;
       } else {
         return 0;
@@ -47,6 +47,10 @@ class TabsScaffold extends HookConsumerWidget {
           elevation: 10,
           items: const [
             BottomNavigationBarItem(
+              icon: Icon(CupertinoIcons.house_fill),
+              label: "Home",
+            ),
+            BottomNavigationBarItem(
               icon: Icon(CupertinoIcons.chat_bubble_fill),
               label: "Chat",
             ),
@@ -58,10 +62,6 @@ class TabsScaffold extends HookConsumerWidget {
               icon: Icon(CupertinoIcons.book_fill),
               label: "Devos",
             ),
-            BottomNavigationBarItem(
-              icon: Icon(CupertinoIcons.person_fill),
-              label: "Account",
-            ),
           ],
           backgroundColor: context.theme.bottomNavigationBarTheme.backgroundColor,
           selectedItemColor: context.theme.bottomNavigationBarTheme.selectedItemColor,
@@ -71,23 +71,23 @@ class TabsScaffold extends HookConsumerWidget {
             switch (value) {
               case 0:
                 if (hapticFeedbackEnabled) HapticFeedback.lightImpact();
-                context.go("/chat");
+                context.go("/home");
                 break;
               case 1:
                 if (hapticFeedbackEnabled) HapticFeedback.lightImpact();
-                context.go("/images");
+                context.go("/chat");
                 break;
               case 2:
                 if (hapticFeedbackEnabled) HapticFeedback.lightImpact();
-                context.go("/devotions");
+                context.go("/images");
                 break;
               case 3:
                 if (hapticFeedbackEnabled) HapticFeedback.lightImpact();
-                context.go("/account");
+                context.go("/devotions");
                 break;
               default:
                 if (hapticFeedbackEnabled) HapticFeedback.lightImpact();
-                context.go("/chat");
+                context.go("/home");
                 break;
             }
           },

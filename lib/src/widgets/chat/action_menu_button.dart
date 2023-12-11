@@ -57,7 +57,7 @@ class ChatActionMenuButton extends HookConsumerWidget {
                 maxWidth: context.width * 0.5,
               ),
               color: (context.brightness == Brightness.dark ? context.colorScheme.primary : Colors.grey.shade200)
-                  .withOpacity(0.95),
+                  .withOpacity(0.97),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(25),
               ),
