@@ -132,12 +132,11 @@ class HomeScreen extends HookConsumerWidget {
                     TextField(
                       controller: queryTextController,
                       focusNode: queryTextFocusNode,
-                      onTapOutside: (event) {
-                        queryTextFocusNode.unfocus();
-                      },
                       minLines: 1,
                       maxLines: 3,
                       keyboardType: TextInputType.multiline,
+                      textCapitalization: TextCapitalization.sentences,
+                      autocorrect: true,
                       decoration: InputDecoration(
                         hintText: "Type a message",
                         contentPadding: const EdgeInsets.only(
@@ -167,6 +166,9 @@ class HomeScreen extends HookConsumerWidget {
                           icon: const Icon(Icons.arrow_upward),
                         ),
                       ),
+                      onTapOutside: (event) {
+                        queryTextFocusNode.unfocus();
+                      },
                     ),
                   ],
                 ),
