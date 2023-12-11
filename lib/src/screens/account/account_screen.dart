@@ -22,7 +22,6 @@ class AccountScreen extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final currentUser = ref.watch(currentUserProvider).requireValue;
     final currentUserPrefs = ref.watch(currentUserPreferencesProvider).requireValue;
-
     final hapticFeedbackEnabled = currentUserPrefs.hapticFeedback;
 
     return AnnotatedRegion<SystemUiOverlayStyle>(

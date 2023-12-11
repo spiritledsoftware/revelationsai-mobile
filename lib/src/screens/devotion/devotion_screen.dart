@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_app_badger/flutter_app_badger.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
@@ -131,6 +132,7 @@ class DevotionScreen extends HookConsumerWidget {
                 snap: true,
                 floating: true,
                 backgroundColor: context.colorScheme.primary,
+                systemOverlayStyle: SystemUiOverlayStyle.light,
                 title: loading.value || devotion.value == null
                     ? Row(
                         mainAxisAlignment: MainAxisAlignment.center,

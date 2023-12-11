@@ -37,11 +37,13 @@ class HomeScreen extends HookConsumerWidget {
         child: NestedScrollView(
           headerSliverBuilder: (context, innerBoxIsScrolled) => [
             SliverAppBar(
+              automaticallyImplyLeading: false,
               snap: true,
               floating: true,
               centerTitle: false,
               expandedHeight: 70,
               backgroundColor: context.colorScheme.primary,
+              systemOverlayStyle: SystemUiOverlayStyle.light,
               title: const Logo(
                 colorScheme: RAIColorScheme.light,
                 width: 200,

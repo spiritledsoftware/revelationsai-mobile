@@ -35,10 +35,12 @@ class AllImagesScreen extends HookConsumerWidget {
           headerSliverBuilder: (context, innerBoxIsScrolled) {
             return [
               SliverAppBar(
+                automaticallyImplyLeading: true,
                 snap: true,
                 floating: true,
                 centerTitle: false,
                 backgroundColor: context.colorScheme.primary,
+                systemOverlayStyle: SystemUiOverlayStyle.light,
                 title: const Text("Generated Images"),
                 actions: [
                   IconButton(

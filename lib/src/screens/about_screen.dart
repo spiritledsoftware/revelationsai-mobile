@@ -31,7 +31,7 @@ class AboutScreen extends HookWidget {
         actions: [
           IconButton(
             onPressed: () {
-              context.go("/account");
+              context.go("/home");
             },
             icon: const Icon(
               Icons.close,
