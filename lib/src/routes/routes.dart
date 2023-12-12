@@ -10,7 +10,7 @@ import 'package:revelationsai/src/screens/devotion/devotion_screen.dart';
 import 'package:revelationsai/src/screens/home_screen.dart';
 import 'package:revelationsai/src/screens/images/all_images_screen.dart';
 import 'package:revelationsai/src/screens/images/image_screen.dart';
-import 'package:revelationsai/src/screens/sources_screen.dart';
+import 'package:revelationsai/src/screens/all_sources_screen.dart';
 import 'package:revelationsai/src/screens/splash_screen.dart';
 import 'package:revelationsai/src/widgets/tabs_scaffold.dart';
 

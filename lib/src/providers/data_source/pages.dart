@@ -22,10 +22,10 @@ class DataSourcesPages extends _$DataSourcesPages {
     });
   }
 
-  List<List<DataSource>> _insertPageIntoState(List<DataSource> dataSources, {bool replace = false}) {
+  List<List<DataSource>> _insertPageIntoState(List<DataSource> dataSources) {
     final previousState = state;
     if (previousState.hasValue) {
-      if (replace) {
+      if (previousState.value!.length >= _page) {
         previousState.value!.removeAt(_page - 1);
       }
       return previousState.value!

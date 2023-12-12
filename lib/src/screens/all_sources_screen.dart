@@ -19,7 +19,9 @@ class SourcesScreen extends HookConsumerWidget {
 
     return Scaffold(
       body: ColoredSafeArea(
+        bottom: false,
         color: context.colorScheme.primary,
+        overlayStyle: SystemUiOverlayStyle.light,
         child: NestedScrollView(
           headerSliverBuilder: (context, innerBoxIsScrolled) {
             return [

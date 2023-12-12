@@ -1,12 +1,9 @@
 import 'dart:convert';
-import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart';
 import 'package:image_cropper/image_cropper.dart';
-import 'package:purchases_flutter/purchases_flutter.dart';
 import 'package:revelationsai/src/constants/api.dart';
-import 'package:revelationsai/src/constants/store.dart';
 import 'package:revelationsai/src/models/user.dart';
 import 'package:revelationsai/src/models/user/request.dart';
 import 'package:revelationsai/src/providers/chat/current_id.dart';
@@ -27,10 +24,7 @@ class CurrentUser extends _$CurrentUser {
   @override
   FutureOr<UserInfo> build() async {
     _sharedPreferences = await SharedPreferences.getInstance();
-
     _persistenceRefreshLogic();
-    _purchasesConfigurationLogic();
-
     return await _loginRecoveryAttempt();
   }
 
@@ -233,33 +227,6 @@ class CurrentUser extends _$CurrentUser {
       if (next.hasValue) {
         _sharedPreferences.setString(_sharedPrefsKey, next.value!.session);
       }
-    });
-  }
-
-  void _purchasesConfigurationLogic() {
-    ref.listenSelf((_, next) {
-      if (next.isLoading) return;
-      if (next.hasError || !next.hasValue) {
-        return;
-      }
-
-      Purchases.isConfigured.then((isConfigured) {
-        if (!isConfigured) {
-          debugPrint('Initializing Purchases...');
-          PurchasesConfiguration configuration;
-          if (Platform.isAndroid) {
-            configuration = PurchasesConfiguration(RAIStore.playStoreApiKey);
-          } else if (Platform.isIOS) {
-            configuration = PurchasesConfiguration(RAIStore.appStoreApiKey);
-          } else {
-            throw UnsupportedError("Unsupported platform");
-          }
-          configuration.appUserID = next.value!.id;
-          Purchases.configure(configuration);
-        } else {
-          Purchases.logIn(next.value!.id);
-        }
-      });
     });
   }
 

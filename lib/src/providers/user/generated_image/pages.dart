@@ -20,23 +20,20 @@ class UserGeneratedImagesPages extends _$UserGeneratedImagesPages {
     _loadingLogic();
     _persistenceLogic();
 
-    return await ref.userGeneratedImages.getPageLocal(_getPaginationOptions()).then((value) {
+    return await ref.userGeneratedImages.getPage(_getPaginationOptions()).then((value) {
       if (value.length < pageSize) {
-        ref.userGeneratedImages.getPageRemote(_getPaginationOptions()).then((value) {
-          state = AsyncData(_insertPageIntoState(value, replace: true));
+        ref.userGeneratedImages.refreshPage(_getPaginationOptions()).then((value) {
+          state = AsyncData(_insertPageIntoState(value));
         });
       }
       return _insertPageIntoState(value);
     });
   }
 
-  List<List<UserGeneratedImage>> _insertPageIntoState(
-    List<UserGeneratedImage> userGeneratedImages, {
-    bool replace = false,
-  }) {
+  List<List<UserGeneratedImage>> _insertPageIntoState(List<UserGeneratedImage> userGeneratedImages) {
     final previousState = state;
     if (previousState.hasValue) {
-      if (replace) {
+      if (previousState.value!.length >= _page) {
         previousState.value!.removeAt(_page - 1);
       }
       return previousState.value!
@@ -93,7 +90,7 @@ class UserGeneratedImagesPages extends _$UserGeneratedImagesPages {
   Future<List<List<UserGeneratedImage>>> refresh() async {
     final futures = <Future<List<UserGeneratedImage>>>[];
     for (int i = 1; i <= _page; i++) {
-      futures.add(ref.userGeneratedImages.getPageRemote(
+      futures.add(ref.userGeneratedImages.refreshPage(
         PaginatedEntitiesRequestOptions(page: i, limit: pageSize),
       ));
     }

@@ -24,8 +24,6 @@ class RAIApp extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    debugPrint("Building app...");
-
     final routerListenableNotifier = ref.watch(routerListenableProvider.notifier);
 
     final key = useRef(GlobalKey<NavigatorState>(
@@ -48,26 +46,33 @@ class RAIApp extends HookConsumerWidget {
       [routerListenableNotifier],
     );
 
-    useEffect(() {
-      FirebaseMessaging.onMessageOpenedApp.listen((message) {
+    useOnStreamChange(
+      FirebaseMessaging.onMessageOpenedApp,
+      onData: (message) {
         switch (message.data['task']) {
           case 'daily-devo':
             final id = message.data['id'] ?? '';
-            Future(() => context.go('/?redirect=${Uri.encodeComponent('/devotions/$id')}'));
+            context.go('/?redirect=${Uri.encodeComponent('/devotions/$id')}');
             break;
           case "chat-query":
             final query = message.data['query'] ?? '';
-            Future(() => context.go('/?redirect=${Uri.encodeComponent('/chat?query=$query')}'));
+            context.go('/?redirect=${Uri.encodeComponent('/chat?query=$query')}');
             break;
           default:
             break;
         }
-      });
-      return () {};
-    }, [FirebaseMessaging.onMessageOpenedApp]);
+      },
+      onDone: () {
+        debugPrint('Done on message opened app');
+      },
+      onError: (error, stackTrace) {
+        debugPrint('Error on message opened app: $error $stackTrace');
+      },
+    );
 
-    useEffect(() {
-      FirebaseMessaging.onMessage.listen((message) {
+    useOnStreamChange(
+      FirebaseMessaging.onMessage,
+      onData: (message) {
         switch (message.data['task']) {
           case 'daily-devo':
             final id = message.data['id'] ?? '';
@@ -106,9 +111,14 @@ class RAIApp extends HookConsumerWidget {
           default:
             break;
         }
-      });
-      return () {};
-    }, [FirebaseMessaging.onMessage]);
+      },
+      onDone: () {
+        debugPrint('Done on message');
+      },
+      onError: (error, stackTrace) {
+        debugPrint('Error on message: $error $stackTrace');
+      },
+    );
 
     return _EagerlyInitializedProviders(
       child: MaterialApp.router(
@@ -132,7 +142,6 @@ class _EagerlyInitializedProviders extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     ref.watch(currentChatIdProvider);
     ref.watch(currentDevotionIdProvider);
-
     return child;
   }
 }

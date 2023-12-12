@@ -28,14 +28,14 @@ class AccountScreen extends HookConsumerWidget {
       value: context.isDarkMode ? SystemUiOverlayStyle.light : SystemUiOverlayStyle.dark,
       child: Scaffold(
         floatingActionButtonLocation: FloatingActionButtonLocation.miniStartTop,
-        floatingActionButton: FloatingActionButton.small(
+        floatingActionButton: IconButton(
           onPressed: () {
             if (hapticFeedbackEnabled) {
               HapticFeedback.mediumImpact();
             }
             context.go("/home");
           },
-          child: const Icon(Icons.arrow_back),
+          icon: const Icon(Icons.chevron_left, size: 40),
         ),
         body: Stack(
           children: [
@@ -91,7 +91,7 @@ class AccountScreen extends HookConsumerWidget {
                     },
                   ),
                   const SizedBox(
-                    height: 20,
+                    height: 30,
                   ),
                   Padding(
                     padding: EdgeInsets.symmetric(

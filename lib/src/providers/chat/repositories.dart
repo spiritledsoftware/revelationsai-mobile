@@ -122,16 +122,27 @@ class ChatRepository {
     }
   }
 
-  Future<List<Chat>> getPageLocal(PaginatedEntitiesRequestOptions options) async {
+  Future<List<Chat>> getPage(PaginatedEntitiesRequestOptions options) async {
+    if ((await getAllLocal()).isEmpty) {
+      return await _getPageRemote(options);
+    }
+    return await _getPageLocal(options);
+  }
+
+  Future<List<Chat>> refreshPage(PaginatedEntitiesRequestOptions options) async {
+    return await _getPageRemote(options);
+  }
+
+  Future<List<Chat>> _getPageLocal(PaginatedEntitiesRequestOptions options) async {
     return await _queryBuilderForPageOptions(options)
         .offset((options.page - 1) * options.limit)
         .limit(options.limit)
         .findAll();
   }
 
-  Future<List<Chat>> getPageRemote(PaginatedEntitiesRequestOptions options) async {
+  Future<List<Chat>> _getPageRemote(PaginatedEntitiesRequestOptions options) async {
     return await ChatService.getChats(session: _session, paginationOptions: options).then((value) async {
-      await deleteManyLocal(await getPageLocal(options).then((value) => value.map((e) => e.id).toList()));
+      await deleteManyLocal(await _getPageLocal(options).then((value) => value.map((e) => e.id).toList()));
       await _saveMany(value.entities);
       return value.entities;
     });
@@ -159,7 +170,27 @@ class ChatMessagesRepository {
     return await _isar.chatMessages.where().findAll();
   }
 
-  Future<List<ChatMessage>> getPageByChatIdLocal(String chatId, PaginatedEntitiesRequestOptions options) async {
+  Future<List<ChatMessage>> getPageByChatId(
+    String chatId,
+    PaginatedEntitiesRequestOptions options,
+  ) async {
+    if (await _hasLocalForChatId(chatId)) {
+      return await _getPageByChatIdLocal(chatId, options);
+    }
+    return await _getPageByChatIdRemote(chatId, options);
+  }
+
+  Future<List<ChatMessage>> refreshPageByChatId(
+    String chatId,
+    PaginatedEntitiesRequestOptions options,
+  ) async {
+    return await _getPageByChatIdRemote(chatId, options);
+  }
+
+  Future<List<ChatMessage>> _getPageByChatIdLocal(
+    String chatId,
+    PaginatedEntitiesRequestOptions options,
+  ) async {
     return await _isar.chatMessages
         .where()
         .chatIdEqualTo(chatId)
@@ -171,14 +202,17 @@ class ChatMessagesRepository {
         .then((value) => value.reversed.toList());
   }
 
-  Future<List<ChatMessage>> getPageByChatIdRemote(String chatId, PaginatedEntitiesRequestOptions options) async {
+  Future<List<ChatMessage>> _getPageByChatIdRemote(
+    String chatId,
+    PaginatedEntitiesRequestOptions options,
+  ) async {
     return await ChatService.getChatMessages(
       session: _session,
       chatId: chatId,
       paginationOptions: options,
     ).then((value) => value.reversed.toList()).then((value) async {
       await deleteManyLocal(
-          await getPageByChatIdLocal(chatId, options).then((value) => value.map((e) => e.id).toList()));
+          await _getPageByChatIdLocal(chatId, options).then((value) => value.map((e) => e.id).toList()));
       await save(value.map((e) {
         return e.copyWith(
           chatId: chatId,

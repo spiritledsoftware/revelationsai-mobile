@@ -15,6 +15,7 @@ import 'package:revelationsai/src/utils/build_context_extensions.dart';
 import 'package:revelationsai/src/widgets/branding/logo.dart';
 import 'package:revelationsai/src/widgets/colored_safe_area.dart';
 import 'package:revelationsai/src/widgets/gradient_text.dart';
+import 'package:revelationsai/src/widgets/refresh_indicator.dart';
 
 class HomeScreen extends HookConsumerWidget {
   const HomeScreen({super.key});
@@ -34,6 +35,7 @@ class HomeScreen extends HookConsumerWidget {
     return Scaffold(
       body: ColoredSafeArea(
         color: context.colorScheme.primary,
+        overlayStyle: SystemUiOverlayStyle.light,
         child: NestedScrollView(
           headerSliverBuilder: (context, innerBoxIsScrolled) => [
             SliverAppBar(
@@ -41,7 +43,6 @@ class HomeScreen extends HookConsumerWidget {
               snap: true,
               floating: true,
               centerTitle: false,
-              expandedHeight: 70,
               backgroundColor: context.colorScheme.primary,
               systemOverlayStyle: SystemUiOverlayStyle.light,
               title: const Logo(
@@ -73,243 +74,251 @@ class HomeScreen extends HookConsumerWidget {
               ],
             ),
           ],
-          body: ListView(
-            children: [
-              const SizedBox(height: 20),
-              GradientText(
-                "Hello, ${currentUser.name ?? "friend"}",
-                gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [
-                    if (context.brightness == Brightness.dark) ...[
-                      Colors.white,
-                      context.secondaryColor,
+          body: RAIRefreshIndicator(
+            onRefresh: () {
+              return Future.wait([
+                ref.refresh(singleDevotionProvider(null).future),
+                ref.refresh(mostAskedUserMessagesProvider(5).future),
+              ]);
+            },
+            child: ListView(
+              children: [
+                const SizedBox(height: 20),
+                GradientText(
+                  "Hello, ${currentUser.name ?? "friend"}",
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [
+                      if (context.brightness == Brightness.dark) ...[
+                        Colors.white,
+                        context.secondaryColor,
+                      ],
+                      if (context.brightness == Brightness.light) ...[
+                        context.primaryColor,
+                        context.secondaryColor,
+                      ],
                     ],
-                    if (context.brightness == Brightness.light) ...[
-                      context.primaryColor,
-                      context.secondaryColor,
-                    ],
-                  ],
+                  ),
+                  style: context.textTheme.headlineMedium?.copyWith(
+                    fontWeight: FontWeight.w900,
+                  ),
+                  textAlign: TextAlign.center,
                 ),
-                style: context.textTheme.headlineMedium?.copyWith(
-                  fontWeight: FontWeight.w900,
-                ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 20),
-              Container(
-                margin: const EdgeInsets.symmetric(
-                  horizontal: 10,
-                ),
-                padding: const EdgeInsets.all(20),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(20),
-                  color: context.colorScheme.secondary.withOpacity(0.2),
-                ),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    GradientText(
-                      "What's on your mind?",
-                      gradient: LinearGradient(
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                        colors: [
-                          if (context.brightness == Brightness.dark) ...[
-                            Colors.white,
-                            context.secondaryColor,
+                const SizedBox(height: 20),
+                Container(
+                  margin: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                  ),
+                  padding: const EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(20),
+                    color: context.colorScheme.secondary.withOpacity(0.2),
+                  ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      GradientText(
+                        "What's on your mind?",
+                        gradient: LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          colors: [
+                            if (context.brightness == Brightness.dark) ...[
+                              Colors.white,
+                              context.secondaryColor,
+                            ],
+                            if (context.brightness == Brightness.light) ...[
+                              context.primaryColor,
+                              context.secondaryColor,
+                            ],
                           ],
-                          if (context.brightness == Brightness.light) ...[
-                            context.primaryColor,
-                            context.secondaryColor,
-                          ],
-                        ],
-                      ),
-                      style: context.textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-                    TextField(
-                      controller: queryTextController,
-                      focusNode: queryTextFocusNode,
-                      minLines: 1,
-                      maxLines: 3,
-                      keyboardType: TextInputType.multiline,
-                      textCapitalization: TextCapitalization.sentences,
-                      autocorrect: true,
-                      decoration: InputDecoration(
-                        hintText: "Type a message",
-                        contentPadding: const EdgeInsets.only(
-                          left: 30,
-                          right: 10,
-                          top: 10,
-                          bottom: 10,
                         ),
-                        focusedBorder: OutlineInputBorder(
-                          borderSide: BorderSide(
-                            color: context.colorScheme.onBackground.withOpacity(0.8),
+                        style: context.textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                      TextField(
+                        controller: queryTextController,
+                        focusNode: queryTextFocusNode,
+                        minLines: 1,
+                        maxLines: 3,
+                        keyboardType: TextInputType.multiline,
+                        textCapitalization: TextCapitalization.sentences,
+                        autocorrect: true,
+                        decoration: InputDecoration(
+                          hintText: "Type a message",
+                          contentPadding: const EdgeInsets.only(
+                            left: 30,
+                            right: 10,
+                            top: 10,
+                            bottom: 10,
                           ),
-                          borderRadius: BorderRadius.circular(50),
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderSide: BorderSide(
-                            color: context.colorScheme.onBackground.withOpacity(0.8),
+                          focusedBorder: OutlineInputBorder(
+                            borderSide: BorderSide(
+                              color: context.colorScheme.onBackground.withOpacity(0.8),
+                            ),
+                            borderRadius: BorderRadius.circular(50),
                           ),
-                          borderRadius: BorderRadius.circular(50),
-                        ),
-                        suffixIcon: IconButton(
-                          visualDensity: VisualDensity.compact,
-                          onPressed: () {
-                            if (hapticFeedbackEnabled) HapticFeedback.lightImpact();
-                            context.go("/chat?query=${queryTextController.text}");
-                          },
-                          icon: const Icon(Icons.arrow_upward),
-                        ),
-                      ),
-                      onTapOutside: (event) {
-                        queryTextFocusNode.unfocus();
-                      },
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 20),
-              Container(
-                margin: const EdgeInsets.symmetric(
-                  horizontal: 10,
-                ),
-                padding: const EdgeInsets.all(20),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(20),
-                  color: context.colorScheme.secondary.withOpacity(0.2),
-                ),
-                child: Column(
-                  children: [
-                    GradientText(
-                      "Latest Devo",
-                      gradient: LinearGradient(
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                        colors: [
-                          if (context.brightness == Brightness.dark) ...[
-                            Colors.white,
-                            context.secondaryColor,
-                          ],
-                          if (context.brightness == Brightness.light) ...[
-                            context.primaryColor,
-                            context.secondaryColor,
-                          ],
-                        ],
-                      ),
-                      style: context.textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-                    latestDevotion.when(
-                      data: (devo) => GestureDetector(
-                        onTap: () {
-                          context.go("/devotions/${devo.id}");
-                        },
-                        child: Text(
-                          devo.bibleReading,
-                        ),
-                      ),
-                      error: (error, stackTrace) => Center(
-                        child: Text(
-                          error.toString(),
-                          style: context.textTheme.titleMedium,
-                        ),
-                      ),
-                      loading: () => Center(
-                        child: SpinKitSpinningLines(
-                          color: context.colorScheme.primary,
-                          size: 40,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 20),
-              Container(
-                margin: const EdgeInsets.symmetric(
-                  horizontal: 10,
-                ),
-                padding: const EdgeInsets.all(20),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(20),
-                  color: context.colorScheme.secondary.withOpacity(0.2),
-                ),
-                child: Column(
-                  children: [
-                    GradientText(
-                      "Most Asked Questions",
-                      gradient: LinearGradient(
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                        colors: [
-                          if (context.brightness == Brightness.dark) ...[
-                            Colors.white,
-                            context.secondaryColor,
-                          ],
-                          if (context.brightness == Brightness.light) ...[
-                            context.primaryColor,
-                            context.secondaryColor,
-                          ],
-                        ],
-                      ),
-                      style: context.textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-                    mostAskedUserMessages.when(
-                      data: (messages) => ListView.builder(
-                        shrinkWrap: true,
-                        physics: const NeverScrollableScrollPhysics(),
-                        itemCount: messages.length,
-                        itemBuilder: (context, index) {
-                          final message = messages[index];
-                          return ListTile(
-                            onTap: () {
-                              context.go("/chat?query=$message");
+                          enabledBorder: OutlineInputBorder(
+                            borderSide: BorderSide(
+                              color: context.colorScheme.onBackground.withOpacity(0.8),
+                            ),
+                            borderRadius: BorderRadius.circular(50),
+                          ),
+                          suffixIcon: IconButton(
+                            visualDensity: VisualDensity.compact,
+                            onPressed: () {
+                              if (hapticFeedbackEnabled) HapticFeedback.lightImpact();
+                              context.go("/chat?query=${queryTextController.text}");
                             },
-                            leading: Text(
-                              "${(index + 1).toString()}.",
-                              style: context.textTheme.titleMedium,
-                            ),
-                            title: Text(
-                              message,
-                              style: context.textTheme.bodyMedium,
-                            ),
-                            trailing: const Icon(
-                              CupertinoIcons.arrow_right,
-                              size: 15,
-                            ),
-                          );
+                            icon: const Icon(Icons.arrow_upward),
+                          ),
+                        ),
+                        onTapOutside: (event) {
+                          queryTextFocusNode.unfocus();
                         },
                       ),
-                      error: (error, stackTrace) => Center(
-                        child: Text(
-                          error.toString(),
-                          style: context.textTheme.titleMedium,
-                        ),
-                      ),
-                      loading: () => Center(
-                        child: SpinKitSpinningLines(
-                          color: context.colorScheme.secondary,
-                          size: 40,
-                        ),
-                      ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
-              const SizedBox(height: 20),
-            ],
+                const SizedBox(height: 20),
+                Container(
+                  margin: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                  ),
+                  padding: const EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(20),
+                    color: context.colorScheme.secondary.withOpacity(0.2),
+                  ),
+                  child: Column(
+                    children: [
+                      GradientText(
+                        "Latest Devo",
+                        gradient: LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          colors: [
+                            if (context.brightness == Brightness.dark) ...[
+                              Colors.white,
+                              context.secondaryColor,
+                            ],
+                            if (context.brightness == Brightness.light) ...[
+                              context.primaryColor,
+                              context.secondaryColor,
+                            ],
+                          ],
+                        ),
+                        style: context.textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                      latestDevotion.when(
+                        data: (devo) => GestureDetector(
+                          onTap: () {
+                            context.go("/devotions/${devo.id}");
+                          },
+                          child: Text(
+                            devo.bibleReading,
+                          ),
+                        ),
+                        error: (error, stackTrace) => Center(
+                          child: Text(
+                            error.toString(),
+                            style: context.textTheme.titleMedium,
+                          ),
+                        ),
+                        loading: () => Center(
+                          child: SpinKitSpinningLines(
+                            color: context.colorScheme.primary,
+                            size: 40,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 20),
+                Container(
+                  margin: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                  ),
+                  padding: const EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(20),
+                    color: context.colorScheme.secondary.withOpacity(0.2),
+                  ),
+                  child: Column(
+                    children: [
+                      GradientText(
+                        "Most Asked Questions",
+                        gradient: LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          colors: [
+                            if (context.brightness == Brightness.dark) ...[
+                              Colors.white,
+                              context.secondaryColor,
+                            ],
+                            if (context.brightness == Brightness.light) ...[
+                              context.primaryColor,
+                              context.secondaryColor,
+                            ],
+                          ],
+                        ),
+                        style: context.textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                      mostAskedUserMessages.when(
+                        data: (messages) => ListView.builder(
+                          shrinkWrap: true,
+                          physics: const NeverScrollableScrollPhysics(),
+                          itemCount: messages.length,
+                          itemBuilder: (context, index) {
+                            final message = messages[index];
+                            return ListTile(
+                              onTap: () {
+                                context.go("/chat?query=$message");
+                              },
+                              leading: Text(
+                                "${(index + 1).toString()}.",
+                                style: context.textTheme.titleMedium,
+                              ),
+                              title: Text(
+                                message,
+                                style: context.textTheme.bodyMedium,
+                              ),
+                              trailing: const Icon(
+                                CupertinoIcons.arrow_right,
+                                size: 15,
+                              ),
+                            );
+                          },
+                        ),
+                        error: (error, stackTrace) => Center(
+                          child: Text(
+                            error.toString(),
+                            style: context.textTheme.titleMedium,
+                          ),
+                        ),
+                        loading: () => Center(
+                          child: SpinKitSpinningLines(
+                            color: context.colorScheme.secondary,
+                            size: 40,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 20),
+              ],
+            ),
           ),
         ),
       ),

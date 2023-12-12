@@ -27,10 +27,10 @@ Future<void> main() async {
   debugPrint('Initializing Firebase');
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
-  ).then((_) {
+  ).then((_) async {
     FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
-    FirebaseMessaging.instance.subscribeToTopic('daily-devo');
-    FirebaseMessaging.instance.subscribeToTopic('chat-query');
+    await FirebaseMessaging.instance.subscribeToTopic('daily-devo');
+    await FirebaseMessaging.instance.subscribeToTopic('chat-query');
   });
 
   await MobileAds.instance.initialize();

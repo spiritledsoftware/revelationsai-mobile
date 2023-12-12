@@ -7,8 +7,11 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:purchases_flutter/purchases_flutter.dart';
 import 'package:revelationsai/src/models/alert.dart';
+import 'package:revelationsai/src/providers/in_app_purchases/customer_info.dart';
+import 'package:revelationsai/src/providers/in_app_purchases/packages.dart';
 import 'package:revelationsai/src/providers/user/current.dart';
 import 'package:revelationsai/src/utils/build_context_extensions.dart';
+import 'package:revelationsai/src/widgets/refresh_indicator.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
 class UpgradeScreen extends HookConsumerWidget {
@@ -16,45 +19,15 @@ class UpgradeScreen extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final customerInfo = ref.watch(customerInfoProvider);
+    final packages = ref.watch(packagesProvider);
+
     final isMounted = useIsMounted();
-    final customerInfo = useState<CustomerInfo?>(null);
-    final packages = useState<List<Package>>([]);
-    final loading = useState<bool>(false);
     final purchasesRestored = useState(false);
     final alert = useState<Alert?>(null);
 
     final purchasesRestoreFuture = useState<Future?>(null);
     final purchasesRestoreSnapshot = useFuture(purchasesRestoreFuture.value);
-
-    useEffect(() {
-      loading.value = true;
-      Future.wait([
-        Purchases.getCustomerInfo().then((info) {
-          if (isMounted()) {
-            debugPrint("Customer Info: $info");
-            customerInfo.value = info;
-          }
-        }),
-        Purchases.getOfferings().then((offerings) {
-          if (isMounted()) {
-            debugPrint("Offering: ${offerings.current!.serverDescription}");
-            packages.value = offerings.current?.availablePackages ?? [];
-          }
-        }),
-      ]).catchError((error) {
-        if (isMounted()) {
-          alert.value = Alert(
-            type: AlertType.error,
-            message: error.toString(),
-          );
-        }
-        return [null];
-      }).whenComplete(() {
-        if (isMounted()) loading.value = false;
-      });
-
-      return () {};
-    }, []);
 
     useEffect(() {
       if (purchasesRestoreSnapshot.hasError && purchasesRestoreSnapshot.connectionState != ConnectionState.waiting) {
@@ -63,7 +36,6 @@ class UpgradeScreen extends HookConsumerWidget {
           message: purchasesRestoreSnapshot.error.toString(),
         );
       }
-
       return () {};
     }, [purchasesRestoreSnapshot.hasError]);
 
@@ -106,17 +78,15 @@ class UpgradeScreen extends HookConsumerWidget {
             ),
         ],
       ),
-      body: loading.value
-          ? Center(
-              child: SpinKitDualRing(
-                color: context.colorScheme.secondary,
-              ),
-            )
-          : SingleChildScrollView(
-              child: Column(
-                mainAxisSize: MainAxisSize.max,
-                mainAxisAlignment: MainAxisAlignment.start,
-                crossAxisAlignment: CrossAxisAlignment.center,
+      body: customerInfo.hasValue && packages.hasValue
+          ? RAIRefreshIndicator(
+              onRefresh: () {
+                return Future.wait([
+                  ref.refresh(customerInfoProvider.future),
+                  ref.refresh(packagesProvider.future),
+                ]);
+              },
+              child: ListView(
                 children: [
                   Padding(
                     padding: const EdgeInsets.symmetric(
@@ -227,7 +197,7 @@ class UpgradeScreen extends HookConsumerWidget {
                   ListView.builder(
                     physics: const NeverScrollableScrollPhysics(),
                     shrinkWrap: true,
-                    itemCount: packages.value.length,
+                    itemCount: packages.requireValue.length,
                     itemBuilder: (context, index) {
                       return Padding(
                         padding: const EdgeInsets.symmetric(
@@ -235,8 +205,8 @@ class UpgradeScreen extends HookConsumerWidget {
                           vertical: 8,
                         ),
                         child: ProductTile(
-                          key: ValueKey(packages.value[index].identifier),
-                          package: packages.value[index],
+                          key: ValueKey(packages.requireValue[index].identifier),
+                          package: packages.requireValue[index],
                           customerInfo: customerInfo.value,
                         ),
                       );
@@ -305,7 +275,20 @@ class UpgradeScreen extends HookConsumerWidget {
                   ),
                 ],
               ),
-            ),
+            )
+          : customerInfo.hasError || packages.hasError
+              ? const Center(
+                  child: Text(
+                    'An error occurred while loading the packages. Please try again later.',
+                    textAlign: TextAlign.center,
+                  ),
+                )
+              : Center(
+                  child: SpinKitSpinningLines(
+                    color: context.colorScheme.secondary,
+                    size: 40,
+                  ),
+                ),
     );
   }
 }

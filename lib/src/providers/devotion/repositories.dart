@@ -98,25 +98,30 @@ class DevotionRepository {
     }
   }
 
-  Future<List<Devotion>> getPageLocal(PaginatedEntitiesRequestOptions options) async {
+  Future<List<Devotion>> getPage(PaginatedEntitiesRequestOptions options) async {
+    if ((await getAllLocal()).isEmpty) {
+      return await _getPageRemote(options);
+    }
+    return await _getPageLocal(options);
+  }
+
+  Future<List<Devotion>> refreshPage(PaginatedEntitiesRequestOptions options) async {
+    return await _getPageRemote(options);
+  }
+
+  Future<List<Devotion>> _getPageLocal(PaginatedEntitiesRequestOptions options) async {
     return await _queryBuilderForPageOptions(options)
         .offset((options.page - 1) * options.limit)
         .limit(options.limit)
         .findAll();
   }
 
-  Future<List<Devotion>> getPageRemote(PaginatedEntitiesRequestOptions options) async {
+  Future<List<Devotion>> _getPageRemote(PaginatedEntitiesRequestOptions options) async {
     return await DevotionService.getDevotions(paginationOptions: options).then((value) async {
-      await deleteManyLocal(await getPageLocal(options).then((value) => value.map((e) => e.id).toList()));
+      await deleteManyLocal(await _getPageLocal(options).then((value) => value.map((e) => e.id).toList()));
       await _saveMany(value.entities);
       return value.entities;
     });
-  }
-
-  Future<Devotion> getLatest() async {
-    return await getPageLocal(
-      PaginatedEntitiesRequestOptions(page: 1, limit: 1, orderBy: "createdAt", order: OrderType.desc),
-    ).then((value) => value.first);
   }
 }
 

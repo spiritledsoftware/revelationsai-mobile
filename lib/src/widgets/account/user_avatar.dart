@@ -8,12 +8,14 @@ class UserAvatar extends HookConsumerWidget {
   final double radius;
   final Color backgroundColor;
   final Widget Function(BuildContext context)? badgeBuilder;
+  final bool noShadow;
 
   const UserAvatar({
     super.key,
     this.radius = 25,
     this.backgroundColor = Colors.grey,
     this.badgeBuilder,
+    this.noShadow = false,
   });
 
   @override
@@ -28,24 +30,22 @@ class UserAvatar extends HookConsumerWidget {
             decoration: BoxDecoration(
               color: backgroundColor,
               borderRadius: BorderRadius.circular(100),
-              boxShadow: [
-                BoxShadow(
-                  color: context.theme.shadowColor.withOpacity(0.3),
-                  blurRadius: 10,
-                  offset: const Offset(0, 5),
-                ),
-              ],
+              boxShadow: noShadow
+                  ? null
+                  : [
+                      BoxShadow(
+                        color: context.theme.shadowColor.withOpacity(0.3),
+                        blurRadius: 10,
+                        offset: const Offset(0, 5),
+                      ),
+                    ],
             ),
             child: ClipRRect(
               borderRadius: BorderRadius.circular(100),
               child: RAINetworkImage(
                 imageUrl: currentUser.requireValue.image,
-                fallbackText: currentUser.requireValue.name
-                        ?.substring(0, 1)
-                        .toUpperCase() ??
-                    currentUser.requireValue.email
-                        .substring(0, 1)
-                        .toUpperCase(),
+                fallbackText: currentUser.requireValue.name?.substring(0, 1).toUpperCase() ??
+                    currentUser.requireValue.email.substring(0, 1).toUpperCase(),
                 fallbackTextSize: radius * 0.75,
               ),
             ),

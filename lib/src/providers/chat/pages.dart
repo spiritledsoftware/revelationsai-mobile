@@ -18,20 +18,20 @@ class ChatsPages extends _$ChatsPages {
   FutureOr<List<List<Chat>>> build() async {
     _loadingLogic();
 
-    return await ref.chats.getPageLocal(_getPaginationOptions()).then((value) {
+    return await ref.chats.getPage(_getPaginationOptions()).then((value) {
       if (value.length < pageSize) {
-        ref.chats.getPageRemote(_getPaginationOptions()).then((value) {
-          state = AsyncData(_insertPageIntoState(value, replace: true));
+        ref.chats.refreshPage(_getPaginationOptions()).then((value) {
+          state = AsyncData(_insertPageIntoState(value));
         });
       }
       return _insertPageIntoState(value);
     });
   }
 
-  List<List<Chat>> _insertPageIntoState(List<Chat> chats, {bool replace = false}) {
+  List<List<Chat>> _insertPageIntoState(List<Chat> chats) {
     final previousState = state;
     if (previousState.hasValue) {
-      if (replace) {
+      if (previousState.value!.length >= _page) {
         previousState.value!.removeAt(_page - 1);
       }
       return previousState.value!
@@ -95,7 +95,7 @@ class ChatsPages extends _$ChatsPages {
   Future<List<List<Chat>>> refresh() async {
     final futures = <Future<List<Chat>>>[];
     for (int i = 1; i <= _page; i++) {
-      futures.add(ref.chats.getPageRemote(PaginatedEntitiesRequestOptions(
+      futures.add(ref.chats.refreshPage(PaginatedEntitiesRequestOptions(
         page: i,
         limit: pageSize,
         orderBy: "updatedAt",

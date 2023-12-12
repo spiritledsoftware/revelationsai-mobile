@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:revelationsai/src/models/chat/message.dart';
 import 'package:revelationsai/src/models/pagination.dart';
 import 'package:revelationsai/src/providers/chat/repositories.dart';
@@ -21,10 +22,10 @@ class ChatMessages extends _$ChatMessages {
       return [<ChatMessage>[]];
     }
 
-    return await ref.chatMessages.getPageByChatIdLocal(chatId, _getPaginationOptions()).then((value) {
+    return await ref.chatMessages.getPageByChatId(chatId, _getPaginationOptions()).then((value) {
       if (value.length < pageSize) {
-        ref.chatMessages.getPageByChatIdRemote(chatId, _getPaginationOptions()).then((value) {
-          state = AsyncData(_insertPageIntoState(value, replace: true));
+        ref.chatMessages.refreshPageByChatId(chatId, _getPaginationOptions()).then((value) {
+          state = AsyncData(_insertPageIntoState(value));
         });
       }
       return _insertPageIntoState(value);
@@ -40,15 +41,17 @@ class ChatMessages extends _$ChatMessages {
     );
   }
 
-  List<List<ChatMessage>> _insertPageIntoState(List<ChatMessage> messages, {bool replace = false}) {
+  List<List<ChatMessage>> _insertPageIntoState(List<ChatMessage> messages) {
     final previousState = state;
     if (previousState.hasValue) {
-      if (replace) {
-        previousState.value!.removeAt(previousState.value!.length - (_page - 1));
+      debugPrint("Inserting page $_page into state at index ${previousState.value!.length - _page}");
+      if (previousState.value!.length >= _page) {
+        debugPrint("Removing page index ${previousState.value!.length - _page}");
+        previousState.value!.removeAt(previousState.value!.length - _page);
       }
       return previousState.value!
         ..insert(
-          previousState.value!.length - (_page - 1), // insert at the beginning
+          0,
           messages,
         );
     } else {
@@ -89,7 +92,7 @@ class ChatMessages extends _$ChatMessages {
     final futures = <Future<List<ChatMessage>>>[];
     for (int i = _page; i >= 1; i--) {
       futures.add(
-        ref.chatMessages.getPageByChatIdRemote(
+        ref.chatMessages.refreshPageByChatId(
           chatId!,
           PaginatedEntitiesRequestOptions(
             page: i,

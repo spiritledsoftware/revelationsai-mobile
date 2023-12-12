@@ -31,6 +31,7 @@ class AllImagesScreen extends HookConsumerWidget {
     return Scaffold(
       body: ColoredSafeArea(
         color: context.colorScheme.primary,
+        overlayStyle: SystemUiOverlayStyle.light,
         child: NestedScrollView(
           headerSliverBuilder: (context, innerBoxIsScrolled) {
             return [

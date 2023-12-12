@@ -94,7 +94,18 @@ class UserGeneratedImageRepository {
     return await _isar.userGeneratedImages.where().findAll();
   }
 
-  Future<List<UserGeneratedImage>> getPageLocal(PaginatedEntitiesRequestOptions options) async {
+  Future<List<UserGeneratedImage>> getPage(PaginatedEntitiesRequestOptions options) async {
+    if ((await getAllLocal()).isEmpty) {
+      return await _getPageRemote(options);
+    }
+    return await _getPageLocal(options);
+  }
+
+  Future<List<UserGeneratedImage>> refreshPage(PaginatedEntitiesRequestOptions options) async {
+    return await _getPageRemote(options);
+  }
+
+  Future<List<UserGeneratedImage>> _getPageLocal(PaginatedEntitiesRequestOptions options) async {
     return await _isar.userGeneratedImages
         .where()
         .sortByCreatedAtDesc()
@@ -103,10 +114,10 @@ class UserGeneratedImageRepository {
         .findAll();
   }
 
-  Future<List<UserGeneratedImage>> getPageRemote(PaginatedEntitiesRequestOptions options) async {
+  Future<List<UserGeneratedImage>> _getPageRemote(PaginatedEntitiesRequestOptions options) async {
     return await UserGeneratedImageService.getUserGeneratedImages(session: _session, paginationOptions: options)
         .then((value) async {
-      await deleteManyLocal(await getPageLocal(options).then((value) => value.map((e) => e.id).toList()));
+      await deleteManyLocal(await _getPageLocal(options).then((value) => value.map((e) => e.id).toList()));
       await _saveMany(value.entities);
       return value.entities;
     });
