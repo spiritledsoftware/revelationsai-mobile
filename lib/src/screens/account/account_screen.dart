@@ -31,7 +31,7 @@ class AccountScreen extends HookConsumerWidget {
         floatingActionButton: IconButton(
           onPressed: () {
             if (hapticFeedbackEnabled) {
-              HapticFeedback.mediumImpact();
+              HapticFeedback.lightImpact();
             }
             context.go("/home");
           },

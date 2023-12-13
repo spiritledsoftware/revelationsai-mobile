@@ -229,7 +229,7 @@ class SourceInfoPreview extends HookConsumerWidget {
                               IconButton(
                                 onPressed: () {
                                   if (hapticFeedback) {
-                                    HapticFeedback.mediumImpact();
+                                    HapticFeedback.lightImpact();
                                   }
                                   if (copied.value) return;
                                   Clipboard.setData(
@@ -239,7 +239,7 @@ class SourceInfoPreview extends HookConsumerWidget {
                                   ).then((value) {
                                     if (isMounted()) {
                                       if (hapticFeedback) {
-                                        HapticFeedback.mediumImpact();
+                                        HapticFeedback.lightImpact();
                                       }
                                       copied.value = true;
                                     }
@@ -265,7 +265,7 @@ class SourceInfoPreview extends HookConsumerWidget {
                               IconButton(
                                 onPressed: () {
                                   if (hapticFeedback) {
-                                    HapticFeedback.mediumImpact();
+                                    HapticFeedback.lightImpact();
                                   }
                                   Share.shareUri(
                                     Uri.parse(sourceDocument.url),

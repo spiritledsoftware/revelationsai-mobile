@@ -396,7 +396,7 @@ class ChatScreen extends HookConsumerWidget {
                       child: ChatSuggestions(
                         onTap: (suggestionString) {
                           if (currentUserPreferences.hapticFeedback) {
-                            HapticFeedback.mediumImpact();
+                            HapticFeedback.lightImpact();
                           }
                           chatHook.append(
                             ChatMessage(
@@ -422,7 +422,7 @@ class ChatScreen extends HookConsumerWidget {
                             child: IconButton(
                               onPressed: () {
                                 if (currentUserPreferences.hapticFeedback) {
-                                  HapticFeedback.mediumImpact();
+                                  HapticFeedback.lightImpact();
                                 }
                                 scrollToEnd();
                               },

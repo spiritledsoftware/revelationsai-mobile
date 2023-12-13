@@ -63,7 +63,7 @@ class ChatActionMenuButton extends HookConsumerWidget {
               ),
               onOpened: () {
                 if (currentUserPreferences.hapticFeedback) {
-                  HapticFeedback.mediumImpact();
+                  HapticFeedback.lightImpact();
                 }
               },
               itemBuilder: (context) {

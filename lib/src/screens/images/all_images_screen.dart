@@ -68,7 +68,7 @@ class AllImagesScreen extends HookConsumerWidget {
                   IconButton(
                     onPressed: () async {
                       if (currentUserPrefs.hapticFeedback) {
-                        HapticFeedback.mediumImpact();
+                        HapticFeedback.lightImpact();
                       }
                       if (currentUser.remainingGeneratedImages < 1) {
                         ScaffoldMessenger.of(context).showSnackBar(

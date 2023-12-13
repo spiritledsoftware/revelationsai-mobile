@@ -3,8 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:intl/intl.dart';
 import 'package:revelationsai/src/constants/colors.dart';
 import 'package:revelationsai/src/providers/devotion/single.dart';
 import 'package:revelationsai/src/providers/user/current.dart';
@@ -53,7 +55,7 @@ class HomeScreen extends HookConsumerWidget {
                 IconButton(
                   onPressed: () {
                     if (hapticFeedbackEnabled) {
-                      HapticFeedback.mediumImpact();
+                      HapticFeedback.lightImpact();
                     }
                     showModalBottomSheet(
                       elevation: 20,
@@ -150,8 +152,8 @@ class HomeScreen extends HookConsumerWidget {
                         decoration: InputDecoration(
                           hintText: "Type a message",
                           contentPadding: const EdgeInsets.only(
-                            left: 30,
-                            right: 10,
+                            left: 20,
+                            right: 0,
                             top: 10,
                             bottom: 10,
                           ),
@@ -159,21 +161,26 @@ class HomeScreen extends HookConsumerWidget {
                             borderSide: BorderSide(
                               color: context.colorScheme.onBackground.withOpacity(0.8),
                             ),
-                            borderRadius: BorderRadius.circular(50),
+                            borderRadius: BorderRadius.circular(25),
                           ),
                           enabledBorder: OutlineInputBorder(
                             borderSide: BorderSide(
                               color: context.colorScheme.onBackground.withOpacity(0.8),
                             ),
-                            borderRadius: BorderRadius.circular(50),
+                            borderRadius: BorderRadius.circular(25),
                           ),
                           suffixIcon: IconButton(
                             visualDensity: VisualDensity.compact,
                             onPressed: () {
-                              if (hapticFeedbackEnabled) HapticFeedback.lightImpact();
+                              if (hapticFeedbackEnabled) {
+                                HapticFeedback.lightImpact();
+                              }
                               context.go("/chat?query=${queryTextController.text}");
                             },
-                            icon: const Icon(Icons.arrow_upward),
+                            icon: const FaIcon(
+                              FontAwesomeIcons.arrowUp,
+                              size: 18,
+                            ),
                           ),
                         ),
                         onTapOutside: (event) {
@@ -215,14 +222,32 @@ class HomeScreen extends HookConsumerWidget {
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-                      const SizedBox(height: 10),
                       latestDevotion.when(
                         data: (devo) => GestureDetector(
                           onTap: () {
+                            if (hapticFeedbackEnabled) {
+                              HapticFeedback.lightImpact();
+                            }
                             context.go("/devotions/${devo.id}");
                           },
-                          child: Text(
-                            devo.bibleReading,
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                devo.bibleReading.split(" - ")[0],
+                                style: context.textTheme.titleSmall,
+                              ),
+                              Text(
+                                DateFormat.yMd().format(devo.createdAt.toLocal()),
+                                style: context.textTheme.titleSmall,
+                              ),
+                              const SizedBox(height: 10),
+                              Text(
+                                devo.bibleReading.split(" - ")[1],
+                                maxLines: 5,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ],
                           ),
                         ),
                         error: (error, stackTrace) => Center(

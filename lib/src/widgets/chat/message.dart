@@ -42,7 +42,7 @@ class Message extends HookConsumerWidget {
     final showMessageDialog = useCallback(() {
       if (!isLoading) {
         if (hapticFeedback) {
-          HapticFeedback.mediumImpact();
+          HapticFeedback.lightImpact();
         }
         showDialog(
           barrierColor:

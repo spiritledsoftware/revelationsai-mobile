@@ -107,7 +107,7 @@ class Sources extends HookConsumerWidget {
                   child: ListTile(
                     onLongPress: () {
                       if (currentUserPrefs.hapticFeedback) {
-                        HapticFeedback.mediumImpact();
+                        HapticFeedback.lightImpact();
                       }
                       showCupertinoModalPopup(
                         context: context,

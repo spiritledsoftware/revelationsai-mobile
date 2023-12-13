@@ -298,7 +298,7 @@ UseChatReturnObject useChat({required UseChatOptions options}) {
   Function() reload = useCallback(
     () {
       if (options.hapticFeedback) {
-        HapticFeedback.mediumImpact();
+        HapticFeedback.lightImpact();
       }
       if (messagesRef.value.isEmpty) {
         error.value = Exception('No messages to reload');
@@ -332,7 +332,7 @@ UseChatReturnObject useChat({required UseChatOptions options}) {
   Function() handleSubmit = useCallback(
     () {
       if (options.hapticFeedback) {
-        HapticFeedback.mediumImpact();
+        HapticFeedback.lightImpact();
       }
       if (inputController.text.isEmpty) {
         error.value = Exception('Input cannot be empty');

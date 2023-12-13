@@ -41,14 +41,14 @@ class DevotionActionMenuButton extends HookConsumerWidget {
       ),
       onOpened: () {
         if (currentUserPrefs.hapticFeedback) {
-          HapticFeedback.mediumImpact();
+          HapticFeedback.lightImpact();
         }
       },
       itemBuilder: (context) => [
         PopupMenuItem(
           onTap: () {
             if (currentUserPrefs.hapticFeedback) {
-              HapticFeedback.mediumImpact();
+              HapticFeedback.lightImpact();
             }
             showModalBottomSheet(
               elevation: 20,

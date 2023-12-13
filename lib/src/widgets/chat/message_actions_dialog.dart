@@ -92,7 +92,7 @@ class MessageActionsDialog extends HookConsumerWidget {
                     IconButton(
                       onPressed: () {
                         if (hapticFeedback) {
-                          HapticFeedback.mediumImpact();
+                          HapticFeedback.lightImpact();
                         }
                         Clipboard.setData(
                           ClipboardData(
@@ -101,7 +101,7 @@ class MessageActionsDialog extends HookConsumerWidget {
                         ).then((value) {
                           if (isMounted()) {
                             if (hapticFeedback) {
-                              HapticFeedback.mediumImpact();
+                              HapticFeedback.lightImpact();
                             }
                             copied.value = true;
                           }
@@ -130,7 +130,7 @@ class MessageActionsDialog extends HookConsumerWidget {
                           return;
                         }
                         if (hapticFeedback) {
-                          HapticFeedback.mediumImpact();
+                          HapticFeedback.lightImpact();
                         }
                         final image = await screenshotController!.capture();
                         if (image == null) {
@@ -156,7 +156,7 @@ class MessageActionsDialog extends HookConsumerWidget {
                       IconButton(
                         onPressed: () {
                           if (hapticFeedback) {
-                            HapticFeedback.mediumImpact();
+                            HapticFeedback.lightImpact();
                           }
                           reactionsNotifier!.createReaction(
                             reactionType: AiResponseReactionType.LIKE,
@@ -184,7 +184,7 @@ class MessageActionsDialog extends HookConsumerWidget {
                       IconButton(
                         onPressed: () {
                           if (hapticFeedback) {
-                            HapticFeedback.mediumImpact();
+                            HapticFeedback.lightImpact();
                           }
                           showDialog(
                             context: context,
