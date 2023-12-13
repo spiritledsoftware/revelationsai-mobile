@@ -159,7 +159,7 @@ Future<ChatMessage> getStreamedResponse({
           final words = value.split(' ').toList(growable: false);
           for (int i = 0; i < words.length; i++) {
             await Future.delayed(
-              const Duration(milliseconds: 5),
+              const Duration(milliseconds: 10),
               () {
                 final addSpace = i != 0;
                 reply = reply.copyWith(content: "${reply.content}${addSpace ? " " : ""}${words[i]}");
