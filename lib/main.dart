@@ -29,8 +29,8 @@ Future<void> main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   ).then((_) async {
     FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
-    await FirebaseMessaging.instance.subscribeToTopic('daily-devo');
-    await FirebaseMessaging.instance.subscribeToTopic('chat-query');
+   FirebaseMessaging.instance.subscribeToTopic('daily-devo');
+     FirebaseMessaging.instance.subscribeToTopic('chat-query');
   });
 
   await MobileAds.instance.initialize();
