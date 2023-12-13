@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -17,6 +18,11 @@ class DevotionModal extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final devotionsPages = ref.watch(devotionsPagesProvider);
     final devotionsPagesNotifier = ref.watch(devotionsPagesProvider.notifier);
+
+    useEffect(() {
+      devotionsPagesNotifier.refresh();
+      return () {};
+    }, []);
 
     return Container(
       decoration: BoxDecoration(

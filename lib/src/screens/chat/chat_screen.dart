@@ -66,23 +66,19 @@ class ChatScreen extends HookConsumerWidget {
 
     final watchedChat = ref.watch(singleChatProvider(chatHook.chatId.value));
     useEffect(() {
-      if (watchedChat is AsyncData<Chat>) {
-        if (isMounted()) {
-          chat.value = watchedChat.value;
-        }
+      if (isMounted()) {
+        chat.value = watchedChat.value;
       }
       return () {};
-    }, [watchedChat]);
+    }, [watchedChat.value]);
 
     final watchedChatMessages = ref.watch(chatMessagesProvider(chatHook.chatId.value));
     useEffect(() {
-      if (watchedChatMessages is AsyncData<List<List<ChatMessage>>>) {
-        if (isMounted() && !chatHook.loading.value) {
-          chatHook.messages.value = watchedChatMessages.value.expand((element) => element).toList();
-        }
+      if (isMounted() && !chatHook.loading.value) {
+        chatHook.messages.value = watchedChatMessages.value?.expand((element) => element).toList() ?? [];
       }
       return () {};
-    }, [watchedChatMessages]);
+    }, [watchedChatMessages.value]);
 
     final scrollToEnd = useCallback(() {
       if (scrollController.hasClients) {
@@ -223,12 +219,12 @@ class ChatScreen extends HookConsumerWidget {
     useEffect(() {
       debugPrint(
           "ChatScreen: chatHook.loading.value: ${chatHook.loading.value} chatHook.currentResponseId.value: ${chatHook.currentResponseId.value} chatHook.error.value: ${chatHook.error.value}");
-      if (!chatHook.loading.value && chatHook.currentResponseId.value == null && chatHook.error.value == null) {
+      if (!chatHook.loading.value && chatHook.error.value == null) {
         debugPrint("Refreshing chat data since chat is idle.");
         Future(() => refreshChatData());
       }
       return () {};
-    }, [chatHook.loading.value, chatHook.currentResponseId.value, chatHook.error.value]);
+    }, [chatHook.loading.value, chatHook.error.value]);
 
     useEffect(() {
       debugPrint("ChatScreen: chatHook.error.value: ${chatHook.error.value}");
@@ -267,16 +263,20 @@ class ChatScreen extends HookConsumerWidget {
       return () {};
     }, [alert.value]);
 
+    void inputListener() {
+      if (isMounted()) {
+        input.value = chatHook.inputController.text;
+      }
+    }
+
     useEffect(() {
-      chatHook.inputController.addListener(() {
-        if (isMounted()) {
-          input.value = chatHook.inputController.text;
-        }
-      });
-      return () {};
+      chatHook.inputController.addListener(inputListener);
+      return () {
+        chatHook.inputController.removeListener(inputListener);
+      };
     }, [chatHook.inputController]);
 
-    void scrollClosure() {
+    void scrollListener() {
       if (scrollController.position.outOfRange) {
         return;
       }
@@ -304,13 +304,15 @@ class ChatScreen extends HookConsumerWidget {
     useEffect(() {
       debugPrint("ChatScreen: scrollController.hasClients: ${scrollController.hasClients}");
       if (scrollController.hasClients) {
-        scrollController.addListener(scrollClosure);
+        scrollController.addListener(scrollListener);
       } else {
         if (isMounted()) {
           scrollableEndIsInView.value = true;
         }
       }
-      return () {};
+      return () {
+        scrollController.removeListener(scrollListener);
+      };
     }, [scrollController.hasClients]);
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
