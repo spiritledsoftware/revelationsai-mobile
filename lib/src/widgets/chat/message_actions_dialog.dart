@@ -145,7 +145,7 @@ class MessageActionsDialog extends HookConsumerWidget {
                             ),
                           ],
                           subject: "Message from RevelationsAI",
-                          text: "Check out this message from RevelationsAI!",
+                          text: "Check out this message from RevelationsAI!\n\nhttps://revelationsai.com",
                         );
                       },
                       visualDensity: RAIVisualDensity.tightest,
