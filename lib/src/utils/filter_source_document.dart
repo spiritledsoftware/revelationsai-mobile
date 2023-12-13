@@ -79,7 +79,19 @@ List<SourceDocument> filterSourceDocuments(List<SourceDocument> value) {
           ));
           continue;
         }
+        if (match.url == prospect.url) {
+          filteredSources.removeWhere((element) => element.id == match.id);
+          filteredSources.add(prospect.copyWith(
+            pageContent: "${match.pageContent}\n$contentSeparator\n${prospect.pageContent}",
+            distance: min(
+              prospect.distance,
+              match.distance,
+            ),
+          ));
+          continue;
+        }
       }
+
       filteredSources.add(prospect.copyWith(
         pageContent: "${match.pageContent}\n$contentSeparator\n${prospect.pageContent}",
         distance: min(prospect.distance, match.distance),
