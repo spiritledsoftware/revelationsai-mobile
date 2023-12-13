@@ -159,7 +159,7 @@ Future<ChatMessage> getStreamedResponse({
           final words = value.split(' ').toList(growable: false);
           for (int i = 0; i < words.length; i++) {
             await Future.delayed(
-              const Duration(milliseconds: 10),
+              const Duration(milliseconds: 20),
               () {
                 final addSpace = i != 0;
                 reply = reply.copyWith(content: "${reply.content}${addSpace ? " " : ""}${words[i]}");
@@ -167,8 +167,8 @@ Future<ChatMessage> getStreamedResponse({
                   ...chatRequest.messages,
                   reply,
                 ];
-                if (hapticFeedback) {
-                  HapticFeedback.mediumImpact();
+                if (hapticFeedback && i % 3 == 0) {
+                  HapticFeedback.lightImpact();
                 }
               },
             );

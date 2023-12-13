@@ -4,13 +4,13 @@ import 'package:go_router/go_router.dart';
 import 'package:revelationsai/src/screens/about_screen.dart';
 import 'package:revelationsai/src/screens/account/account_screen.dart';
 import 'package:revelationsai/src/screens/account/upgrade_screen.dart';
+import 'package:revelationsai/src/screens/all_sources_screen.dart';
 import 'package:revelationsai/src/screens/auth_screen.dart';
 import 'package:revelationsai/src/screens/chat/chat_screen.dart';
 import 'package:revelationsai/src/screens/devotion/devotion_screen.dart';
 import 'package:revelationsai/src/screens/home_screen.dart';
 import 'package:revelationsai/src/screens/images/all_images_screen.dart';
 import 'package:revelationsai/src/screens/images/image_screen.dart';
-import 'package:revelationsai/src/screens/all_sources_screen.dart';
 import 'package:revelationsai/src/screens/splash_screen.dart';
 import 'package:revelationsai/src/widgets/tabs_scaffold.dart';
 
@@ -36,9 +36,7 @@ List<RouteBase> routes = [
   GoRoute(
     path: "/",
     builder: (context, state) {
-      return SplashScreen(
-        redirectPath: state.uri.queryParameters["redirect"],
-      );
+      return const SplashScreen();
     },
   ),
   GoRoute(

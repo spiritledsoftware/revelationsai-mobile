@@ -8,7 +8,7 @@ Future<bool> inAppReviewLogic() async {
   try {
     final randomInt = (Random().nextDouble() * 100).ceil();
     debugPrint("Random int for in app review logic: $randomInt");
-    final showInAppReview = randomInt % 5;
+    final showInAppReview = randomInt % 3;
     debugPrint("Will show an in-app-review if this equals 0: $showInAppReview");
     if (showInAppReview == 0) {
       final inAppReview = InAppReview.instance;

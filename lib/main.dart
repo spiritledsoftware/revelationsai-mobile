@@ -14,6 +14,8 @@ import 'package:revelationsai/firebase_options.dart';
 import 'package:revelationsai/src/app.dart';
 import 'package:revelationsai/src/constants/new_relic.dart';
 
+const notificationTopics = {'daily-devo', 'daily-query'};
+
 @pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   await Firebase.initializeApp();
@@ -29,8 +31,15 @@ Future<void> main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   ).then((_) async {
     FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
-   FirebaseMessaging.instance.subscribeToTopic('daily-devo');
-     FirebaseMessaging.instance.subscribeToTopic('chat-query');
+    debugPrint('Subscribing to topics');
+    for (final topic in notificationTopics) {
+      debugPrint('Subscribing to topic $topic');
+      FirebaseMessaging.instance.subscribeToTopic(topic);
+      if (kDebugMode) {
+        debugPrint('Subscribing to test topic $topic-test');
+        FirebaseMessaging.instance.subscribeToTopic('$topic-test');
+      }
+    }
   });
 
   await MobileAds.instance.initialize();

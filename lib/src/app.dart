@@ -5,6 +5,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:newrelic_mobile/newrelic_navigation_observer.dart';
+import 'package:revelationsai/src/constants/colors.dart';
 import 'package:revelationsai/src/constants/theme.dart';
 import 'package:revelationsai/src/providers/chat/current_id.dart';
 import 'package:revelationsai/src/providers/devotion/current_id.dart';
@@ -26,99 +27,107 @@ class RAIApp extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final routerListenableNotifier = ref.watch(routerListenableProvider.notifier);
 
-    final key = useRef(GlobalKey<NavigatorState>(
+    final navigatorKey = useRef(GlobalKey<NavigatorState>(
       debugLabel: 'routerKey',
     ));
 
     final router = useMemoized(
       () => GoRouter(
         observers: [NewRelicNavigationObserver()],
-        navigatorKey: key.value,
+        navigatorKey: navigatorKey.value,
         refreshListenable: routerListenableNotifier,
         debugLogDiagnostics: true,
         initialLocation: initLocation,
         routes: routes,
         redirect: routerListenableNotifier.redirect,
         errorBuilder: (context, state) {
-          return const SplashScreen(redirectPath: "/chat");
+          return const SplashScreen();
         },
       ),
-      [routerListenableNotifier],
+      [
+        routerListenableNotifier,
+        initLocation,
+        navigatorKey.value,
+        routes,
+        routerListenableNotifier.redirect,
+      ],
     );
 
-    useOnStreamChange(
-      FirebaseMessaging.onMessageOpenedApp,
-      onData: (message) {
-        switch (message.data['task']) {
-          case 'daily-devo':
-            final id = message.data['id'] ?? '';
-            context.go('/?redirect=${Uri.encodeComponent('/devotions/$id')}');
-            break;
-          case "chat-query":
-            final query = message.data['query'] ?? '';
-            context.go('/?redirect=${Uri.encodeComponent('/chat?query=$query')}');
-            break;
-          default:
-            break;
-        }
-      },
-      onDone: () {
-        debugPrint('Done on message opened app');
-      },
-      onError: (error, stackTrace) {
-        debugPrint('Error on message opened app: $error $stackTrace');
-      },
-    );
+    final onMessage = useCallback((RemoteMessage message) {
+      debugPrint('Handling message: ${message.messageId} ${message.data.toString()}');
+      switch (message.data['task']) {
+        case 'daily-devo':
+          final id = message.data['id'] ?? '';
+          Flushbar(
+            backgroundColor: RAIColors.secondary,
+            titleColor: RAIColors.primary,
+            messageColor: RAIColors.primary,
+            title: message.notification?.title ?? '',
+            message: message.notification?.body ?? '',
+            duration: const Duration(seconds: 8),
+            isDismissible: true,
+            flushbarPosition: FlushbarPosition.TOP,
+            flushbarStyle: FlushbarStyle.GROUNDED,
+            padding: const EdgeInsets.all(30),
+            dismissDirection: FlushbarDismissDirection.VERTICAL,
+            animationDuration: const Duration(milliseconds: 200),
+            onTap: (flushbar) {
+              router.go('/?redirect=${Uri.encodeComponent('/devotions/$id')}');
+              flushbar.dismiss();
+            },
+          ).show(navigatorKey.value.currentContext!);
+          break;
+        case "chat-query":
+          final query = message.data['query'] ?? '';
+          Flushbar(
+            backgroundColor: RAIColors.secondary,
+            titleColor: RAIColors.primary,
+            messageColor: RAIColors.primary,
+            title: message.notification?.title ?? '',
+            message: message.notification?.body ?? '',
+            duration: const Duration(seconds: 8),
+            isDismissible: true,
+            flushbarPosition: FlushbarPosition.TOP,
+            flushbarStyle: FlushbarStyle.GROUNDED,
+            padding: const EdgeInsets.all(30),
+            dismissDirection: FlushbarDismissDirection.VERTICAL,
+            animationDuration: const Duration(milliseconds: 200),
+            onTap: (flushbar) {
+              router.go('/?redirect=${Uri.encodeComponent('/chat?query=$query')}');
+              flushbar.dismiss();
+            },
+          ).show(navigatorKey.value.currentContext!);
+          break;
+        default:
+          break;
+      }
+    }, [router, navigatorKey.value.currentContext]);
 
-    useOnStreamChange(
-      FirebaseMessaging.onMessage,
-      onData: (message) {
-        switch (message.data['task']) {
-          case 'daily-devo':
-            final id = message.data['id'] ?? '';
-            Flushbar(
-              title: message.notification?.title ?? '',
-              message: message.notification?.body ?? '',
-              duration: const Duration(seconds: 8),
-              isDismissible: true,
-              flushbarPosition: FlushbarPosition.TOP,
-              flushbarStyle: FlushbarStyle.GROUNDED,
-              padding: const EdgeInsets.all(30),
-              dismissDirection: FlushbarDismissDirection.VERTICAL,
-              animationDuration: const Duration(milliseconds: 200),
-              onTap: (flushbar) {
-                context.go('/?redirect=${Uri.encodeComponent('/devotions/$id')}');
-              },
-            ).show(context);
-            break;
-          case "chat-query":
-            final query = message.data['query'] ?? '';
-            Flushbar(
-              title: message.notification?.title ?? '',
-              message: message.notification?.body ?? '',
-              duration: const Duration(seconds: 8),
-              isDismissible: true,
-              flushbarPosition: FlushbarPosition.TOP,
-              flushbarStyle: FlushbarStyle.GROUNDED,
-              padding: const EdgeInsets.all(30),
-              dismissDirection: FlushbarDismissDirection.VERTICAL,
-              animationDuration: const Duration(milliseconds: 200),
-              onTap: (flushbar) {
-                context.go('/?redirect=${Uri.encodeComponent('/chat?query=$query')}');
-              },
-            ).show(context);
-            break;
-          default:
-            break;
-        }
-      },
-      onDone: () {
-        debugPrint('Done on message');
-      },
-      onError: (error, stackTrace) {
-        debugPrint('Error on message: $error $stackTrace');
-      },
-    );
+    final onMessageOpenedApp = useCallback((RemoteMessage message) {
+      debugPrint('Handling message opened app: ${message.messageId} ${message.data.toString()}');
+      switch (message.data['task']) {
+        case 'daily-devo':
+          final id = message.data['id'] ?? '';
+          router.go('/?redirect=${Uri.encodeComponent('/devotions/$id')}');
+          break;
+        case "chat-query":
+          final query = message.data['query'] ?? '';
+          router.go('/?redirect=${Uri.encodeComponent('/chat?query=$query')}');
+          break;
+        default:
+          break;
+      }
+    }, [router]);
+
+    useEffect(() {
+      debugPrint('Setting up FirebaseMessaging listeners');
+      FirebaseMessaging.onMessage.listen(onMessage);
+      FirebaseMessaging.onMessageOpenedApp.listen(onMessageOpenedApp);
+      return () {
+        FirebaseMessaging.onMessage.drain();
+        FirebaseMessaging.onMessageOpenedApp.drain();
+      };
+    }, [onMessage, onMessageOpenedApp]);
 
     return _EagerlyInitializedProviders(
       child: MaterialApp.router(
