@@ -135,7 +135,9 @@ class ChatMessages extends _$ChatMessages {
   void _persistenceLogic() {
     ref.listenSelf((prev, next) async {
       if (next.hasValue && next.value != prev?.value) {
-        await ref.chatMessages.deleteAllLocal();
+        if (chatId != null) {
+          await ref.chatMessages.deleteAllLocalByChatId(chatId!);
+        }
         await ref.chatMessages.saveMany(next.value!.expand((element) => element).toList());
       }
     });

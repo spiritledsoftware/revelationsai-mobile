@@ -289,6 +289,11 @@ class ChatMessagesRepository {
     await _isar.writeTxn(() async =>
         _isar.chatMessages.deleteAll(await getAllLocal().then((value) => value.map((e) => e.isarId).toList())));
   }
+
+  Future<void> deleteAllLocalByChatId(String chatId) async {
+    await _isar.writeTxn(() async => _isar.chatMessages
+        .deleteAll(await _getLocalByChatId(chatId).then((value) => value.map((e) => e.isarId).toList())));
+  }
 }
 
 extension ChatRepositoryRefX on Ref {
