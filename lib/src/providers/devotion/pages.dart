@@ -17,6 +17,7 @@ class DevotionsPages extends _$DevotionsPages {
   @override
   FutureOr<List<List<Devotion>>> build() async {
     _loadingLogic();
+    _persistenceLogic();
 
     return await ref.devotions.getPage(_getPaginationOptions()).then((value) {
       if (value.length < pageSize) {
@@ -85,6 +86,9 @@ class DevotionsPages extends _$DevotionsPages {
     }
     return await Future.wait(futures).then((value) async {
       state = AsyncData(value);
+      ref.devotions.deleteAllLocal().then((_) {
+        ref.devotions.saveMany(value.expand((element) => element).toList());
+      });
       return value;
     });
   }
@@ -113,6 +117,15 @@ class DevotionsPages extends _$DevotionsPages {
       } else {
         _isLoadingInitial = false;
         _isLoadingNextPage = false;
+      }
+    });
+  }
+
+  void _persistenceLogic() {
+    ref.listenSelf((prev, next) async {
+      if (next.hasValue && next.value != prev?.value) {
+        await ref.devotions.deleteAllLocal();
+        await ref.devotions.saveMany(next.value!.expand((element) => element).toList());
       }
     });
   }

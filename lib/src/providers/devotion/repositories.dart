@@ -50,16 +50,16 @@ class DevotionRepository {
 
   Future<Devotion> _fetch(String id) async {
     return await DevotionService.getDevotion(id: id).then((value) async {
-      await _save(value);
+      await save(value);
       return value;
     });
   }
 
-  Future<int> _save(Devotion chat) async {
+  Future<int> save(Devotion chat) async {
     return await _isar.writeTxn(() => _isar.devotions.put(chat));
   }
 
-  Future<List<int>> _saveMany(List<Devotion> chats) async {
+  Future<List<int>> saveMany(List<Devotion> chats) async {
     return await _isar.writeTxn(() => _isar.devotions.putAll(chats));
   }
 
@@ -69,6 +69,11 @@ class DevotionRepository {
 
   Future<void> deleteManyLocal(List<String> ids) async {
     await _isar.writeTxn(() async => await _isar.devotions.deleteAll(ids.map((e) => fastHash(e)).toList()));
+  }
+
+  Future<void> deleteAllLocal() async {
+    await _isar.writeTxn(() async => await _isar.devotions
+        .deleteAll(await getAllLocal().then((value) => value.map((e) => fastHash(e.id)).toList())));
   }
 
   Future<List<Devotion>> getAllLocal() async {
@@ -99,10 +104,11 @@ class DevotionRepository {
   }
 
   Future<List<Devotion>> getPage(PaginatedEntitiesRequestOptions options) async {
-    if ((await getAllLocal()).isEmpty) {
+    final local = await _getPageLocal(options);
+    if (local.isEmpty) {
       return await _getPageRemote(options);
     }
-    return await _getPageLocal(options);
+    return local;
   }
 
   Future<List<Devotion>> refreshPage(PaginatedEntitiesRequestOptions options) async {
@@ -119,7 +125,7 @@ class DevotionRepository {
   Future<List<Devotion>> _getPageRemote(PaginatedEntitiesRequestOptions options) async {
     return await DevotionService.getDevotions(paginationOptions: options).then((value) async {
       await deleteManyLocal(await _getPageLocal(options).then((value) => value.map((e) => e.id).toList()));
-      await _saveMany(value.entities);
+      await saveMany(value.entities);
       return value.entities;
     });
   }

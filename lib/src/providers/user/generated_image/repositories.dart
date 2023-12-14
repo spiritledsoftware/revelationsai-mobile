@@ -43,7 +43,7 @@ class UserGeneratedImageRepository {
 
   Future<UserGeneratedImage> _fetch(String id) async {
     return await UserGeneratedImageService.getUserGeneratedImage(id: id, session: _session).then((value) async {
-      await _save(value);
+      await save(value);
       return value;
     });
   }
@@ -52,13 +52,13 @@ class UserGeneratedImageRepository {
     return _fetch(id);
   }
 
-  Future<int> _save(UserGeneratedImage userGeneratedImage) async {
+  Future<int> save(UserGeneratedImage userGeneratedImage) async {
     return await _isar.writeTxn(() async {
       return await _isar.userGeneratedImages.put(userGeneratedImage);
     });
   }
 
-  Future<List<int>> _saveMany(List<UserGeneratedImage> userGeneratedImages) async {
+  Future<List<int>> saveMany(List<UserGeneratedImage> userGeneratedImages) async {
     return await _isar.writeTxn(() async {
       return await _isar.userGeneratedImages.putAll(userGeneratedImages);
     });
@@ -74,6 +74,11 @@ class UserGeneratedImageRepository {
     await _isar.writeTxn(() async => await _isar.userGeneratedImages.deleteAll(ids.map(fastHash).toList()));
   }
 
+  Future<void> deleteAllLocal() async {
+    await _isar.writeTxn(() async => await _isar.userGeneratedImages
+        .deleteAll(await getAllLocal().then((value) => value.map((e) => fastHash(e.id)).toList())));
+  }
+
   Future<void> deleteRemote(String id) async {
     return await UserGeneratedImageService.deleteUserGeneratedImage(id: id, session: _session).then((value) async {
       if (await _hasLocal(id)) {
@@ -85,7 +90,7 @@ class UserGeneratedImageRepository {
   Future<UserGeneratedImage> create(CreateUserGeneratedImageRequest request) async {
     return await UserGeneratedImageService.createUserGeneratedImage(session: _session, request: request)
         .then((value) async {
-      await _save(value);
+      await save(value);
       return value;
     });
   }
@@ -95,10 +100,11 @@ class UserGeneratedImageRepository {
   }
 
   Future<List<UserGeneratedImage>> getPage(PaginatedEntitiesRequestOptions options) async {
-    if ((await getAllLocal()).isEmpty) {
+    final local = await _getPageLocal(options);
+    if (local.isEmpty) {
       return await _getPageRemote(options);
     }
-    return await _getPageLocal(options);
+    return local;
   }
 
   Future<List<UserGeneratedImage>> refreshPage(PaginatedEntitiesRequestOptions options) async {
@@ -118,7 +124,7 @@ class UserGeneratedImageRepository {
     return await UserGeneratedImageService.getUserGeneratedImages(session: _session, paginationOptions: options)
         .then((value) async {
       await deleteManyLocal(await _getPageLocal(options).then((value) => value.map((e) => e.id).toList()));
-      await _saveMany(value.entities);
+      await saveMany(value.entities);
       return value.entities;
     });
   }

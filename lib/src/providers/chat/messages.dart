@@ -17,6 +17,7 @@ class ChatMessages extends _$ChatMessages {
   @override
   FutureOr<List<List<ChatMessage>>> build(String? chatId) async {
     _loadingLogic();
+    _persistenceLogic();
 
     if (chatId == null) {
       return [<ChatMessage>[]];
@@ -127,6 +128,15 @@ class ChatMessages extends _$ChatMessages {
       } else {
         _isLoadingInitial = false;
         _isLoadingNextPage = false;
+      }
+    });
+  }
+
+  void _persistenceLogic() {
+    ref.listenSelf((prev, next) async {
+      if (next.hasValue && next.value != prev?.value) {
+        await ref.chatMessages.deleteAllLocal();
+        await ref.chatMessages.saveMany(next.value!.expand((element) => element).toList());
       }
     });
   }

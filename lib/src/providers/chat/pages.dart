@@ -17,6 +17,7 @@ class ChatsPages extends _$ChatsPages {
   @override
   FutureOr<List<List<Chat>>> build() async {
     _loadingLogic();
+    _persistenceLogic();
 
     return await ref.chats.getPage(_getPaginationOptions()).then((value) {
       if (value.length < pageSize) {
@@ -104,6 +105,9 @@ class ChatsPages extends _$ChatsPages {
     }
     return await Future.wait(futures).then((value) async {
       state = AsyncData(value);
+      ref.chats.deleteAllLocal().then((_) {
+        ref.chats.saveMany(value.expand((element) => element).toList());
+      });
       return value;
     });
   }
@@ -128,6 +132,15 @@ class ChatsPages extends _$ChatsPages {
       } else {
         _isLoadingInitial = false;
         _isLoadingNextPage = false;
+      }
+    });
+  }
+
+  void _persistenceLogic() {
+    ref.listenSelf((prev, next) async {
+      if (next.hasValue && next.value != prev?.value) {
+        await ref.chats.deleteAllLocal();
+        await ref.chats.saveMany(next.value!.expand((element) => element).toList());
       }
     });
   }

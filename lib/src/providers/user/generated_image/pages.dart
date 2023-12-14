@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:revelationsai/src/models/pagination.dart';
 import 'package:revelationsai/src/models/user/generated_image.dart';
 import 'package:revelationsai/src/providers/user/generated_image/repositories.dart';
-import 'package:revelationsai/src/providers/user/generated_image/single.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'pages.g.dart';
@@ -96,6 +95,9 @@ class UserGeneratedImagesPages extends _$UserGeneratedImagesPages {
     }
     return await Future.wait(futures).then((value) async {
       state = AsyncData(value);
+      ref.userGeneratedImages.deleteAllLocal().then((_) {
+        ref.userGeneratedImages.saveMany(value.expand((element) => element).toList());
+      });
       return value;
     });
   }
@@ -125,23 +127,10 @@ class UserGeneratedImagesPages extends _$UserGeneratedImagesPages {
   }
 
   void _persistenceLogic() {
-    ref.listenSelf((previous, next) async {
-      if (next.hasValue && previous?.value != next.value) {
-        for (final userGeneratedImagesPage in next.value!) {
-          for (final userGeneratedImage in userGeneratedImagesPage) {
-            Future.wait([
-              ref.read(singleUserGeneratedImageProvider(userGeneratedImage.id).future),
-            ]);
-          }
-        }
-
-        final savedUserGeneratedImages = await ref.userGeneratedImages.getAllLocal();
-        final userGeneratedImagesPagesFlat = next.value!.expand((element) => element);
-        for (final savedUserGeneratedImage in savedUserGeneratedImages) {
-          if (!userGeneratedImagesPagesFlat.any((element) => element.id == savedUserGeneratedImage.id)) {
-            ref.userGeneratedImages.deleteLocal(savedUserGeneratedImage.id);
-          }
-        }
+    ref.listenSelf((prev, next) async {
+      if (next.hasValue && next.value != prev?.value) {
+        await ref.userGeneratedImages.deleteAllLocal();
+        await ref.userGeneratedImages.saveMany(next.value!.expand((element) => element).toList());
       }
     });
   }
