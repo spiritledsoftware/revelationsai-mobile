@@ -247,11 +247,8 @@ class ChatMessagesRepository {
       chatId: chatId,
     ).then((value) async {
       await deleteLocalByChatId(chatId);
-      await saveMany(value.map((e) {
-        return e.copyWith(
-          chatId: chatId,
-        );
-      }).toList());
+      value = value.map((e) => e.copyWith(chatId: chatId)).toList();
+      await saveMany(value);
       return value;
     });
   }

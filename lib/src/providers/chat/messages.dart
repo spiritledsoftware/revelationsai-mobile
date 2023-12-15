@@ -138,7 +138,11 @@ class ChatMessages extends _$ChatMessages {
         if (chatId != null) {
           await ref.chatMessages.deleteAllLocalByChatId(chatId!);
         }
-        await ref.chatMessages.saveMany(next.value!.expand((element) => element).toList());
+        await ref.chatMessages.saveMany(next.value!
+            .expand(
+              (element) => element.map((e) => e.copyWith(chatId: chatId)),
+            )
+            .toList());
       }
     });
   }
