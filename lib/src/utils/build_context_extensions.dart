@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 extension ThemeBuildContextExtension on BuildContext {
   ThemeData get theme => Theme.of(this);
@@ -24,4 +25,13 @@ extension MediaBuildContextExtension on BuildContext {
 
   bool get isPortrait => mediaQuery.orientation == Orientation.portrait;
   bool get isLandscape => mediaQuery.orientation == Orientation.landscape;
+}
+
+extension GoRouterContextX on BuildContext {
+  GoRouterState get goRouterState => GoRouterState.of(this);
+  Uri get uri => goRouterState.uri;
+  String get path => uri.path;
+  String get query => uri.query;
+  String get fragment => uri.fragment;
+  Map<String, String> get queryParameters => uri.queryParameters;
 }

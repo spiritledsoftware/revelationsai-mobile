@@ -11,28 +11,28 @@ class TabsScaffold extends HookConsumerWidget {
 
   const TabsScaffold({super.key, required this.child});
 
-  int _calculateCurrentIndex(BuildContext ctx) {
-    String path = GoRouter.of(ctx).routeInformationProvider.value.uri.path;
-    debugPrint("Current path: $path");
-
-    if (path.startsWith("/home") || path.startsWith("/account") || path.startsWith("/upgrade")) {
-      return 0;
-    } else if (path.startsWith("/chat")) {
-      return 1;
-    } else if (path.startsWith("/images")) {
-      return 2;
-    } else if (path.startsWith("/devotions")) {
-      return 3;
-    } else {
-      return 0;
+  int _calculateCurrentIndex(String path) {
+    switch (path) {
+      case String p when p.startsWith("/home"):
+      case String p when p.startsWith("/account"):
+      case String p when p.startsWith("/upgrade"):
+        return 0;
+      case String p when p.startsWith("/chat"):
+        return 1;
+      case String p when p.startsWith("/images"):
+        return 2;
+      case String p when p.startsWith("/devotions"):
+        return 3;
+      default:
+        debugPrint("Unknown path: $path");
+        return 0;
     }
   }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final currentUserPrefs = ref.watch(currentUserPreferencesProvider).requireValue;
-
-    final hapticFeedbackEnabled = currentUserPrefs.hapticFeedback;
+    final hapticFeedback =
+        ref.watch(currentUserPreferencesProvider.select((value) => value.valueOrNull?.hapticFeedback ?? true));
 
     return Scaffold(
       body: child,
@@ -43,7 +43,7 @@ class TabsScaffold extends HookConsumerWidget {
         ),
         child: BottomNavigationBar(
           type: BottomNavigationBarType.fixed,
-          enableFeedback: hapticFeedbackEnabled,
+          enableFeedback: hapticFeedback,
           elevation: 10,
           items: const [
             BottomNavigationBarItem(
@@ -66,27 +66,27 @@ class TabsScaffold extends HookConsumerWidget {
           backgroundColor: context.theme.bottomNavigationBarTheme.backgroundColor,
           selectedItemColor: context.theme.bottomNavigationBarTheme.selectedItemColor,
           unselectedItemColor: context.theme.bottomNavigationBarTheme.unselectedItemColor,
-          currentIndex: _calculateCurrentIndex(context),
+          currentIndex: _calculateCurrentIndex(context.path),
           onTap: (value) {
             switch (value) {
               case 0:
-                if (hapticFeedbackEnabled) HapticFeedback.lightImpact();
+                if (hapticFeedback) HapticFeedback.lightImpact();
                 context.go("/home");
                 break;
               case 1:
-                if (hapticFeedbackEnabled) HapticFeedback.lightImpact();
+                if (hapticFeedback) HapticFeedback.lightImpact();
                 context.go("/chat");
                 break;
               case 2:
-                if (hapticFeedbackEnabled) HapticFeedback.lightImpact();
+                if (hapticFeedback) HapticFeedback.lightImpact();
                 context.go("/images");
                 break;
               case 3:
-                if (hapticFeedbackEnabled) HapticFeedback.lightImpact();
+                if (hapticFeedback) HapticFeedback.lightImpact();
                 context.go("/devotions");
                 break;
               default:
-                if (hapticFeedbackEnabled) HapticFeedback.lightImpact();
+                if (hapticFeedback) HapticFeedback.lightImpact();
                 context.go("/home");
                 break;
             }

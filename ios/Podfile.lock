@@ -7,7 +7,7 @@ PODS:
   - firebase_core (2.24.2):
     - Firebase/CoreOnly (= 10.18.0)
     - Flutter
-  - firebase_messaging (14.7.8):
+  - firebase_messaging (14.7.9):
     - Firebase/Messaging (= 10.18.0)
     - firebase_core
     - Flutter
@@ -128,12 +128,12 @@ PODS:
     - Flutter
     - FlutterMacOS
   - PromisesObjC (2.3.1)
-  - purchases_flutter (6.5.0):
+  - purchases_flutter (6.5.1):
     - Flutter
-    - PurchasesHybridCommon (= 8.1.0)
-  - PurchasesHybridCommon (8.1.0):
-    - RevenueCat (= 4.31.1)
-  - RevenueCat (4.31.1)
+    - PurchasesHybridCommon (= 8.1.1)
+  - PurchasesHybridCommon (8.1.1):
+    - RevenueCat (= 4.31.2)
+  - RevenueCat (4.31.2)
   - share_plus (0.0.1):
     - Flutter
   - shared_preferences_foundation (0.0.1):
@@ -245,7 +245,7 @@ EXTERNAL SOURCES:
 SPEC CHECKSUMS:
   Firebase: 414ad272f8d02dfbf12662a9d43f4bba9bec2a06
   firebase_core: 0af4a2b24f62071f9bf283691c0ee41556dcb3f5
-  firebase_messaging: d4e4603f091c7b716b3f6c55550b2fa5dbf62ffd
+  firebase_messaging: 875385354f623750aa03204a028d640108bc3412
   FirebaseCore: 2322423314d92f946219c8791674d2f3345b598f
   FirebaseCoreInternal: b444828ea7cfd594fca83046b95db98a2be4f290
   FirebaseInstallations: 033d199474164db20c8350736842a94fe717b960
@@ -275,9 +275,9 @@ SPEC CHECKSUMS:
   package_info_plus: 115f4ad11e0698c8c1c5d8a689390df880f47e85
   path_provider_foundation: 29f094ae23ebbca9d3d0cec13889cd9060c0e943
   PromisesObjC: c50d2056b5253dadbd6c2bea79b0674bd5a52fa4
-  purchases_flutter: 437e9c2ba0619a8c502a4036d3e0ea78c870d429
-  PurchasesHybridCommon: 8920b878fd7b5e2b358b24c6c37592259655657a
-  RevenueCat: 3d9d19d3564c101f7f25a0a4fc10da1a9b04ddbe
+  purchases_flutter: 87bed34c0cf821834812f9e02b245f6b325c8e58
+  PurchasesHybridCommon: 2439f6e671fb4d60878a652e4377fa7e588368e6
+  RevenueCat: 63f6f4ae6916095561b90b2e1de86a492af67493
   share_plus: c3fef564749587fc939ef86ffb283ceac0baf9f5
   shared_preferences_foundation: 5b919d13b803cadd15ed2dc053125c68730e5126
   sqflite: 31f7eba61e3074736dff8807a9b41581e4f7f15a

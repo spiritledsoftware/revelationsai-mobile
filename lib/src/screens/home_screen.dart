@@ -8,7 +8,7 @@ import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:revelationsai/src/constants/colors.dart';
-import 'package:revelationsai/src/providers/devotion/single.dart';
+import 'package:revelationsai/src/providers/devotion/latest.dart';
 import 'package:revelationsai/src/providers/user/current.dart';
 import 'package:revelationsai/src/providers/user/message/most_asked.dart';
 import 'package:revelationsai/src/providers/user/preferences.dart';
@@ -31,8 +31,16 @@ class HomeScreen extends HookConsumerWidget {
     final queryTextController = useTextEditingController();
     final queryTextFocusNode = useFocusNode();
 
-    final latestDevotion = ref.watch(singleDevotionProvider(null));
+    final latestDevotion = ref.watch(latestDevotionProvider);
     final mostAskedUserMessages = ref.watch(mostAskedUserMessagesProvider(5));
+
+    useEffect(() {
+      Future.wait([
+        ref.read(latestDevotionProvider.notifier).refresh(),
+        ref.refresh(mostAskedUserMessagesProvider(5).future),
+      ]);
+      return () {};
+    }, []);
 
     return Scaffold(
       body: ColoredSafeArea(
@@ -79,7 +87,7 @@ class HomeScreen extends HookConsumerWidget {
           body: RAIRefreshIndicator(
             onRefresh: () {
               return Future.wait([
-                ref.refresh(singleDevotionProvider(null).future),
+                ref.read(latestDevotionProvider.notifier).refresh(),
                 ref.refresh(mostAskedUserMessagesProvider(5).future),
               ]);
             },
