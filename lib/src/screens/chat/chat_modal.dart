@@ -255,7 +255,6 @@ class ChatListItem extends HookConsumerWidget {
             context.go(
               '/chat/${chat.id}',
             );
-            Navigator.of(context).pop();
           },
         ),
       ),

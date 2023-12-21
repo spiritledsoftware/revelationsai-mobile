@@ -28,16 +28,6 @@ class AboutScreen extends HookWidget {
         title: const Logo(
           colorScheme: RAIColorScheme.light,
         ),
-        actions: [
-          IconButton(
-            onPressed: () {
-              context.go("/home");
-            },
-            icon: const Icon(
-              Icons.close,
-            ),
-          ),
-        ],
       ),
       body: Center(
         child: Column(
@@ -53,10 +43,9 @@ class AboutScreen extends HookWidget {
             const SizedBox(
               height: 30,
             ),
-            Wrap(
-              alignment: WrapAlignment.center,
+            Column(
               children: [
-                TextButton(
+                ElevatedButton(
                   onPressed: () {
                     showLicensePage(
                       context: context,
@@ -72,24 +61,18 @@ class AboutScreen extends HookWidget {
                     "Licenses",
                   ),
                 ),
-                const SizedBox(
-                  width: 10,
-                ),
                 Link(
                   uri: Uri.parse("https://www.iconfinder.com/"),
                   builder: (context, followLink) {
-                    return TextButton(
+                    return ElevatedButton(
                       onPressed: followLink,
                       child: const Text("Icons by IconFinder"),
                     );
                   },
                 ),
-                const SizedBox(
-                  width: 10,
-                ),
-                TextButton(
+                ElevatedButton(
                   onPressed: () {
-                    context.push("/sources");
+                    context.push("/home/sources");
                   },
                   child: const Text(
                     "All Sources",

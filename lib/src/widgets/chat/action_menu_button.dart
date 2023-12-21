@@ -8,7 +8,6 @@ import 'package:revelationsai/src/models/chat.dart';
 import 'package:revelationsai/src/providers/chat/current_id.dart';
 import 'package:revelationsai/src/providers/chat/single.dart';
 import 'package:revelationsai/src/providers/user/preferences.dart';
-import 'package:revelationsai/src/screens/chat/chat_modal.dart';
 import 'package:revelationsai/src/utils/build_context_extensions.dart';
 import 'package:revelationsai/src/widgets/chat/create_dialog.dart';
 import 'package:revelationsai/src/widgets/chat/rename_dialog.dart';
@@ -135,16 +134,10 @@ class ChatActionMenuButton extends HookConsumerWidget {
                   ),
                   PopupMenuItem(
                     onTap: () {
-                      showModalBottomSheet(
-                        elevation: 20,
-                        isScrollControlled: true,
-                        context: context,
-                        builder: (_) => const FractionallySizedBox(
-                          widthFactor: 1.0,
-                          heightFactor: 0.90,
-                          child: ChatModal(),
-                        ),
-                      );
+                      if (currentUserPreferences.hapticFeedback) {
+                        HapticFeedback.lightImpact();
+                      }
+                      context.go('${context.path}/history');
                     },
                     child: Row(
                       mainAxisSize: MainAxisSize.max,

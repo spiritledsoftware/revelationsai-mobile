@@ -29,7 +29,8 @@ extension MediaBuildContextExtension on BuildContext {
 
 extension GoRouterContextX on BuildContext {
   GoRouterState get goRouterState => GoRouterState.of(this);
-  Uri get uri => goRouterState.uri;
+  GoRouteInformationProvider get goRouteInformationProvider => GoRouter.of(this).routeInformationProvider;
+  Uri get uri => goRouteInformationProvider.value.uri;
   String get path => uri.path;
   String get query => uri.query;
   String get fragment => uri.fragment;

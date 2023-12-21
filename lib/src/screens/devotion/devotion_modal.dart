@@ -175,7 +175,6 @@ class DevotionListItem extends HookConsumerWidget {
           context.go(
             '/devotions/${devotion.id}',
           );
-          Navigator.of(context).pop();
         },
       ),
     );

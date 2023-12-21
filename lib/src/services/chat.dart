@@ -1,14 +1,9 @@
 import 'dart:convert';
 
 import 'package:http/http.dart';
-import 'package:revelationsai/src/hooks/use_chat.dart' show nanoid;
 import 'package:revelationsai/src/models/chat/message.dart';
 import 'package:revelationsai/src/models/pagination.dart';
-import 'package:revelationsai/src/models/search.dart';
-import 'package:revelationsai/src/services/ai_response.dart';
-import 'package:revelationsai/src/services/user/message.dart';
 import 'package:revelationsai/src/utils/http_helpers.dart';
-import 'package:uuid/uuid.dart';
 
 import '../constants/api.dart';
 import '../models/chat.dart';
@@ -116,89 +111,26 @@ class ChatService {
     }
   }
 
-  static Future<List<ChatMessage>> getChatMessages({
+  static Future<PaginatedEntitiesResponseData<ChatMessage>> getChatMessages({
     required String session,
     required String chatId,
     PaginatedEntitiesRequestOptions? paginationOptions,
   }) async {
-    paginationOptions ??= PaginatedEntitiesRequestOptions(page: 1, limit: 100);
-    final messagesPage = await UserMessageService.searchForUserMessages(
-      paginationOptions: paginationOptions.copyWith(
-        limit: (paginationOptions.limit / 2).ceil(),
-        orderBy: "createdAt",
-        order: OrderType.desc,
-      ),
-      query: Query(
-        AND: [
-          Query(
-            eq: ColumnValue(
-              column: 'chatId',
-              value: chatId,
-            ),
-          ),
-        ],
-      ),
-      session: session,
+    paginationOptions ??= PaginatedEntitiesRequestOptions(page: 1, limit: 10);
+    Response res = await get(
+      Uri.parse('${API.url}/chats/$chatId/messages?${paginationOptions.searchQuery}'),
+      headers: <String, String>{
+        'Authorization': 'Bearer $session',
+      },
     );
 
-    final messages = await Future.wait(messagesPage.entities.map(
-      (userMessage) async {
-        final ChatMessage message = ChatMessage(
-          id: userMessage.aiId ?? userMessage.id,
-          uuid: userMessage.id,
-          content: userMessage.text,
-          createdAt: userMessage.createdAt,
-          role: Role.user,
-        );
+    if (!res.ok) {
+      throw res.exception;
+    }
 
-        final responsesPage = await AiResponseService.searchForAiResponses(
-          paginationOptions: PaginatedEntitiesRequestOptions(
-            page: 1,
-            limit: 10,
-            orderBy: "createdAt",
-            order: OrderType.desc,
-          ),
-          query: Query(
-            AND: [
-              Query(
-                eq: ColumnValue(
-                  column: 'userMessageId',
-                  value: userMessage.id,
-                ),
-              ),
-            ],
-          ),
-          session: session,
-        );
-
-        final replies = responsesPage.entities.where((element) => !element.failed && !element.regenerated).map(
-              (aiResponse) => ChatMessage(
-                id: aiResponse.aiId ?? aiResponse.id,
-                uuid: aiResponse.id,
-                content: aiResponse.text ?? "",
-                createdAt: aiResponse.createdAt,
-                role: Role.assistant,
-              ),
-            );
-
-        return [
-          replies.lastOrNull ??
-              ChatMessage(
-                id: nanoid(),
-                uuid: const Uuid().v4(),
-                content: "Failed message",
-                createdAt: DateTime.now(),
-                role: Role.assistant,
-              ),
-          message
-        ];
-      },
-    ));
-
-    return messages
-        .expand(
-          (element) => element,
-        )
-        .toList();
+    final data = jsonDecode(utf8.decode(res.bodyBytes));
+    return PaginatedEntitiesResponseData.fromJson(data, (json) {
+      return ChatMessage.fromJson(json as Map<String, dynamic>);
+    });
   }
 }

@@ -94,7 +94,7 @@ class SettingsModal extends HookConsumerWidget {
                   ),
                   title: const Text('About RevelationsAI'),
                   onTap: () {
-                    context.go("/about");
+                    context.go("/home/about");
                   },
                 ),
                 ListTile(
@@ -154,7 +154,7 @@ class SettingsModal extends HookConsumerWidget {
                   trailing: Text(ref.watch(currentUserProvider).requireValue.name ??
                       ref.watch(currentUserProvider).requireValue.email),
                   onTap: () {
-                    context.go("/account");
+                    context.go("/home/account");
                   },
                 ),
                 ListTile(
@@ -181,7 +181,7 @@ class SettingsModal extends HookConsumerWidget {
                         ),
                       ),
                   onTap: () {
-                    context.go("/upgrade");
+                    context.go("/home/upgrade");
                   },
                 ),
                 const Divider(),

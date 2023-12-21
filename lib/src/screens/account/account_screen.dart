@@ -387,7 +387,7 @@ class AccountScreen extends HookConsumerWidget {
                           ),
                         ),
                         onPressed: () {
-                          context.go("/upgrade");
+                          context.go("/home/upgrade");
                         },
                         child: const Text("Upgrade"),
                       ),

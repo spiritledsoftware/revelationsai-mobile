@@ -47,7 +47,7 @@ class AllImagesScreen extends HookConsumerWidget {
                   IconButton(
                     visualDensity: VisualDensity.compact,
                     onPressed: () {
-                      context.go("/upgrade");
+                      context.go("/home/upgrade");
                     },
                     style: IconButton.styleFrom(
                       shape: CircleBorder(
@@ -82,7 +82,7 @@ class AllImagesScreen extends HookConsumerWidget {
                             backgroundColor: context.colorScheme.error,
                           ),
                         );
-                        context.go("/upgrade");
+                        context.go("/home/upgrade");
                         return;
                       }
                       await showDialog(
@@ -126,13 +126,16 @@ class AllImagesScreen extends HookConsumerWidget {
                       itemCount: imagesFlat.length,
                       itemBuilder: (context, index) {
                         final image = imagesFlat[index];
-                        return GestureDetector(
-                          onTap: () {
-                            context.go("/images/${image.id}");
-                          },
-                          child: RAINetworkImage(
-                            imageUrl: image.url,
-                            fallbackText: "Failed",
+                        return Hero(
+                          tag: image.id,
+                          child: GestureDetector(
+                            onTap: () {
+                              context.push("/images/${image.id}");
+                            },
+                            child: RAINetworkImage(
+                              imageUrl: image.url,
+                              fallbackText: "Failed",
+                            ),
                           ),
                         );
                       },

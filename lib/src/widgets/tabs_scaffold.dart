@@ -7,27 +7,9 @@ import 'package:revelationsai/src/providers/user/preferences.dart';
 import 'package:revelationsai/src/utils/build_context_extensions.dart';
 
 class TabsScaffold extends HookConsumerWidget {
-  final Widget child;
+  final StatefulNavigationShell navShell;
 
-  const TabsScaffold({super.key, required this.child});
-
-  int _calculateCurrentIndex(String path) {
-    switch (path) {
-      case String p when p.startsWith("/home"):
-      case String p when p.startsWith("/account"):
-      case String p when p.startsWith("/upgrade"):
-        return 0;
-      case String p when p.startsWith("/chat"):
-        return 1;
-      case String p when p.startsWith("/images"):
-        return 2;
-      case String p when p.startsWith("/devotions"):
-        return 3;
-      default:
-        debugPrint("Unknown path: $path");
-        return 0;
-    }
-  }
+  const TabsScaffold({super.key, required this.navShell});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -35,7 +17,7 @@ class TabsScaffold extends HookConsumerWidget {
         ref.watch(currentUserPreferencesProvider.select((value) => value.valueOrNull?.hapticFeedback ?? true));
 
     return Scaffold(
-      body: child,
+      body: navShell,
       bottomNavigationBar: Theme(
         data: ThemeData(
           splashColor: Colors.transparent,
@@ -66,33 +48,22 @@ class TabsScaffold extends HookConsumerWidget {
           backgroundColor: context.theme.bottomNavigationBarTheme.backgroundColor,
           selectedItemColor: context.theme.bottomNavigationBarTheme.selectedItemColor,
           unselectedItemColor: context.theme.bottomNavigationBarTheme.unselectedItemColor,
-          currentIndex: _calculateCurrentIndex(context.path),
-          onTap: (value) {
-            switch (value) {
-              case 0:
-                if (hapticFeedback) HapticFeedback.lightImpact();
-                context.go("/home");
-                break;
-              case 1:
-                if (hapticFeedback) HapticFeedback.lightImpact();
-                context.go("/chat");
-                break;
-              case 2:
-                if (hapticFeedback) HapticFeedback.lightImpact();
-                context.go("/images");
-                break;
-              case 3:
-                if (hapticFeedback) HapticFeedback.lightImpact();
-                context.go("/devotions");
-                break;
-              default:
-                if (hapticFeedback) HapticFeedback.lightImpact();
-                context.go("/home");
-                break;
+          currentIndex: navShell.currentIndex,
+          onTap: (index) {
+            if (hapticFeedback) {
+              HapticFeedback.lightImpact();
             }
+            _goBranch(index);
           },
         ),
       ),
+    );
+  }
+
+  void _goBranch(int index) {
+    navShell.goBranch(
+      index,
+      initialLocation: index == navShell.currentIndex,
     );
   }
 }

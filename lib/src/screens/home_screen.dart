@@ -12,7 +12,6 @@ import 'package:revelationsai/src/providers/devotion/latest.dart';
 import 'package:revelationsai/src/providers/user/current.dart';
 import 'package:revelationsai/src/providers/user/message/most_asked.dart';
 import 'package:revelationsai/src/providers/user/preferences.dart';
-import 'package:revelationsai/src/screens/account/settings_modal.dart';
 import 'package:revelationsai/src/utils/build_context_extensions.dart';
 import 'package:revelationsai/src/widgets/branding/logo.dart';
 import 'package:revelationsai/src/widgets/colored_safe_area.dart';
@@ -65,16 +64,7 @@ class HomeScreen extends HookConsumerWidget {
                     if (hapticFeedbackEnabled) {
                       HapticFeedback.lightImpact();
                     }
-                    showModalBottomSheet(
-                      elevation: 20,
-                      isScrollControlled: true,
-                      context: context,
-                      builder: (_) => const FractionallySizedBox(
-                        heightFactor: 0.90,
-                        widthFactor: 1,
-                        child: SettingsModal(),
-                      ),
-                    );
+                    context.go("/home/settings");
                   },
                   icon: const Icon(
                     Icons.settings,

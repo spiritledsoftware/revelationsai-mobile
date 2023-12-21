@@ -105,7 +105,7 @@ class ChatScreen extends HookConsumerWidget {
             backgroundColor: context.colorScheme.error,
           ),
         );
-        context.go("/upgrade");
+        context.go("/home/upgrade");
         return;
       }
       scrollToEnd();
@@ -125,7 +125,7 @@ class ChatScreen extends HookConsumerWidget {
             backgroundColor: context.colorScheme.error,
           ),
         );
-        context.go("/upgrade");
+        context.go("/home/upgrade");
         return;
       }
       scrollToEnd();
@@ -336,61 +336,64 @@ class ChatScreen extends HookConsumerWidget {
             : Stack(
                 children: [
                   Positioned.fill(
-                    child: ListView.builder(
+                    child: Scrollbar(
                       controller: scrollController,
-                      physics: const AlwaysScrollableScrollPhysics(
-                        parent: BouncingScrollPhysics(
-                          parent: RangeMaintainingScrollPhysics(),
+                      child: ListView.builder(
+                        controller: scrollController,
+                        physics: const AlwaysScrollableScrollPhysics(
+                          parent: BouncingScrollPhysics(
+                            parent: RangeMaintainingScrollPhysics(),
+                          ),
                         ),
-                      ),
-                      shrinkWrap: true,
-                      reverse: true,
-                      itemCount: chatHook.messages.value.length + 2,
-                      itemBuilder: (context, index) {
-                        if (index == 0) {
-                          return const SizedBox(
-                            height: 65,
+                        shrinkWrap: true,
+                        reverse: true,
+                        itemCount: chatHook.messages.value.length + 2,
+                        itemBuilder: (context, index) {
+                          if (index == 0) {
+                            return const SizedBox(
+                              height: 65,
+                            );
+                          }
+
+                          if (index == chatHook.messages.value.length + 1) {
+                            final chatMessagesNotifier = ref.read(chatMessagesProvider(chatHook.chatId.value).notifier);
+                            if (chatMessagesNotifier.isLoadingNextPage()) {
+                              return SizedBox(
+                                height: 30,
+                                width: 30,
+                                child: Center(
+                                  child: SpinKitSpinningLines(
+                                    color: context.colorScheme.onBackground,
+                                    size: 30,
+                                  ),
+                                ),
+                              );
+                            }
+                            if (chatMessagesNotifier.hasNextPage()) {
+                              return SizedBox(
+                                height: 30,
+                                width: 30,
+                                child: Center(
+                                  child: Icon(
+                                    Icons.arrow_upward,
+                                    color: context.colorScheme.onBackground,
+                                  ),
+                                ),
+                              );
+                            }
+                            return const SizedBox();
+                          }
+
+                          final message = chatHook.messages.value[chatHook.messages.value.length - index];
+                          return Message(
+                            chatId: chatHook.chatId.value,
+                            message: message,
+                            isCurrentResponse: chatHook.currentResponseId.value == message.id,
+                            isLoading: chatHook.loading.value,
+                            isLastMessage: index == 1,
                           );
-                        }
-
-                        if (index == chatHook.messages.value.length + 1) {
-                          final chatMessagesNotifier = ref.read(chatMessagesProvider(chatHook.chatId.value).notifier);
-                          if (chatMessagesNotifier.isLoadingNextPage()) {
-                            return SizedBox(
-                              height: 30,
-                              width: 30,
-                              child: Center(
-                                child: SpinKitSpinningLines(
-                                  color: context.colorScheme.onBackground,
-                                  size: 30,
-                                ),
-                              ),
-                            );
-                          }
-                          if (chatMessagesNotifier.hasNextPage()) {
-                            return SizedBox(
-                              height: 30,
-                              width: 30,
-                              child: Center(
-                                child: Icon(
-                                  Icons.arrow_upward,
-                                  color: context.colorScheme.onBackground,
-                                ),
-                              ),
-                            );
-                          }
-                          return const SizedBox();
-                        }
-
-                        final message = chatHook.messages.value[chatHook.messages.value.length - index];
-                        return Message(
-                          chatId: chatHook.chatId.value,
-                          message: message,
-                          isCurrentResponse: chatHook.currentResponseId.value == message.id,
-                          isLoading: chatHook.loading.value,
-                          isLastMessage: index == 1,
-                        );
-                      },
+                        },
+                      ),
                     ),
                   ),
                   if (chatHook.messages.value.isEmpty && currentUserPreferences.chatSuggestions) ...[
@@ -504,7 +507,7 @@ class ChatScreen extends HookConsumerWidget {
                                               : null,
                                         ),
                                         onPressed: () {
-                                          context.go("/upgrade");
+                                          context.go("/home/upgrade");
                                         },
                                         icon: Text(
                                           currentUser.remainingQueries > 10

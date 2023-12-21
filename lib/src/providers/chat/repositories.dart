@@ -212,7 +212,7 @@ class ChatMessagesRepository {
       session: _session,
       chatId: chatId,
       paginationOptions: options,
-    ).then((value) => value.reversed.toList()).then((value) async {
+    ).then((value) => value.entities).then((value) => value.reversed.toList()).then((value) async {
       await deleteManyLocal(
           await _getPageByChatIdLocal(chatId, options).then((value) => value.map((e) => e.id).toList()));
       await saveMany(value.map((e) {
@@ -245,7 +245,7 @@ class ChatMessagesRepository {
     return await ChatService.getChatMessages(
       session: _session,
       chatId: chatId,
-    ).then((value) async {
+    ).then((value) => value.entities).then((value) async {
       await deleteLocalByChatId(chatId);
       value = value.map((e) => e.copyWith(chatId: chatId)).toList();
       await saveMany(value);

@@ -27,28 +27,42 @@ class RAIApp extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final routerListenableNotifier = ref.watch(routerListenableProvider.notifier);
 
-    final navigatorKey = useRef(GlobalKey<NavigatorState>(
-      debugLabel: 'routerKey',
-    ));
+    final rootNavigatorKey = useRef(GlobalKey<NavigatorState>());
+    final shellHomeNavigatorKey = useRef(GlobalKey<NavigatorState>());
+    final shellChatNavigatorKey = useRef(GlobalKey<NavigatorState>());
+    final shellImagesNavigatorKey = useRef(GlobalKey<NavigatorState>());
+    final shellDevotionsNavigatorKey = useRef(GlobalKey<NavigatorState>());
 
     final router = useMemoized(
       () => GoRouter(
         observers: [NewRelicNavigationObserver()],
-        navigatorKey: navigatorKey.value,
+        navigatorKey: rootNavigatorKey.value,
         refreshListenable: routerListenableNotifier,
         debugLogDiagnostics: true,
         initialLocation: initLocation,
-        routes: routes,
+        routes: getRoutes(
+          rootNavigatorKey: rootNavigatorKey.value,
+          shellHomeNavigatorKey: shellHomeNavigatorKey.value,
+          shellChatNavigatorKey: shellChatNavigatorKey.value,
+          shellImagesNavigatorKey: shellImagesNavigatorKey.value,
+          shellDevotionsNavigatorKey: shellDevotionsNavigatorKey.value,
+        ),
         redirect: routerListenableNotifier.redirect,
-        errorBuilder: (context, state) {
-          return const SplashScreen();
+        errorPageBuilder: (context, state) {
+          return const NoTransitionPage(
+            child: SplashScreen(),
+          );
         },
       ),
       [
         routerListenableNotifier,
         initLocation,
-        navigatorKey.value,
-        routes,
+        getRoutes,
+        rootNavigatorKey.value,
+        shellHomeNavigatorKey.value,
+        shellChatNavigatorKey.value,
+        shellImagesNavigatorKey.value,
+        shellDevotionsNavigatorKey.value,
         routerListenableNotifier.redirect,
       ],
     );
@@ -75,7 +89,7 @@ class RAIApp extends HookConsumerWidget {
               router.go('/?redirect=${Uri.encodeComponent('/devotions/$id')}');
               flushbar.dismiss();
             },
-          ).show(navigatorKey.value.currentContext!);
+          ).show(rootNavigatorKey.value.currentContext!);
           break;
         case "chat-query":
           final query = message.data['query'] ?? '';
@@ -96,12 +110,12 @@ class RAIApp extends HookConsumerWidget {
               router.go('/?redirect=${Uri.encodeComponent('/chat?query=$query')}');
               flushbar.dismiss();
             },
-          ).show(navigatorKey.value.currentContext!);
+          ).show(rootNavigatorKey.value.currentContext!);
           break;
         default:
           break;
       }
-    }, [router, navigatorKey.value.currentContext]);
+    }, [router, rootNavigatorKey.value]);
 
     final onMessageOpenedApp = useCallback((RemoteMessage message) {
       debugPrint('Handling message opened app: ${message.messageId} ${message.data.toString()}');

@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:revelationsai/src/constants/website.dart';
 import 'package:revelationsai/src/models/devotion.dart';
@@ -8,7 +9,6 @@ import 'package:revelationsai/src/models/devotion/reaction.dart';
 import 'package:revelationsai/src/providers/devotion/reaction.dart';
 import 'package:revelationsai/src/providers/devotion/reaction_count.dart';
 import 'package:revelationsai/src/providers/user/preferences.dart';
-import 'package:revelationsai/src/screens/devotion/devotion_modal.dart';
 import 'package:revelationsai/src/utils/build_context_extensions.dart';
 import 'package:revelationsai/src/widgets/devotion/reaction_comment_dialog.dart';
 import 'package:share_plus/share_plus.dart';
@@ -50,16 +50,7 @@ class DevotionActionMenuButton extends HookConsumerWidget {
             if (currentUserPrefs.hapticFeedback) {
               HapticFeedback.lightImpact();
             }
-            showModalBottomSheet(
-              elevation: 20,
-              isScrollControlled: true,
-              context: context,
-              builder: (_) => const FractionallySizedBox(
-                widthFactor: 1.0,
-                heightFactor: 0.90,
-                child: DevotionModal(),
-              ),
-            );
+            context.go("${context.path}/history");
           },
           child: Row(
             mainAxisSize: MainAxisSize.min,
