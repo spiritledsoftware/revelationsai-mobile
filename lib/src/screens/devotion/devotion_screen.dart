@@ -326,26 +326,35 @@ class DevotionScreen extends HookConsumerWidget {
                                         size: 15,
                                       ),
                                       title: Text(
-                                        sourceDoc.name,
-                                        maxLines: 2,
+                                        sourceDoc.hasTitle ? sourceDoc.title! : sourceDoc.name,
+                                        maxLines:
+                                            sourceDoc.hasTitle && sourceDoc.hasAuthor ? 1 : 2, // leave room for author
                                         overflow: TextOverflow.ellipsis,
                                         style: const TextStyle(
                                           fontSize: 12,
                                         ),
                                       ),
-                                      subtitle: Text(
-                                        sourceDoc.isWebpage
-                                            ? sourceDoc.hasTitle
-                                                ? sourceDoc.title!
-                                                : sourceDoc.url
-                                            : sourceDoc.isFile
-                                                ? 'Page(s): ${sourceDoc.pageNumbers?.keys.join(", ")}'
-                                                : sourceDoc.url,
-                                        overflow: TextOverflow.ellipsis,
-                                        maxLines: 2,
-                                        style: const TextStyle(
-                                          fontSize: 12,
-                                        ),
+                                      subtitle: Column(
+                                        mainAxisSize: MainAxisSize.min,
+                                        mainAxisAlignment: MainAxisAlignment.center,
+                                        crossAxisAlignment: CrossAxisAlignment.center,
+                                        children: [
+                                          if (!sourceDoc.hasTitle && sourceDoc.isWebpage) ...[
+                                            Text(
+                                              Uri.parse(
+                                                sourceDoc.url,
+                                              ).pathSegments.lastWhere((element) => element.isNotEmpty),
+                                              textAlign: TextAlign.center,
+                                              softWrap: false,
+                                              overflow: TextOverflow.ellipsis,
+                                            ),
+                                          ],
+                                          if (sourceDoc.hasTitle && sourceDoc.hasAuthor) ...[
+                                            Text(
+                                              sourceDoc.author!,
+                                            ),
+                                          ],
+                                        ],
                                       ),
                                       onTap: followLink,
                                     ),
