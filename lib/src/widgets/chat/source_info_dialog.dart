@@ -161,32 +161,30 @@ class SourceInfoPreview extends HookConsumerWidget {
                               onLoadStop: (controller, url) {
                                 if (isMounted()) loading.value = false;
                               },
-                              onLoadError: (controller, url, code, message) {
+                              onReceivedError: (controller, request, rError) {
                                 if (isMounted()) error.value = true;
                               },
-                              onLoadHttpError: (controller, url, statusCode, description) {
+                              onReceivedHttpError: (controller, request, errorResponse) {
                                 if (isMounted()) error.value = true;
                               },
                               initialUrlRequest: URLRequest(
-                                url: Uri.parse(
-                                  sourceDocument.isFile && Platform.isAndroid
-                                      ? 'https://docs.google.com/viewer?url=${sourceDocument.url}'
-                                      : sourceDocument.url,
+                                url: WebUri.uri(
+                                  Uri.parse(
+                                    sourceDocument.isFile && Platform.isAndroid
+                                        ? 'https://docs.google.com/viewer?url=${sourceDocument.url}'
+                                        : sourceDocument.url,
+                                  ),
                                 ),
                               ),
-                              initialOptions: InAppWebViewGroupOptions(
-                                crossPlatform: InAppWebViewOptions(
-                                  disableVerticalScroll: true,
-                                  disableHorizontalScroll: true,
-                                  javaScriptCanOpenWindowsAutomatically: false,
-                                  supportZoom: false,
-                                  disableContextMenu: true,
-                                  horizontalScrollBarEnabled: false,
-                                  verticalScrollBarEnabled: false,
-                                ),
-                                android: AndroidInAppWebViewOptions(
-                                  useHybridComposition: true,
-                                ),
+                              initialSettings: InAppWebViewSettings(
+                                disableVerticalScroll: true,
+                                disableHorizontalScroll: true,
+                                javaScriptCanOpenWindowsAutomatically: false,
+                                supportZoom: false,
+                                disableContextMenu: true,
+                                horizontalScrollBarEnabled: false,
+                                verticalScrollBarEnabled: false,
+                                useHybridComposition: true,
                               ),
                             ),
                           ),

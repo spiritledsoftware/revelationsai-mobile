@@ -22,6 +22,7 @@ class Devotion with _$Devotion {
     required String summary,
     String? reflection,
     String? prayer,
+    required List<String> diveDeeperQueries,
     required bool failed,
   }) = _Devotion;
 

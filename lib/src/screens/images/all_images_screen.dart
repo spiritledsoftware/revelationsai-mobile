@@ -126,16 +126,13 @@ class AllImagesScreen extends HookConsumerWidget {
                       itemCount: imagesFlat.length,
                       itemBuilder: (context, index) {
                         final image = imagesFlat[index];
-                        return Hero(
-                          tag: image.id,
-                          child: GestureDetector(
-                            onTap: () {
-                              context.push("/images/${image.id}");
-                            },
-                            child: RAINetworkImage(
-                              imageUrl: image.url,
-                              fallbackText: "Failed",
-                            ),
+                        return GestureDetector(
+                          onTap: () {
+                            context.push("/images/${image.id}");
+                          },
+                          child: RAINetworkImage(
+                            imageUrl: image.url,
+                            fallbackText: "Failed",
                           ),
                         );
                       },
