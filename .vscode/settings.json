@@ -16,6 +16,19 @@
     "upstash"
   ],
   "java.configuration.updateBuildConfiguration": "automatic",
-  "eslint.workingDirectories": [".", "packages/core", "packages/functions", "packages/website", "packages/auth-ui"],
-  "eslint.validate": ["javascript", "javascriptreact", "typescript", "typescriptreact", "svelte"]
+  "eslint.workingDirectories": [
+    ".",
+    "packages/core",
+    "packages/functions",
+    "packages/website",
+    "packages/auth-ui"
+  ],
+  "eslint.validate": [
+    "javascript",
+    "javascriptreact",
+    "typescript",
+    "typescriptreact",
+    "svelte"
+  ],
+  "java.compile.nullAnalysis.mode": "automatic"
 }

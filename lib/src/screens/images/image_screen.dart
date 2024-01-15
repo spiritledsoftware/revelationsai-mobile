@@ -120,12 +120,9 @@ class ImageScreen extends HookConsumerWidget {
                       },
                       child: Stack(
                         children: [
-                          Hero(
-                            tag: image!.id,
-                            child: RAINetworkImage(
-                              imageUrl: image.url,
-                              fallbackText: image.id,
-                            ),
+                          RAINetworkImage(
+                            imageUrl: image!.url,
+                            fallbackText: image.id,
                           ),
                           Positioned.fill(
                             child: AnimatedOpacity(

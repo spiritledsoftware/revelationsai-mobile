@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_app_badger/flutter_app_badger.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:revelationsai/src/constants/visual_density.dart';
@@ -294,6 +295,40 @@ class DevotionScreen extends HookConsumerWidget {
                                 .toList(),
                           )
                         ],
+                        if (devotion.value!.diveDeeperQueries.isNotEmpty) ...[
+                          Container(
+                            margin: const EdgeInsets.only(
+                              top: 20,
+                            ),
+                            alignment: Alignment.center,
+                            child: const Text(
+                              "Dive Deeper",
+                              style: TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ),
+                          ...devotion.value!.diveDeeperQueries.map((query) {
+                            return ListTile(
+                              onTap: () {
+                                context.go("/chat?query=${Uri.encodeQueryComponent(query)}");
+                              },
+                              leading: const Icon(
+                                CupertinoIcons.chat_bubble_fill,
+                                size: 18,
+                              ),
+                              title: Text(
+                                query,
+                                style: context.textTheme.bodyMedium,
+                              ),
+                              trailing: const Icon(
+                                CupertinoIcons.chevron_right,
+                                size: 18,
+                              ),
+                            );
+                          })
+                        ],
                         Container(
                           margin: const EdgeInsets.only(bottom: 20),
                           child: ExpansionTile(
@@ -326,26 +361,34 @@ class DevotionScreen extends HookConsumerWidget {
                                         size: 15,
                                       ),
                                       title: Text(
-                                        sourceDoc.name,
-                                        maxLines: 2,
+                                        sourceDoc.hasTitle ? sourceDoc.title! : sourceDoc.name,
+                                        maxLines:
+                                            sourceDoc.hasTitle && sourceDoc.hasAuthor ? 1 : 2, // leave room for author
                                         overflow: TextOverflow.ellipsis,
                                         style: const TextStyle(
                                           fontSize: 12,
                                         ),
                                       ),
-                                      subtitle: Text(
-                                        sourceDoc.isWebpage
-                                            ? sourceDoc.hasTitle
-                                                ? sourceDoc.title!
-                                                : sourceDoc.url
-                                            : sourceDoc.isFile
-                                                ? 'Page(s): ${sourceDoc.pageNumbers?.keys.join(", ")}'
-                                                : sourceDoc.url,
-                                        overflow: TextOverflow.ellipsis,
-                                        maxLines: 2,
-                                        style: const TextStyle(
-                                          fontSize: 12,
-                                        ),
+                                      subtitle: Column(
+                                        mainAxisSize: MainAxisSize.min,
+                                        mainAxisAlignment: MainAxisAlignment.center,
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          if (!sourceDoc.hasTitle && sourceDoc.isWebpage) ...[
+                                            Text(
+                                              Uri.parse(
+                                                sourceDoc.url,
+                                              ).pathSegments.lastWhere((element) => element.isNotEmpty),
+                                              softWrap: false,
+                                              overflow: TextOverflow.ellipsis,
+                                            ),
+                                          ],
+                                          if (sourceDoc.hasTitle && sourceDoc.hasAuthor) ...[
+                                            Text(
+                                              sourceDoc.author!,
+                                            ),
+                                          ],
+                                        ],
                                       ),
                                       onTap: followLink,
                                     ),

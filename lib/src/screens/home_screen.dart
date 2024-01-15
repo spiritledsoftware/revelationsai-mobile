@@ -13,10 +13,25 @@ import 'package:revelationsai/src/providers/user/current.dart';
 import 'package:revelationsai/src/providers/user/message/most_asked.dart';
 import 'package:revelationsai/src/providers/user/preferences.dart';
 import 'package:revelationsai/src/utils/build_context_extensions.dart';
+import 'package:revelationsai/src/utils/capitalization.dart';
 import 'package:revelationsai/src/widgets/branding/logo.dart';
 import 'package:revelationsai/src/widgets/colored_safe_area.dart';
 import 'package:revelationsai/src/widgets/gradient_text.dart';
 import 'package:revelationsai/src/widgets/refresh_indicator.dart';
+
+const greetings = {
+  "Peace be with you",
+  "Shalom",
+  "Hello",
+  "God bless you",
+  "Welcome",
+  "Grace and peace",
+  "Grace to you",
+  "Greetings",
+  "The Lord be with you",
+  "Joy in Lord to you",
+  "Pax Domini",
+};
 
 class HomeScreen extends HookConsumerWidget {
   const HomeScreen({super.key});
@@ -26,6 +41,10 @@ class HomeScreen extends HookConsumerWidget {
     final currentUser = ref.watch(currentUserProvider.select((value) => value.requireValue));
     final hapticFeedbackEnabled =
         ref.watch(currentUserPreferencesProvider.select((value) => value.value?.hapticFeedback ?? true));
+
+    final greeting = useRef(greetings.elementAt(
+      DateTime.now().millisecondsSinceEpoch % greetings.length,
+    ));
 
     final queryTextController = useTextEditingController();
     final queryTextFocusNode = useFocusNode();
@@ -84,26 +103,31 @@ class HomeScreen extends HookConsumerWidget {
             child: ListView(
               children: [
                 const SizedBox(height: 20),
-                GradientText(
-                  "Hello, ${currentUser.name ?? "friend"}",
-                  gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [
-                      if (context.brightness == Brightness.dark) ...[
-                        Colors.white,
-                        context.secondaryColor,
-                      ],
-                      if (context.brightness == Brightness.light) ...[
-                        context.primaryColor,
-                        context.secondaryColor,
-                      ],
-                    ],
+                Container(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: context.width * 0.1,
                   ),
-                  style: context.textTheme.headlineMedium?.copyWith(
-                    fontWeight: FontWeight.w900,
+                  child: GradientText(
+                    "${greeting.value},\n${currentUser.name ?? "friend"}",
+                    gradient: LinearGradient(
+                      begin: Alignment.centerLeft,
+                      end: Alignment.centerRight,
+                      colors: [
+                        if (context.brightness == Brightness.dark) ...[
+                          Colors.white,
+                          context.secondaryColor,
+                        ],
+                        if (context.brightness == Brightness.light) ...[
+                          context.primaryColor,
+                          context.secondaryColor,
+                        ],
+                      ],
+                    ),
+                    style: context.textTheme.headlineMedium?.copyWith(
+                      fontWeight: FontWeight.w900,
+                    ),
+                    textAlign: TextAlign.center,
                   ),
-                  textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 20),
                 Container(
@@ -119,7 +143,7 @@ class HomeScreen extends HookConsumerWidget {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       GradientText(
-                        "What's on your mind?",
+                        "Ask a Question",
                         gradient: LinearGradient(
                           begin: Alignment.topCenter,
                           end: Alignment.bottomCenter,
@@ -232,20 +256,100 @@ class HomeScreen extends HookConsumerWidget {
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               Text(
-                                devo.bibleReading.split(" - ")[0],
-                                style: context.textTheme.titleSmall,
-                              ),
-                              Text(
-                                DateFormat.yMd().format(devo.createdAt.toLocal()),
+                                '${devo.topic.toTitleCase()} - ${DateFormat.yMd().format(devo.createdAt.toLocal())}',
                                 style: context.textTheme.titleSmall,
                               ),
                               const SizedBox(height: 10),
                               Text(
-                                devo.bibleReading.split(" - ")[1],
-                                maxLines: 5,
+                                devo.bibleReading,
+                                maxLines: 6,
                                 overflow: TextOverflow.ellipsis,
                               ),
                             ],
+                          ),
+                        ),
+                        error: (error, stackTrace) => Center(
+                          child: Text(
+                            error.toString(),
+                            style: context.textTheme.titleMedium,
+                          ),
+                        ),
+                        loading: () => Center(
+                          child: SpinKitSpinningLines(
+                            color: context.colorScheme.primary,
+                            size: 40,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 20),
+                Container(
+                  margin: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                  ),
+                  padding: const EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(20),
+                    color: context.colorScheme.secondary.withOpacity(0.2),
+                  ),
+                  child: Column(
+                    children: [
+                      GradientText(
+                        "Dive Deeper",
+                        gradient: LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          colors: [
+                            if (context.brightness == Brightness.dark) ...[
+                              Colors.white,
+                              context.secondaryColor,
+                            ],
+                            if (context.brightness == Brightness.light) ...[
+                              context.primaryColor,
+                              context.secondaryColor,
+                            ],
+                          ],
+                        ),
+                        style: context.textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      latestDevotion.when(
+                        data: (devo) => GestureDetector(
+                          onTap: () {
+                            if (hapticFeedbackEnabled) {
+                              HapticFeedback.lightImpact();
+                            }
+                            context.go("/devotions/${devo.id}");
+                          },
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: devo.diveDeeperQueries
+                                .map(
+                                  (query) => ListTile(
+                                    onTap: () {
+                                      if (hapticFeedbackEnabled) {
+                                        HapticFeedback.lightImpact();
+                                      }
+                                      context.go("/chat?query=${Uri.encodeQueryComponent(query)}");
+                                    },
+                                    leading: const Icon(
+                                      CupertinoIcons.chat_bubble_fill,
+                                      size: 18,
+                                    ),
+                                    title: Text(
+                                      query,
+                                      style: context.textTheme.bodySmall,
+                                    ),
+                                    trailing: const Icon(
+                                      CupertinoIcons.chevron_right,
+                                      size: 18,
+                                    ),
+                                  ),
+                                )
+                                .toList(),
                           ),
                         ),
                         error: (error, stackTrace) => Center(

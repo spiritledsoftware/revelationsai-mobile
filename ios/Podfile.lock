@@ -7,7 +7,7 @@ PODS:
   - firebase_core (2.24.2):
     - Firebase/CoreOnly (= 10.18.0)
     - Flutter
-  - firebase_messaging (14.7.9):
+  - firebase_messaging (14.7.10):
     - Firebase/Messaging (= 10.18.0)
     - firebase_core
     - Flutter
@@ -34,11 +34,11 @@ PODS:
   - Flutter (1.0.0)
   - flutter_app_badger (1.3.0):
     - Flutter
-  - flutter_inappwebview (0.0.1):
+  - flutter_inappwebview_ios (0.0.1):
     - Flutter
-    - flutter_inappwebview/Core (= 0.0.1)
+    - flutter_inappwebview_ios/Core (= 0.0.1)
     - OrderedSet (~> 5.0)
-  - flutter_inappwebview/Core (0.0.1):
+  - flutter_inappwebview_ios/Core (0.0.1):
     - Flutter
     - OrderedSet (~> 5.0)
   - flutter_native_splash (0.0.1):
@@ -117,10 +117,10 @@ PODS:
     - nanopb/encode (= 2.30909.1)
   - nanopb/decode (2.30909.1)
   - nanopb/encode (2.30909.1)
-  - newrelic_mobile (1.0.5):
+  - newrelic_mobile (1.0.6):
     - Flutter
-    - NewRelicAgent (= 7.4.7)
-  - NewRelicAgent (7.4.7)
+    - NewRelicAgent (= 7.4.8)
+  - NewRelicAgent (7.4.8)
   - OrderedSet (5.0.0)
   - package_info_plus (0.4.5):
     - Flutter
@@ -128,12 +128,15 @@ PODS:
     - Flutter
     - FlutterMacOS
   - PromisesObjC (2.3.1)
-  - purchases_flutter (6.5.1):
+  - purchases_flutter (6.15.0):
     - Flutter
-    - PurchasesHybridCommon (= 8.1.1)
-  - PurchasesHybridCommon (8.1.1):
-    - RevenueCat (= 4.31.2)
-  - RevenueCat (4.31.2)
+    - PurchasesHybridCommon (= 8.10.1)
+  - PurchasesHybridCommon (8.10.1):
+    - RevenueCat (= 4.31.9)
+    - RevenueCatUI (= 4.31.9)
+  - RevenueCat (4.31.9)
+  - RevenueCatUI (4.31.9):
+    - RevenueCat (= 4.31.9)
   - share_plus (0.0.1):
     - Flutter
   - shared_preferences_foundation (0.0.1):
@@ -153,7 +156,7 @@ DEPENDENCIES:
   - firebase_messaging (from `.symlinks/plugins/firebase_messaging/ios`)
   - Flutter (from `Flutter`)
   - flutter_app_badger (from `.symlinks/plugins/flutter_app_badger/ios`)
-  - flutter_inappwebview (from `.symlinks/plugins/flutter_inappwebview/ios`)
+  - flutter_inappwebview_ios (from `.symlinks/plugins/flutter_inappwebview_ios/ios`)
   - flutter_native_splash (from `.symlinks/plugins/flutter_native_splash/ios`)
   - flutter_timezone (from `.symlinks/plugins/flutter_timezone/ios`)
   - flutter_web_auth_2 (from `.symlinks/plugins/flutter_web_auth_2/ios`)
@@ -192,6 +195,7 @@ SPEC REPOS:
     - PromisesObjC
     - PurchasesHybridCommon
     - RevenueCat
+    - RevenueCatUI
     - TOCropViewController
 
 EXTERNAL SOURCES:
@@ -203,8 +207,8 @@ EXTERNAL SOURCES:
     :path: Flutter
   flutter_app_badger:
     :path: ".symlinks/plugins/flutter_app_badger/ios"
-  flutter_inappwebview:
-    :path: ".symlinks/plugins/flutter_inappwebview/ios"
+  flutter_inappwebview_ios:
+    :path: ".symlinks/plugins/flutter_inappwebview_ios/ios"
   flutter_native_splash:
     :path: ".symlinks/plugins/flutter_native_splash/ios"
   flutter_timezone:
@@ -245,14 +249,14 @@ EXTERNAL SOURCES:
 SPEC CHECKSUMS:
   Firebase: 414ad272f8d02dfbf12662a9d43f4bba9bec2a06
   firebase_core: 0af4a2b24f62071f9bf283691c0ee41556dcb3f5
-  firebase_messaging: 875385354f623750aa03204a028d640108bc3412
+  firebase_messaging: 90e8a6db84b6e1e876cebce4f30f01dc495e7014
   FirebaseCore: 2322423314d92f946219c8791674d2f3345b598f
   FirebaseCoreInternal: b444828ea7cfd594fca83046b95db98a2be4f290
   FirebaseInstallations: 033d199474164db20c8350736842a94fe717b960
   FirebaseMessaging: 9bc34a98d2e0237e1b121915120d4d48ddcf301e
-  Flutter: f04841e97a9d0b0a8025694d0796dd46242b2854
+  Flutter: e0871f40cf51350855a761d2e70bf5af5b9b5de7
   flutter_app_badger: b87fc231847b03b92ce1412aa351842e7e97932f
-  flutter_inappwebview: 3d32228f1304635e7c028b0d4252937730bbc6cf
+  flutter_inappwebview_ios: 97215cf7d4677db55df76782dbd2930c5e1c1ea0
   flutter_native_splash: 52501b97d1c0a5f898d687f1646226c1f93c56ef
   flutter_timezone: ffb07bdad3c6276af8dada0f11978d8a1f8a20bb
   flutter_web_auth_2: 051cf9f5dc366f31b5dcc4e2952c2b954767be8a
@@ -265,25 +269,26 @@ SPEC CHECKSUMS:
   GoogleUtilities: 0759d1a57ebb953965c2dfe0ba4c82e95ccc2e34
   image_cropper: a3291c624a953049bc6a02e1f8c8ceb162a24b25
   image_gallery_saver: cb43cc43141711190510e92c460eb1655cd343cb
-  image_picker_ios: 4a8aadfbb6dc30ad5141a2ce3832af9214a705b5
+  image_picker_ios: 99dfe1854b4fa34d0364e74a78448a0151025425
   in_app_review: 318597b3a06c22bb46dc454d56828c85f444f99d
   isar_flutter_libs: b69f437aeab9c521821c3f376198c4371fa21073
   nanopb: d4d75c12cd1316f4a64e3c6963f879ecd4b5e0d5
-  newrelic_mobile: bcae0ba33903e7a43fc90aeaec3aae5ac7d2f8c6
-  NewRelicAgent: b30325c08049ed1b1ed7a77992fa8b56d7b54856
+  newrelic_mobile: 4c9362729d4fd7adc4cb72b5059c717a08dabaaf
+  NewRelicAgent: 87553984bd86ff4d0e1ae213ef4bade772c86c0a
   OrderedSet: aaeb196f7fef5a9edf55d89760da9176ad40b93c
   package_info_plus: 115f4ad11e0698c8c1c5d8a689390df880f47e85
-  path_provider_foundation: 29f094ae23ebbca9d3d0cec13889cd9060c0e943
+  path_provider_foundation: 3784922295ac71e43754bd15e0653ccfd36a147c
   PromisesObjC: c50d2056b5253dadbd6c2bea79b0674bd5a52fa4
-  purchases_flutter: 87bed34c0cf821834812f9e02b245f6b325c8e58
-  PurchasesHybridCommon: 2439f6e671fb4d60878a652e4377fa7e588368e6
-  RevenueCat: 63f6f4ae6916095561b90b2e1de86a492af67493
+  purchases_flutter: ce847b4848ccec17cadfb1a2e2a3ad1d3f681849
+  PurchasesHybridCommon: 170de77f83fd9cb570457157e92ea04c7aef8196
+  RevenueCat: aa3e439fb6282e7768609774a73c06ab87c3d9c3
+  RevenueCatUI: ef3f12dddf49d333a66a13f1d32c73ef1075ae95
   share_plus: c3fef564749587fc939ef86ffb283ceac0baf9f5
-  shared_preferences_foundation: 5b919d13b803cadd15ed2dc053125c68730e5126
+  shared_preferences_foundation: b4c3b4cddf1c21f02770737f147a3f5da9d39695
   sqflite: 31f7eba61e3074736dff8807a9b41581e4f7f15a
   TOCropViewController: edfd4f25713d56905ad1e0b9f5be3fbe0f59c863
-  url_launcher_ios: bf5ce03e0e2088bad9cc378ea97fa0ed5b49673b
-  webview_flutter_wkwebview: 2e2d318f21a5e036e2c3f26171342e95908bd60a
+  url_launcher_ios: bbd758c6e7f9fd7b5b1d4cde34d2b95fcce5e812
+  webview_flutter_wkwebview: 4f3e50f7273d31e5500066ed267e3ae4309c5ae4
 
 PODFILE CHECKSUM: 30fd037378af23deb27bda10d412293db5dad599
 
