@@ -326,30 +326,39 @@ class HomeScreen extends HookConsumerWidget {
                           },
                           child: Column(
                             mainAxisSize: MainAxisSize.min,
-                            children: devo.diveDeeperQueries
-                                .map(
-                                  (query) => ListTile(
-                                    onTap: () {
-                                      if (hapticFeedbackEnabled) {
-                                        HapticFeedback.lightImpact();
-                                      }
-                                      context.go("/chat?query=${Uri.encodeQueryComponent(query)}");
-                                    },
-                                    leading: const Icon(
-                                      CupertinoIcons.chat_bubble_fill,
-                                      size: 18,
+                            children: devo.diveDeeperQueries.isNotEmpty
+                                ? devo.diveDeeperQueries
+                                    .map(
+                                      (query) => ListTile(
+                                        onTap: () {
+                                          if (hapticFeedbackEnabled) {
+                                            HapticFeedback.lightImpact();
+                                          }
+                                          context.go("/chat?query=${Uri.encodeQueryComponent(query)}");
+                                        },
+                                        leading: const Icon(
+                                          CupertinoIcons.chat_bubble_fill,
+                                          size: 18,
+                                        ),
+                                        title: Text(
+                                          query,
+                                          style: context.textTheme.bodySmall,
+                                        ),
+                                        trailing: const Icon(
+                                          CupertinoIcons.chevron_right,
+                                          size: 18,
+                                        ),
+                                      ),
+                                    )
+                                    .toList()
+                                : [
+                                    ListTile(
+                                      title: Text(
+                                        "No dive deeper queries found for this devotion",
+                                        style: context.textTheme.bodySmall,
+                                      ),
                                     ),
-                                    title: Text(
-                                      query,
-                                      style: context.textTheme.bodySmall,
-                                    ),
-                                    trailing: const Icon(
-                                      CupertinoIcons.chevron_right,
-                                      size: 18,
-                                    ),
-                                  ),
-                                )
-                                .toList(),
+                                  ],
                           ),
                         ),
                         error: (error, stackTrace) => Center(
