@@ -14,8 +14,8 @@ class SourcesScreen extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final dataSources = ref.watch(dataSourcesPagesProvider);
-    final dataSourcesNotifier = ref.watch(dataSourcesPagesProvider.notifier);
+    final dataSources = ref.watch(dataSourcesPagesProvider());
+    final dataSourcesNotifier = ref.watch(dataSourcesPagesProvider().notifier);
 
     return Scaffold(
       body: ColoredSafeArea(
