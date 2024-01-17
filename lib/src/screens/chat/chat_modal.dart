@@ -13,6 +13,8 @@ import 'package:revelationsai/src/widgets/chat/create_dialog.dart';
 import 'package:revelationsai/src/widgets/refresh_indicator.dart';
 
 class ChatModal extends HookConsumerWidget {
+  static const _pageSize = 6;
+
   const ChatModal({super.key});
 
   @override
@@ -21,8 +23,14 @@ class ChatModal extends HookConsumerWidget {
     final searchTextController = useTextEditingController();
     final searchText = useState('');
 
-    final chatsPages = ref.watch(chatsPagesProvider(searchText.value));
-    final chatsPagesNotifier = ref.watch(chatsPagesProvider(searchText.value).notifier);
+    final chatsPages = ref.watch(chatsPagesProvider(
+      pageSize: _pageSize,
+      queryString: searchText.value,
+    ));
+    final chatsPagesNotifier = ref.watch(chatsPagesProvider(
+      pageSize: _pageSize,
+      queryString: searchText.value,
+    ).notifier);
 
     useEffect(() {
       chatsPagesNotifier.refresh();
@@ -166,7 +174,12 @@ class ChatModal extends HookConsumerWidget {
             Expanded(
               child: RAIRefreshIndicator(
                 onRefresh: () async {
-                  await ref.read(chatsPagesProvider(searchText.value).notifier).refresh();
+                  await ref
+                      .read(chatsPagesProvider(
+                        pageSize: _pageSize,
+                        queryString: searchText.value,
+                      ).notifier)
+                      .refresh();
                 },
                 child: ListView.builder(
                   physics: const AlwaysScrollableScrollPhysics(),
@@ -276,7 +289,12 @@ class ChatListItem extends HookConsumerWidget {
         );
       },
       onDismissed: (direction) {
-        ref.read(chatsPagesProvider(searchQuery).notifier).deleteChat(chat.id);
+        ref
+            .read(chatsPagesProvider(
+              pageSize: ChatModal._pageSize,
+              queryString: searchQuery,
+            ).notifier)
+            .deleteChat(chat.id);
         if (currentChatId == chat.id) {
           ref.read(currentChatIdProvider.notifier).update(null);
           context.go('/chat/history');

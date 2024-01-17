@@ -13,6 +13,8 @@ import 'package:revelationsai/src/utils/capitalization.dart';
 import 'package:revelationsai/src/widgets/refresh_indicator.dart';
 
 class DevotionModal extends HookConsumerWidget {
+  static const _pageSize = 6;
+
   const DevotionModal({super.key});
 
   @override
@@ -21,8 +23,14 @@ class DevotionModal extends HookConsumerWidget {
     final searchTextFocusNode = useFocusNode();
     final searchText = useState('');
 
-    final devotionsPages = ref.watch(devotionsPagesProvider(searchText.value));
-    final devotionsPagesNotifier = ref.watch(devotionsPagesProvider(searchText.value).notifier);
+    final devotionsPages = ref.watch(devotionsPagesProvider(
+      pageSize: _pageSize,
+      queryString: searchText.value,
+    ));
+    final devotionsPagesNotifier = ref.watch(devotionsPagesProvider(
+      pageSize: _pageSize,
+      queryString: searchText.value,
+    ).notifier);
 
     useEffect(() {
       devotionsPagesNotifier.refresh();
@@ -144,7 +152,12 @@ class DevotionModal extends HookConsumerWidget {
             Expanded(
               child: RAIRefreshIndicator(
                 onRefresh: () async {
-                  await ref.read(devotionsPagesProvider().notifier).refresh();
+                  await ref
+                      .read(devotionsPagesProvider(
+                        pageSize: _pageSize,
+                        queryString: searchText.value,
+                      ).notifier)
+                      .refresh();
                 },
                 child: ListView.builder(
                   physics: const AlwaysScrollableScrollPhysics(),

@@ -7,14 +7,14 @@ part 'pages.g.dart';
 
 @riverpod
 class DataSourcesPages extends _$DataSourcesPages {
-  static const int pageSize = 10;
-
   int _page = 1;
   bool _isLoadingInitial = true;
   bool _isLoadingNextPage = false;
 
   @override
-  FutureOr<List<List<DataSource>>> build() async {
+  FutureOr<List<List<DataSource>>> build({
+    int pageSize = 10,
+  }) async {
     _loadingLogic();
 
     return await ref.dataSources.getPage(PaginatedEntitiesRequestOptions(page: _page, limit: pageSize)).then((value) {

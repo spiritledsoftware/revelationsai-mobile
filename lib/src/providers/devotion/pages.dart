@@ -7,15 +7,15 @@ part 'pages.g.dart';
 
 @Riverpod()
 class DevotionsPages extends _$DevotionsPages {
-  static const int pageSize = 6;
-
   int _page = 1;
   bool _isLoadingInitial = true;
-  final bool _isLoading = false;
   bool _isLoadingNextPage = false;
 
   @override
-  FutureOr<List<List<Devotion>>> build([String? queryString = ""]) async {
+  FutureOr<List<List<Devotion>>> build({
+    int pageSize = 6,
+    String? queryString,
+  }) async {
     _loadingLogic();
     _persistenceLogic();
 
@@ -100,10 +100,6 @@ class DevotionsPages extends _$DevotionsPages {
 
   bool isLoadingInitial() {
     return _isLoadingInitial;
-  }
-
-  bool isLoading() {
-    return _isLoading;
   }
 
   bool isLoadingNextPage() {

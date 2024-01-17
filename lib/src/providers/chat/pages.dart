@@ -8,14 +8,15 @@ part 'pages.g.dart';
 
 @Riverpod()
 class ChatsPages extends _$ChatsPages {
-  static const int pageSize = 7;
-
   int _page = 1;
   bool _isLoadingInitial = true;
   bool _isLoadingNextPage = false;
 
   @override
-  FutureOr<List<List<Chat>>> build([String? queryString = ""]) async {
+  FutureOr<List<List<Chat>>> build({
+    int pageSize = 6,
+    String? queryString,
+  }) async {
     _loadingLogic();
     _persistenceLogic();
 

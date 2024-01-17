@@ -101,9 +101,9 @@ class ChatRepository {
   }
 
   QueryBuilder<Chat, Chat, QAfterSortBy> _queryBuilderForPageOptions(
-    PaginatedEntitiesRequestOptions options,
+    PaginatedEntitiesRequestOptions options, [
     String? queryString,
-  ) {
+  ]) {
     final chats = _isar.chats;
     if (queryString != null && queryString.isNotEmpty) {
       final filter = chats.filter().nameContains(queryString, caseSensitive: false);
@@ -151,9 +151,9 @@ class ChatRepository {
   }
 
   Future<List<Chat>> getPage(
-    PaginatedEntitiesRequestOptions options,
+    PaginatedEntitiesRequestOptions options, [
     String? queryString,
-  ) async {
+  ]) async {
     final local = await _getPageLocal(options, queryString);
     if (local.isEmpty) {
       return await _getPageRemote(options, queryString);
@@ -162,9 +162,9 @@ class ChatRepository {
   }
 
   Future<List<Chat>> refreshPage(
-    PaginatedEntitiesRequestOptions options,
+    PaginatedEntitiesRequestOptions options, [
     String? queryString,
-  ) async {
+  ]) async {
     return await _getPageRemote(
       options,
       queryString,
@@ -172,9 +172,9 @@ class ChatRepository {
   }
 
   Future<List<Chat>> _getPageLocal(
-    PaginatedEntitiesRequestOptions options,
+    PaginatedEntitiesRequestOptions options, [
     String? queryString,
-  ) async {
+  ]) async {
     return await _queryBuilderForPageOptions(
       options,
       queryString,
@@ -182,9 +182,9 @@ class ChatRepository {
   }
 
   Future<List<Chat>> _getPageRemote(
-    PaginatedEntitiesRequestOptions options,
+    PaginatedEntitiesRequestOptions options, [
     String? queryString,
-  ) async {
+  ]) async {
     search.Query? query;
     if (queryString != null && queryString.isNotEmpty) {
       query = search.Query(

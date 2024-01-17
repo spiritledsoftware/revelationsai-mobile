@@ -82,7 +82,9 @@ class DevotionRepository {
   }
 
   QueryBuilder<Devotion, Devotion, QAfterSortBy> _queryBuilderForPageOptions(
-      PaginatedEntitiesRequestOptions options, String? queryString) {
+    PaginatedEntitiesRequestOptions options, [
+    String? queryString,
+  ]) {
     final devotions = _isar.devotions;
 
     if (queryString != null && queryString.isNotEmpty) {
@@ -135,9 +137,9 @@ class DevotionRepository {
   }
 
   Future<List<Devotion>> getPage(
-    PaginatedEntitiesRequestOptions options,
+    PaginatedEntitiesRequestOptions options, [
     String? queryString,
-  ) async {
+  ]) async {
     final local = await _getPageLocal(options, queryString);
     if (local.isEmpty) {
       return await _getPageRemote(options, queryString);
@@ -146,16 +148,16 @@ class DevotionRepository {
   }
 
   Future<List<Devotion>> refreshPage(
-    PaginatedEntitiesRequestOptions options,
+    PaginatedEntitiesRequestOptions options, [
     String? queryString,
-  ) async {
+  ]) async {
     return await _getPageRemote(options, queryString);
   }
 
   Future<List<Devotion>> _getPageLocal(
-    PaginatedEntitiesRequestOptions options,
+    PaginatedEntitiesRequestOptions options, [
     String? queryString,
-  ) async {
+  ]) async {
     return await _queryBuilderForPageOptions(options, queryString)
         .offset((options.page - 1) * options.limit)
         .limit(options.limit)
@@ -163,9 +165,9 @@ class DevotionRepository {
   }
 
   Future<List<Devotion>> _getPageRemote(
-    PaginatedEntitiesRequestOptions options,
+    PaginatedEntitiesRequestOptions options, [
     String? queryString,
-  ) async {
+  ]) async {
     search.Query? query;
     if (queryString != null && queryString.isNotEmpty) {
       query = search.Query(
