@@ -108,7 +108,7 @@ class DevotionScreen extends HookConsumerWidget {
         Future(() {
           ref.read(currentDevotionIdProvider.notifier).updateId(devo.id);
         });
-        ref.read(devotionsPagesProvider.future).then((value) {
+        ref.read(devotionsPagesProvider().future).then((value) {
           if (value.first.first.id == devo.id) {
             debugPrint("DevotionScreen: useEffect: User is viewing latest devo, resetting badge count");
             FlutterAppBadger.isAppBadgeSupported().then((value) {

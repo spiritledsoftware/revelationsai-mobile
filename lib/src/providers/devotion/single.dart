@@ -11,7 +11,7 @@ class SingleDevotion extends _$SingleDevotion {
 
   @override
   FutureOr<Devotion> build(String? devotionId) async {
-    _id = devotionId ?? await ref.watch(devotionsPagesProvider.selectAsync((data) => data.first.first.id));
+    _id = devotionId ?? await ref.watch(devotionsPagesProvider().selectAsync((data) => data.first.first.id));
     return await ref.devotions.get(_id);
   }
 

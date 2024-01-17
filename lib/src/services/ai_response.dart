@@ -54,9 +54,10 @@ class AiResponseService {
 
   static Future<PaginatedEntitiesResponseData<AiResponse>> searchForAiResponses({
     PaginatedEntitiesRequestOptions? paginationOptions,
-    required Query query,
+    Query? query,
     required String session,
   }) async {
+    query ??= Query();
     paginationOptions ??= PaginatedEntitiesRequestOptions.defaults();
     Response res = await post(
       Uri.parse(

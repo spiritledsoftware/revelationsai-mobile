@@ -1,4 +1,4 @@
-class AdMob {
+final class AdMob {
   static const String testAndroidAdUnitId = 'ca-app-pub-3940256099942544/1033173712';
   static const String testIosAdUnitId = 'ca-app-pub-3940256099942544/4411468910';
 

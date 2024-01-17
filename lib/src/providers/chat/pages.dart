@@ -6,7 +6,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'pages.g.dart';
 
-@Riverpod(keepAlive: true)
+@Riverpod()
 class ChatsPages extends _$ChatsPages {
   static const int pageSize = 7;
 
@@ -15,13 +15,13 @@ class ChatsPages extends _$ChatsPages {
   bool _isLoadingNextPage = false;
 
   @override
-  FutureOr<List<List<Chat>>> build() async {
+  FutureOr<List<List<Chat>>> build([String queryString = ""]) async {
     _loadingLogic();
     _persistenceLogic();
 
-    return await ref.chats.getPage(_getPaginationOptions()).then((value) {
+    return await ref.chats.getPage(_getPaginationOptions(), queryString).then((value) {
       if (value.length < pageSize) {
-        ref.chats.refreshPage(_getPaginationOptions()).then((value) {
+        ref.chats.refreshPage(_getPaginationOptions(), queryString).then((value) {
           state = AsyncData(_insertPageIntoState(value));
         });
       }
@@ -57,6 +57,8 @@ class ChatsPages extends _$ChatsPages {
   }
 
   bool hasNextPage() {
+    debugPrint("Page length: ${state.value?.last.length}");
+    debugPrint("Has next page: ${(state.value?.last.length ?? 0) >= pageSize}");
     return (state.value?.last.length ?? 0) >= pageSize;
   }
 
@@ -96,12 +98,15 @@ class ChatsPages extends _$ChatsPages {
   Future<List<List<Chat>>> refresh() async {
     final futures = <Future<List<Chat>>>[];
     for (int i = 1; i <= _page; i++) {
-      futures.add(ref.chats.refreshPage(PaginatedEntitiesRequestOptions(
-        page: i,
-        limit: pageSize,
-        orderBy: "updatedAt",
-        order: OrderType.desc,
-      )));
+      futures.add(ref.chats.refreshPage(
+        PaginatedEntitiesRequestOptions(
+          page: i,
+          limit: pageSize,
+          orderBy: "updatedAt",
+          order: OrderType.desc,
+        ),
+        queryString,
+      ));
     }
     return await Future.wait(futures).then((value) async {
       state = AsyncData(value);

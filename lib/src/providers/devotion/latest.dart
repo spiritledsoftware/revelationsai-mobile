@@ -11,12 +11,12 @@ class LatestDevotion extends _$LatestDevotion {
 
   @override
   FutureOr<Devotion> build() async {
-    _id = await ref.watch(devotionsPagesProvider.selectAsync((data) => data.first.first.id));
+    _id = await ref.watch(devotionsPagesProvider().selectAsync((data) => data.first.first.id));
     return await ref.devotions.get(_id);
   }
 
   Future<Devotion> refresh() async {
-    final devotions = await ref.read(devotionsPagesProvider.notifier).refresh();
+    final devotions = await ref.read(devotionsPagesProvider().notifier).refresh();
     final devotion = devotions.first.first;
     state = AsyncData(devotion);
     _id = devotion.id;

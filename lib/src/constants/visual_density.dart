@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-class RAIVisualDensity {
+final class RAIVisualDensity {
   static const VisualDensity tightest = VisualDensity(
     horizontal: VisualDensity.minimumDensity,
     vertical: VisualDensity.minimumDensity,

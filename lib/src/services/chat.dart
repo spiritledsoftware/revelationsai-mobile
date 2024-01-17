@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:http/http.dart';
 import 'package:revelationsai/src/models/chat/message.dart';
 import 'package:revelationsai/src/models/pagination.dart';
+import 'package:revelationsai/src/models/search.dart';
 import 'package:revelationsai/src/utils/http_helpers.dart';
 
 import '../constants/api.dart';
@@ -20,6 +21,32 @@ class ChatService {
         'Authorization': 'Bearer $session',
         'Content-Type': 'application/json; charset=UTF-8',
       },
+    );
+
+    if (!res.ok) {
+      throw res.exception;
+    }
+
+    final data = jsonDecode(utf8.decode(res.bodyBytes));
+    return PaginatedEntitiesResponseData.fromJson(data, (json) {
+      return Chat.fromJson(json as Map<String, dynamic>);
+    });
+  }
+
+  static Future<PaginatedEntitiesResponseData<Chat>> searchForChats({
+    PaginatedEntitiesRequestOptions? paginationOptions,
+    Query? query,
+    required String session,
+  }) async {
+    query ??= Query();
+    paginationOptions ??= PaginatedEntitiesRequestOptions.defaults();
+    Response res = await post(
+      Uri.parse('${API.url}/chats/search?${paginationOptions.searchQuery}'),
+      headers: <String, String>{
+        'Authorization': 'Bearer $session',
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+      body: jsonEncode(query.toJson()),
     );
 
     if (!res.ok) {

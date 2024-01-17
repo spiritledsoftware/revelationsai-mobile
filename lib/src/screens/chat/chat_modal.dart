@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
@@ -16,13 +17,24 @@ class ChatModal extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final chatsPages = ref.watch(chatsPagesProvider);
-    final chatsPagesNotifier = ref.watch(chatsPagesProvider.notifier);
+    final searchTextFocusNode = useFocusNode();
+    final searchTextController = useTextEditingController();
+    final searchText = useState('');
+
+    final chatsPages = ref.watch(chatsPagesProvider(searchText.value));
+    final chatsPagesNotifier = ref.watch(chatsPagesProvider(searchText.value).notifier);
 
     useEffect(() {
       chatsPagesNotifier.refresh();
       return () {};
     }, []);
+
+    useEffect(() {
+      searchTextController.addListener(() {
+        searchText.value = searchTextController.text;
+      });
+      return () {};
+    }, [searchTextController]);
 
     return Container(
       decoration: BoxDecoration(
@@ -61,107 +73,146 @@ class ChatModal extends HookConsumerWidget {
                     ),
                   ),
                 ),
-                IconButton(
-                  color: context.colorScheme.onPrimary,
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                  },
-                  icon: const Icon(
-                    Icons.close,
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 10),
+                  child: Row(
+                    children: [
+                      IconButton(
+                        color: context.colorScheme.onPrimary,
+                        onPressed: () {
+                          showDialog(
+                            barrierDismissible: false,
+                            context: context,
+                            builder: (context) {
+                              return const CreateDialog();
+                            },
+                          );
+                        },
+                        icon: const Icon(
+                          CupertinoIcons.add,
+                        ),
+                      ),
+                      IconButton(
+                        color: context.colorScheme.onPrimary,
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                        },
+                        icon: const Icon(
+                          Icons.close,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ],
             ),
           ),
-          if (!chatsPagesNotifier.isLoadingInitial())
-            Container(
-              padding: const EdgeInsets.all(10),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: ElevatedButton(
-                      onPressed: () {
-                        showDialog(
-                          barrierDismissible: false,
-                          context: context,
-                          builder: (context) {
-                            return const CreateDialog();
-                          },
-                        );
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 8),
+                    child: TextField(
+                      focusNode: searchTextFocusNode,
+                      controller: searchTextController,
+                      onTapOutside: (event) {
+                        searchTextFocusNode.unfocus();
                       },
-                      child: const Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          Text('New Chat'),
-                          SizedBox(
-                            width: 10,
+                      onSubmitted: (value) {
+                        searchTextFocusNode.unfocus();
+                      },
+                      decoration: InputDecoration(
+                        hintText: 'Search',
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
+                          borderSide: BorderSide(
+                            color: context.colorScheme.onBackground.withOpacity(0.2),
                           ),
-                          Icon(Icons.add),
-                        ],
+                        ),
+                        prefixIcon: const Icon(
+                          CupertinoIcons.search,
+                          size: 18,
+                        ),
+                        suffixIcon: searchText.value.isNotEmpty
+                            ? IconButton(
+                                onPressed: () {
+                                  searchTextController.clear();
+                                },
+                                icon: const Icon(
+                                  CupertinoIcons.clear_circled_solid,
+                                  size: 18,
+                                ),
+                              )
+                            : null,
                       ),
                     ),
                   ),
-                ],
+                ),
+              ],
+            ),
+          ),
+          if (chatsPagesNotifier.isLoadingInitial() || !chatsPages.hasValue) ...[
+            Expanded(
+              child: Center(
+                child: SpinKitSpinningLines(
+                  color: context.colorScheme.onBackground,
+                  size: 32,
+                ),
+              ),
+            )
+          ] else ...[
+            Expanded(
+              child: RAIRefreshIndicator(
+                onRefresh: () async {
+                  await ref.read(chatsPagesProvider(searchText.value).notifier).refresh();
+                },
+                child: ListView.builder(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  itemCount: chatsPages.requireValue.expand((element) => element).toList().length + 1,
+                  itemBuilder: (listItemContext, index) {
+                    if (index == chatsPages.requireValue.expand((element) => element).toList().length) {
+                      return chatsPagesNotifier.hasNextPage()
+                          ? Padding(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 8,
+                              ),
+                              child: ElevatedButton(
+                                onPressed: () {
+                                  if (chatsPagesNotifier.isLoadingNextPage()) {
+                                    return;
+                                  }
+                                  chatsPagesNotifier.fetchNextPage();
+                                },
+                                child: chatsPagesNotifier.isLoadingNextPage()
+                                    ? SizedBox(
+                                        height: 20,
+                                        width: 20,
+                                        child: SpinKitSpinningLines(
+                                          color: context.secondaryColor,
+                                          size: 20,
+                                        ),
+                                      )
+                                    : const Text('Show More'),
+                              ),
+                            )
+                          : const SizedBox();
+                    }
+
+                    final chatsFlat = chatsPages.requireValue.expand((element) => element).toList();
+                    final chat = chatsFlat[index];
+                    return ChatListItem(
+                      key: ValueKey(chat.id),
+                      chat: chat,
+                      searchQuery: searchText.value,
+                    );
+                  },
+                ),
               ),
             ),
-          chatsPagesNotifier.isLoadingInitial()
-              ? Expanded(
-                  child: Center(
-                    child: SpinKitSpinningLines(
-                      color: context.colorScheme.onBackground,
-                      size: 32,
-                    ),
-                  ),
-                )
-              : Expanded(
-                  child: RAIRefreshIndicator(
-                    onRefresh: () async {
-                      await ref.read(chatsPagesProvider.notifier).refresh();
-                    },
-                    child: ListView.builder(
-                      physics: const AlwaysScrollableScrollPhysics(),
-                      itemCount: chatsPages.requireValue.expand((element) => element).toList().length + 1,
-                      itemBuilder: (listItemContext, index) {
-                        if (index == chatsPages.requireValue.expand((element) => element).toList().length) {
-                          return chatsPagesNotifier.hasNextPage()
-                              ? Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 16,
-                                    vertical: 8,
-                                  ),
-                                  child: ElevatedButton(
-                                    onPressed: () {
-                                      if (chatsPagesNotifier.isLoadingNextPage()) {
-                                        return;
-                                      }
-                                      chatsPagesNotifier.fetchNextPage();
-                                    },
-                                    child: chatsPagesNotifier.isLoadingNextPage()
-                                        ? SizedBox(
-                                            height: 20,
-                                            width: 20,
-                                            child: SpinKitSpinningLines(
-                                              color: context.secondaryColor,
-                                              size: 20,
-                                            ),
-                                          )
-                                        : const Text('Show More'),
-                                  ),
-                                )
-                              : const SizedBox();
-                        }
-
-                        final chatsFlat = chatsPages.requireValue.expand((element) => element).toList();
-                        final chat = chatsFlat[index];
-                        return ChatListItem(
-                          key: ValueKey(chat.id),
-                          chat: chat,
-                        );
-                      },
-                    ),
-                  ),
-                ),
+          ],
         ],
       ),
     );
@@ -170,8 +221,9 @@ class ChatModal extends HookConsumerWidget {
 
 class ChatListItem extends HookConsumerWidget {
   final Chat chat;
+  final String searchQuery;
 
-  const ChatListItem({super.key, required this.chat});
+  const ChatListItem({super.key, required this.chat, this.searchQuery = ''});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -224,7 +276,7 @@ class ChatListItem extends HookConsumerWidget {
         );
       },
       onDismissed: (direction) {
-        ref.read(chatsPagesProvider.notifier).deleteChat(chat.id);
+        ref.read(chatsPagesProvider(searchQuery).notifier).deleteChat(chat.id);
         if (currentChatId == chat.id) {
           ref.read(currentChatIdProvider.notifier).update(null);
           context.go('/chat');
@@ -235,6 +287,7 @@ class ChatListItem extends HookConsumerWidget {
           color: currentChatId == chat.id ? context.secondaryColor.withOpacity(0.2) : Colors.transparent,
         ),
         child: ListTile(
+          visualDensity: VisualDensity.compact,
           title: Text(
             chat.name,
             softWrap: true,
@@ -250,7 +303,6 @@ class ChatListItem extends HookConsumerWidget {
                   color: context.secondaryColor,
                 )
               : null,
-          dense: true,
           onTap: () {
             context.go(
               '/chat/${chat.id}',

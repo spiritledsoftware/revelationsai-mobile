@@ -5,9 +5,9 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'pages.g.dart';
 
-@Riverpod(keepAlive: true)
+@Riverpod()
 class DevotionsPages extends _$DevotionsPages {
-  static const int pageSize = 7;
+  static const int pageSize = 6;
 
   int _page = 1;
   bool _isLoadingInitial = true;
@@ -15,13 +15,13 @@ class DevotionsPages extends _$DevotionsPages {
   bool _isLoadingNextPage = false;
 
   @override
-  FutureOr<List<List<Devotion>>> build() async {
+  FutureOr<List<List<Devotion>>> build([String queryString = ""]) async {
     _loadingLogic();
     _persistenceLogic();
 
-    return await ref.devotions.getPage(_getPaginationOptions()).then((value) {
+    return await ref.devotions.getPage(_getPaginationOptions(), queryString).then((value) {
       if (value.length < pageSize) {
-        ref.devotions.refreshPage(_getPaginationOptions()).then((value) {
+        ref.devotions.refreshPage(_getPaginationOptions(), queryString).then((value) {
           state = AsyncData(_insertPageIntoState(value));
         });
       }
@@ -79,10 +79,15 @@ class DevotionsPages extends _$DevotionsPages {
   Future<List<List<Devotion>>> refresh() async {
     final futures = <Future<List<Devotion>>>[];
     for (int i = 1; i <= _page; i++) {
-      futures.add(ref.devotions.refreshPage(PaginatedEntitiesRequestOptions(
-        page: i,
-        limit: pageSize,
-      )));
+      futures.add(
+        ref.devotions.refreshPage(
+          PaginatedEntitiesRequestOptions(
+            page: i,
+            limit: pageSize,
+          ),
+          queryString,
+        ),
+      );
     }
     return await Future.wait(futures).then((value) async {
       state = AsyncData(value);

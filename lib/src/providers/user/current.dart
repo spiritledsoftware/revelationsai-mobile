@@ -219,7 +219,7 @@ class CurrentUser extends _$CurrentUser {
           _sharedPreferences.remove(_sharedPrefsKey);
           ref.read(currentChatIdProvider.notifier).update(null);
           ref.read(currentDevotionIdProvider.notifier).updateId(null);
-          ref.read(chatsPagesProvider.notifier).reset();
+          ref.read(chatsPagesProvider().notifier).reset();
         }
         return;
       }

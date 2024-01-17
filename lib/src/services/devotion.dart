@@ -4,6 +4,7 @@ import 'package:http/http.dart';
 import 'package:revelationsai/src/constants/api.dart';
 import 'package:revelationsai/src/models/devotion.dart';
 import 'package:revelationsai/src/models/pagination.dart';
+import 'package:revelationsai/src/models/search.dart';
 import 'package:revelationsai/src/models/source_document.dart';
 import 'package:revelationsai/src/utils/http_helpers.dart';
 
@@ -45,6 +46,30 @@ class DevotionService {
 
     final data = jsonDecode(utf8.decode(res.bodyBytes));
     return Devotion.fromJson(data);
+  }
+
+  static Future<PaginatedEntitiesResponseData<Devotion>> searchForDevotions({
+    PaginatedEntitiesRequestOptions? paginationOptions,
+    Query? query,
+  }) async {
+    query ??= Query();
+    paginationOptions ??= PaginatedEntitiesRequestOptions.defaults();
+    Response res = await post(
+      Uri.parse('${API.url}/devotions/search?${paginationOptions.searchQuery}'),
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+      body: jsonEncode(query.toJson()),
+    );
+
+    if (!res.ok) {
+      throw res.exception;
+    }
+
+    final data = jsonDecode(utf8.decode(res.bodyBytes));
+    return PaginatedEntitiesResponseData.fromJson(data, (json) {
+      return Devotion.fromJson(json as Map<String, dynamic>);
+    });
   }
 
   static Future<List<SourceDocument>> getDevotionSourceDocuments({

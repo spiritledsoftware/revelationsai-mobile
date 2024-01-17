@@ -419,10 +419,10 @@ class HomeScreen extends HookConsumerWidget {
                             final message = messages[index];
                             return ListTile(
                               onTap: () {
-                                context.go("/chat?query=$message");
+                                context.go("/chat?query=${Uri.encodeQueryComponent(message)}");
                               },
                               leading: Text(
-                                "${(index + 1).toString()}.",
+                                "#${(index + 1).toString()}",
                                 style: context.textTheme.titleMedium,
                               ),
                               title: Text(
@@ -430,8 +430,8 @@ class HomeScreen extends HookConsumerWidget {
                                 style: context.textTheme.bodyMedium,
                               ),
                               trailing: const Icon(
-                                CupertinoIcons.arrow_right,
-                                size: 15,
+                                CupertinoIcons.chevron_right,
+                                size: 18,
                               ),
                             );
                           },

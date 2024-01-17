@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:revelationsai/src/constants/colors.dart';
 
-class RAITheme {
+final class RAITheme {
   static final ThemeData light = ThemeData(
     colorScheme: ColorScheme(
       brightness: Brightness.light,

@@ -250,7 +250,7 @@ UseChatReturnObject useChat({required UseChatOptions options}) {
     (ChatRequest chatRequest) async {
       try {
         loading.value = true;
-        ChatMessage newMessage = await getStreamedResponse(
+        await getStreamedResponse(
           chatRequest: chatRequest,
           chatId: chatId,
           currentResponseId: currentResponseId,
@@ -259,7 +259,6 @@ UseChatReturnObject useChat({required UseChatOptions options}) {
           onResponse: options.onResponse,
           onFinish: options.onFinish,
         );
-        // TODO: Do something with the new message
       } on Exception catch (e) {
         debugPrint(e.toString());
         error.value = e;

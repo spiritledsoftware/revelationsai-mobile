@@ -4,6 +4,7 @@ import 'package:revelationsai/src/models/devotion.dart';
 import 'package:revelationsai/src/models/devotion/image.dart';
 import 'package:revelationsai/src/models/devotion/reaction.dart';
 import 'package:revelationsai/src/models/pagination.dart';
+import 'package:revelationsai/src/models/search.dart' as search;
 import 'package:revelationsai/src/models/source_document.dart';
 import 'package:revelationsai/src/providers/isar.dart';
 import 'package:revelationsai/src/providers/user/current.dart';
@@ -80,51 +81,115 @@ class DevotionRepository {
     return await _isar.devotions.where().findAll();
   }
 
-  QueryBuilder<Devotion, Devotion, QAfterSortBy> _queryBuilderForPageOptions(PaginatedEntitiesRequestOptions options) {
-    final where = _isar.devotions.where();
-    switch (options.orderBy) {
-      case "topic":
-        if (options.order == OrderType.desc) {
-          return where.sortByTopicDesc();
-        }
-        return where.sortByTopic();
-      case "createdAt":
-        if (options.order == OrderType.desc) {
-          return where.sortByCreatedAtDesc();
-        }
-        return where.sortByCreatedAt();
-      case "updatedAt":
-        if (options.order == OrderType.desc) {
-          return where.sortByUpdatedAtDesc();
-        }
-        return where.sortByUpdatedAt();
-      default:
-        throw Exception("You cannot order by this field: ${options.orderBy}");
+  QueryBuilder<Devotion, Devotion, QAfterSortBy> _queryBuilderForPageOptions(
+      PaginatedEntitiesRequestOptions options, String? queryString) {
+    final devotions = _isar.devotions;
+
+    if (queryString != null && queryString.isNotEmpty) {
+      final filter = devotions
+          .filter()
+          .topicContains(queryString, caseSensitive: false)
+          .or()
+          .bibleReadingContains(queryString, caseSensitive: false);
+      switch (options.orderBy) {
+        case "topic":
+          if (options.order == OrderType.desc) {
+            return filter.sortByTopicDesc();
+          }
+          return filter.sortByTopic();
+        case "createdAt":
+          if (options.order == OrderType.desc) {
+            return filter.sortByCreatedAtDesc();
+          }
+          return filter.sortByCreatedAt();
+        case "updatedAt":
+          if (options.order == OrderType.desc) {
+            return filter.sortByUpdatedAtDesc();
+          }
+          return filter.sortByUpdatedAt();
+        default:
+          throw Exception("You cannot order by this field: ${options.orderBy}");
+      }
+    } else {
+      final where = devotions.where();
+      switch (options.orderBy) {
+        case "topic":
+          if (options.order == OrderType.desc) {
+            return where.sortByTopicDesc();
+          }
+          return where.sortByTopic();
+        case "createdAt":
+          if (options.order == OrderType.desc) {
+            return where.sortByCreatedAtDesc();
+          }
+          return where.sortByCreatedAt();
+        case "updatedAt":
+          if (options.order == OrderType.desc) {
+            return where.sortByUpdatedAtDesc();
+          }
+          return where.sortByUpdatedAt();
+        default:
+          throw Exception("You cannot order by this field: ${options.orderBy}");
+      }
     }
   }
 
-  Future<List<Devotion>> getPage(PaginatedEntitiesRequestOptions options) async {
-    final local = await _getPageLocal(options);
+  Future<List<Devotion>> getPage(
+    PaginatedEntitiesRequestOptions options,
+    String? queryString,
+  ) async {
+    final local = await _getPageLocal(options, queryString);
     if (local.isEmpty) {
-      return await _getPageRemote(options);
+      return await _getPageRemote(options, queryString);
     }
     return local;
   }
 
-  Future<List<Devotion>> refreshPage(PaginatedEntitiesRequestOptions options) async {
-    return await _getPageRemote(options);
+  Future<List<Devotion>> refreshPage(
+    PaginatedEntitiesRequestOptions options,
+    String? queryString,
+  ) async {
+    return await _getPageRemote(options, queryString);
   }
 
-  Future<List<Devotion>> _getPageLocal(PaginatedEntitiesRequestOptions options) async {
-    return await _queryBuilderForPageOptions(options)
+  Future<List<Devotion>> _getPageLocal(
+    PaginatedEntitiesRequestOptions options,
+    String? queryString,
+  ) async {
+    return await _queryBuilderForPageOptions(options, queryString)
         .offset((options.page - 1) * options.limit)
         .limit(options.limit)
         .findAll();
   }
 
-  Future<List<Devotion>> _getPageRemote(PaginatedEntitiesRequestOptions options) async {
-    return await DevotionService.getDevotions(paginationOptions: options).then((value) async {
-      await deleteManyLocal(await _getPageLocal(options).then((value) => value.map((e) => e.id).toList()));
+  Future<List<Devotion>> _getPageRemote(
+    PaginatedEntitiesRequestOptions options,
+    String? queryString,
+  ) async {
+    search.Query? query;
+    if (queryString != null && queryString.isNotEmpty) {
+      query = search.Query(
+        OR: [
+          search.Query(
+            iLike: search.ColumnPlaceHolder(
+              column: "topic",
+              placeholder: "%$queryString%",
+            ),
+          ),
+          search.Query(
+            iLike: search.ColumnPlaceHolder(
+              column: "bibleReading",
+              placeholder: "%$queryString%",
+            ),
+          ),
+        ],
+      );
+    }
+    return await DevotionService.searchForDevotions(
+      paginationOptions: options,
+      query: query,
+    ).then((value) async {
+      await deleteManyLocal(await _getPageLocal(options, queryString).then((value) => value.map((e) => e.id).toList()));
       await saveMany(value.entities);
       return value.entities;
     });

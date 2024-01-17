@@ -3,6 +3,7 @@ import 'package:isar/isar.dart';
 import 'package:revelationsai/src/models/chat.dart';
 import 'package:revelationsai/src/models/chat/message.dart';
 import 'package:revelationsai/src/models/pagination.dart';
+import 'package:revelationsai/src/models/search.dart' as search;
 import 'package:revelationsai/src/providers/isar.dart';
 import 'package:revelationsai/src/providers/user/current.dart';
 import 'package:revelationsai/src/services/chat.dart';
@@ -99,51 +100,106 @@ class ChatRepository {
     return await _isar.chats.where().findAll();
   }
 
-  QueryBuilder<Chat, Chat, QAfterSortBy> _queryBuilderForPageOptions(PaginatedEntitiesRequestOptions options) {
-    final where = _isar.chats.where();
-    switch (options.orderBy) {
-      case "name":
-        if (options.order == OrderType.desc) {
-          return where.sortByNameDesc();
-        }
-        return where.sortByName();
-      case "createdAt":
-        if (options.order == OrderType.desc) {
-          return where.sortByCreatedAtDesc();
-        }
-        return where.sortByCreatedAt();
-      case "updatedAt":
-        if (options.order == OrderType.desc) {
-          return where.sortByUpdatedAtDesc();
-        }
-        return where.sortByUpdatedAt();
-      default:
-        throw Exception("You cannot order by this field: ${options.orderBy}");
+  QueryBuilder<Chat, Chat, QAfterSortBy> _queryBuilderForPageOptions(
+    PaginatedEntitiesRequestOptions options,
+    String? queryString,
+  ) {
+    final chats = _isar.chats;
+    if (queryString != null && queryString.isNotEmpty) {
+      final filter = chats.filter().nameContains(queryString, caseSensitive: false);
+      switch (options.orderBy) {
+        case "name":
+          if (options.order == OrderType.desc) {
+            return filter.sortByNameDesc();
+          }
+          return filter.sortByName();
+        case "createdAt":
+          if (options.order == OrderType.desc) {
+            return filter.sortByCreatedAtDesc();
+          }
+          return filter.sortByCreatedAt();
+        case "updatedAt":
+          if (options.order == OrderType.desc) {
+            return filter.sortByUpdatedAtDesc();
+          }
+          return filter.sortByUpdatedAt();
+        default:
+          throw Exception("You cannot order by this field: ${options.orderBy}");
+      }
+    } else {
+      final where = chats.where();
+      switch (options.orderBy) {
+        case "name":
+          if (options.order == OrderType.desc) {
+            return where.sortByNameDesc();
+          }
+          return where.sortByName();
+        case "createdAt":
+          if (options.order == OrderType.desc) {
+            return where.sortByCreatedAtDesc();
+          }
+          return where.sortByCreatedAt();
+        case "updatedAt":
+          if (options.order == OrderType.desc) {
+            return where.sortByUpdatedAtDesc();
+          }
+          return where.sortByUpdatedAt();
+        default:
+          throw Exception("You cannot order by this field: ${options.orderBy}");
+      }
     }
   }
 
-  Future<List<Chat>> getPage(PaginatedEntitiesRequestOptions options) async {
-    final local = await _getPageLocal(options);
+  Future<List<Chat>> getPage(
+    PaginatedEntitiesRequestOptions options,
+    String? queryString,
+  ) async {
+    final local = await _getPageLocal(options, queryString);
     if (local.isEmpty) {
-      return await _getPageRemote(options);
+      return await _getPageRemote(options, queryString);
     }
     return local;
   }
 
-  Future<List<Chat>> refreshPage(PaginatedEntitiesRequestOptions options) async {
-    return await _getPageRemote(options);
+  Future<List<Chat>> refreshPage(
+    PaginatedEntitiesRequestOptions options,
+    String? queryString,
+  ) async {
+    return await _getPageRemote(
+      options,
+      queryString,
+    );
   }
 
-  Future<List<Chat>> _getPageLocal(PaginatedEntitiesRequestOptions options) async {
-    return await _queryBuilderForPageOptions(options)
-        .offset((options.page - 1) * options.limit)
-        .limit(options.limit)
-        .findAll();
+  Future<List<Chat>> _getPageLocal(
+    PaginatedEntitiesRequestOptions options,
+    String? queryString,
+  ) async {
+    return await _queryBuilderForPageOptions(
+      options,
+      queryString,
+    ).offset((options.page - 1) * options.limit).limit(options.limit).findAll();
   }
 
-  Future<List<Chat>> _getPageRemote(PaginatedEntitiesRequestOptions options) async {
-    return await ChatService.getChats(session: _session, paginationOptions: options).then((value) async {
-      await deleteManyLocal(await _getPageLocal(options).then((value) => value.map((e) => e.id).toList()));
+  Future<List<Chat>> _getPageRemote(
+    PaginatedEntitiesRequestOptions options,
+    String? queryString,
+  ) async {
+    search.Query? query;
+    if (queryString != null && queryString.isNotEmpty) {
+      query = search.Query(
+        iLike: search.ColumnPlaceHolder(
+          column: "name",
+          placeholder: "%$queryString%",
+        ),
+      );
+    }
+    return await ChatService.searchForChats(session: _session, query: query, paginationOptions: options)
+        .then((value) async {
+      await deleteManyLocal(await _getPageLocal(
+        options,
+        queryString,
+      ).then((value) => value.map((e) => e.id).toList()));
       await saveMany(value.entities);
       return value.entities;
     });
