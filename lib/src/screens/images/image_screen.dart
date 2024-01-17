@@ -72,7 +72,7 @@ class ImageScreen extends HookConsumerWidget {
                       ),
                       TextButton(
                         onPressed: () {
-                          context.pop();
+                          Navigator.of(context).pop();
                           ref.read(userGeneratedImagesPagesProvider.notifier).deleteImage(id);
                           context.go("/images");
                         },

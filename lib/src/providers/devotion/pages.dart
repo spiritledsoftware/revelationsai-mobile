@@ -15,7 +15,7 @@ class DevotionsPages extends _$DevotionsPages {
   bool _isLoadingNextPage = false;
 
   @override
-  FutureOr<List<List<Devotion>>> build([String queryString = ""]) async {
+  FutureOr<List<List<Devotion>>> build([String? queryString = ""]) async {
     _loadingLogic();
     _persistenceLogic();
 

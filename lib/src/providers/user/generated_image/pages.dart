@@ -83,6 +83,8 @@ class UserGeneratedImagesPages extends _$UserGeneratedImagesPages {
       debugPrint("Failed to delete userGeneratedImage: $error");
       state = previousState;
       throw error;
+    }).whenComplete(() {
+      refresh();
     });
   }
 

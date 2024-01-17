@@ -15,7 +15,7 @@ class ChatsPages extends _$ChatsPages {
   bool _isLoadingNextPage = false;
 
   @override
-  FutureOr<List<List<Chat>>> build([String queryString = ""]) async {
+  FutureOr<List<List<Chat>>> build([String? queryString = ""]) async {
     _loadingLogic();
     _persistenceLogic();
 
@@ -92,6 +92,8 @@ class ChatsPages extends _$ChatsPages {
       debugPrint("Failed to delete chat: $error");
       state = previousState;
       throw error;
+    }).whenComplete(() {
+      refresh();
     });
   }
 

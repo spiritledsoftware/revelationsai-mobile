@@ -221,9 +221,9 @@ class ChatModal extends HookConsumerWidget {
 
 class ChatListItem extends HookConsumerWidget {
   final Chat chat;
-  final String searchQuery;
+  final String? searchQuery;
 
-  const ChatListItem({super.key, required this.chat, this.searchQuery = ''});
+  const ChatListItem({super.key, required this.chat, this.searchQuery});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -279,7 +279,7 @@ class ChatListItem extends HookConsumerWidget {
         ref.read(chatsPagesProvider(searchQuery).notifier).deleteChat(chat.id);
         if (currentChatId == chat.id) {
           ref.read(currentChatIdProvider.notifier).update(null);
-          context.go('/chat');
+          context.go('/chat/history');
         }
       },
       child: Container(

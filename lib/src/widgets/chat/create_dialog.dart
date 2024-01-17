@@ -79,9 +79,9 @@ class CreateDialog extends HookConsumerWidget {
             )
                 .then(
               (chat) {
-                ref.read(chatsPagesProvider().notifier).refresh();
+                Navigator.of(context).pop();
                 context.go('/chat/${chat.id}');
-                context.pop();
+                ref.read(chatsPagesProvider().notifier).refresh();
               },
             );
             await createFuture.value;
