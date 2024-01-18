@@ -15,7 +15,7 @@ class ChatMessageMarkdown extends HookWidget {
     super.key,
     required this.data,
     this.selectable = false,
-    this.followLinks = false,
+    this.followLinks = true,
     this.padding = const EdgeInsets.all(0),
   });
 

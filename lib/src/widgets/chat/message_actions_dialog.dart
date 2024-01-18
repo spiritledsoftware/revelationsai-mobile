@@ -68,7 +68,6 @@ class MessageActionsDialog extends HookConsumerWidget {
                     vertical: 8,
                     horizontal: 15,
                   ),
-                  followLinks: true,
                   selectable: true,
                   data: message.content.trim(),
                 ),

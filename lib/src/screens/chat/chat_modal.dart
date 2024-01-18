@@ -131,8 +131,16 @@ class ChatModal extends HookConsumerWidget {
                       onSubmitted: (value) {
                         searchTextFocusNode.unfocus();
                       },
+                      textInputAction: TextInputAction.search,
+                      keyboardType: TextInputType.text,
                       decoration: InputDecoration(
                         hintText: 'Search',
+                        filled: true,
+                        fillColor: context.colorScheme.onBackground.withOpacity(0.1),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
+                          borderSide: BorderSide.none,
+                        ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(10),
                           borderSide: BorderSide(

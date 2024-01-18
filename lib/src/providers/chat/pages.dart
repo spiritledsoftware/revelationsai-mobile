@@ -58,8 +58,6 @@ class ChatsPages extends _$ChatsPages {
   }
 
   bool hasNextPage() {
-    debugPrint("Page length: ${state.value?.last.length}");
-    debugPrint("Has next page: ${(state.value?.last.length ?? 0) >= pageSize}");
     return (state.value?.last.length ?? 0) >= pageSize;
   }
 

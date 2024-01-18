@@ -14,10 +14,18 @@ class DataSourcesPages extends _$DataSourcesPages {
   @override
   FutureOr<List<List<DataSource>>> build({
     int pageSize = 10,
+    String? queryString,
   }) async {
     _loadingLogic();
 
-    return await ref.dataSources.getPage(PaginatedEntitiesRequestOptions(page: _page, limit: pageSize)).then((value) {
+    return await ref.dataSources
+        .getPage(
+            PaginatedEntitiesRequestOptions(
+              page: _page,
+              limit: pageSize,
+            ),
+            queryString)
+        .then((value) {
       return _insertPageIntoState(value);
     });
   }

@@ -1,6 +1,7 @@
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:revelationsai/src/models/data_source.dart';
 import 'package:revelationsai/src/models/pagination.dart';
+import 'package:revelationsai/src/models/search.dart' as search;
 import 'package:revelationsai/src/providers/user/current.dart';
 import 'package:revelationsai/src/services/data_source.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -22,8 +23,24 @@ class DataSourceRepository {
     return await DataSourceService.getDataSource(id, session: _session);
   }
 
-  Future<List<DataSource>> getPage(PaginatedEntitiesRequestOptions options) async {
-    return await DataSourceService.getDataSources(options: options, session: _session).then((value) {
+  Future<List<DataSource>> getPage(
+    PaginatedEntitiesRequestOptions options, [
+    String? queryString,
+  ]) async {
+    search.Query? query;
+    if (queryString != null && queryString.isNotEmpty) {
+      query = search.Query(
+        iLike: search.ColumnPlaceHolder(
+          column: "name",
+          placeholder: "%$queryString%",
+        ),
+      );
+    }
+    return await DataSourceService.searchForDataSources(
+      paginationOptions: options,
+      session: _session,
+      query: query,
+    ).then((value) {
       return value.entities;
     });
   }

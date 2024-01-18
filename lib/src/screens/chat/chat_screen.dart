@@ -351,7 +351,7 @@ class ChatScreen extends HookConsumerWidget {
                         itemBuilder: (context, index) {
                           if (index == 0) {
                             return const SizedBox(
-                              height: 65,
+                              height: 70,
                             );
                           }
 
@@ -446,109 +446,119 @@ class ChatScreen extends HookConsumerWidget {
                             ),
                           ),
                         ],
-                        Container(
-                          padding: const EdgeInsets.only(
-                            bottom: 10,
-                          ),
-                          child: Column(
-                            children: [
-                              Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 10),
-                                child: Opacity(
-                                  opacity: 0.95,
-                                  child: TextField(
-                                    minLines: 1,
-                                    maxLines: 4,
-                                    controller: chatHook.inputController,
-                                    focusNode: chatHook.inputFocusNode,
-                                    onSubmitted: (_) {
-                                      submit();
-                                    },
-                                    onTapOutside: (event) {
-                                      chatHook.inputFocusNode.unfocus();
-                                    },
-                                    autocorrect: true,
-                                    textCapitalization: TextCapitalization.sentences,
-                                    keyboardType: TextInputType.multiline,
-                                    decoration: InputDecoration(
-                                      contentPadding: const EdgeInsets.symmetric(
-                                        vertical: 10,
-                                        horizontal: 25,
-                                      ),
-                                      focusedBorder: OutlineInputBorder(
-                                        borderSide: BorderSide(
-                                          color: context.colorScheme.onBackground.withOpacity(0.2),
-                                        ),
-                                        borderRadius: BorderRadius.circular(40),
-                                      ),
-                                      enabledBorder: OutlineInputBorder(
-                                        borderSide: BorderSide(
-                                          color: context.colorScheme.onBackground.withOpacity(0.2),
-                                        ),
-                                        borderRadius: BorderRadius.circular(40),
-                                      ),
-                                      filled: true,
-                                      fillColor: context.colorScheme.background,
-                                      hintText: "Type a message",
-                                      prefixIconConstraints: const BoxConstraints(
-                                        minWidth: 0,
-                                        minHeight: 0,
-                                      ),
-                                      prefixIcon: IconButton(
-                                        visualDensity: VisualDensity.compact,
-                                        style: IconButton.styleFrom(
-                                          shape: CircleBorder(
-                                            side: BorderSide(
-                                              color: context.colorScheme.onBackground.withOpacity(0.2),
-                                            ),
-                                          ),
-                                          backgroundColor: currentUser.remainingQueries <= 5
-                                              ? context.colorScheme.error.withOpacity(0.2)
-                                              : null,
-                                        ),
-                                        onPressed: () {
-                                          context.go("/home/upgrade");
-                                        },
-                                        icon: Text(
-                                          currentUser.remainingQueries > 10
-                                              ? ">10"
-                                              : currentUser.remainingQueries.toString(),
-                                        ),
-                                      ),
-                                      suffixIcon: chatHook.loading.value
-                                          ? SizedBox(
-                                              width: 30,
-                                              height: 30,
-                                              child: SpinKitWave(
-                                                color: context.colorScheme.onBackground,
-                                                size: 15,
-                                              ),
-                                            )
-                                          : input.value.isEmpty
-                                              ? chatHook.messages.value.isNotEmpty
-                                                  ? IconButton(
-                                                      visualDensity: VisualDensity.compact,
-                                                      onPressed: reload,
-                                                      icon: const FaIcon(
-                                                        FontAwesomeIcons.arrowRotateRight,
-                                                        size: 18,
-                                                      ),
-                                                    )
-                                                  : const SizedBox()
-                                              : IconButton(
-                                                  visualDensity: VisualDensity.compact,
-                                                  onPressed: submit,
-                                                  icon: const Icon(
-                                                    FontAwesomeIcons.arrowUp,
-                                                    size: 18,
-                                                  ),
-                                                ),
+                        Column(
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 10,
+                              ),
+                              child: Opacity(
+                                opacity: 0.95,
+                                child: TextField(
+                                  minLines: 1,
+                                  maxLines: 4,
+                                  controller: chatHook.inputController,
+                                  focusNode: chatHook.inputFocusNode,
+                                  onSubmitted: (_) {
+                                    submit();
+                                  },
+                                  onTapOutside: (event) {
+                                    chatHook.inputFocusNode.unfocus();
+                                  },
+                                  autocorrect: true,
+                                  textCapitalization: TextCapitalization.sentences,
+                                  keyboardType: TextInputType.multiline,
+                                  decoration: InputDecoration(
+                                    contentPadding: const EdgeInsets.symmetric(
+                                      vertical: 10,
+                                      horizontal: 25,
                                     ),
+                                    focusedBorder: OutlineInputBorder(
+                                      borderSide: BorderSide(
+                                        color: context.colorScheme.onBackground.withOpacity(0.2),
+                                      ),
+                                      borderRadius: BorderRadius.circular(40),
+                                    ),
+                                    enabledBorder: OutlineInputBorder(
+                                      borderSide: BorderSide(
+                                        color: context.colorScheme.onBackground.withOpacity(0.2),
+                                      ),
+                                      borderRadius: BorderRadius.circular(40),
+                                    ),
+                                    filled: true,
+                                    fillColor: context.colorScheme.background,
+                                    hintText: "Type a message",
+                                    prefixIconConstraints: const BoxConstraints(
+                                      minWidth: 0,
+                                      minHeight: 0,
+                                    ),
+                                    prefixIcon: IconButton(
+                                      visualDensity: VisualDensity.compact,
+                                      style: IconButton.styleFrom(
+                                        shape: CircleBorder(
+                                          side: BorderSide(
+                                            color: context.colorScheme.onBackground.withOpacity(0.2),
+                                          ),
+                                        ),
+                                        backgroundColor: currentUser.remainingQueries <= 5
+                                            ? context.colorScheme.error.withOpacity(0.2)
+                                            : null,
+                                      ),
+                                      onPressed: () {
+                                        context.go("/home/upgrade");
+                                      },
+                                      icon: Text(
+                                        currentUser.remainingQueries > 10
+                                            ? ">10"
+                                            : currentUser.remainingQueries.toString(),
+                                      ),
+                                    ),
+                                    suffixIcon: chatHook.loading.value
+                                        ? SizedBox(
+                                            width: 30,
+                                            height: 30,
+                                            child: SpinKitWave(
+                                              color: context.colorScheme.onBackground,
+                                              size: 15,
+                                            ),
+                                          )
+                                        : input.value.isEmpty
+                                            ? chatHook.messages.value.isNotEmpty
+                                                ? IconButton(
+                                                    visualDensity: VisualDensity.compact,
+                                                    onPressed: reload,
+                                                    icon: const FaIcon(
+                                                      FontAwesomeIcons.arrowRotateRight,
+                                                      size: 18,
+                                                    ),
+                                                  )
+                                                : const SizedBox()
+                                            : IconButton(
+                                                visualDensity: VisualDensity.compact,
+                                                onPressed: submit,
+                                                icon: const Icon(
+                                                  FontAwesomeIcons.arrowUp,
+                                                  size: 18,
+                                                ),
+                                              ),
                                   ),
                                 ),
                               ),
-                            ],
-                          ),
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.symmetric(
+                                vertical: 5,
+                              ),
+                              child: Text(
+                                "RevelationsAI can make mistakes. Validate all answers against the Bible.",
+                                style: context.textTheme.bodySmall?.copyWith(
+                                  fontSize: 8,
+                                  color: Colors.grey.shade400,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                            ),
+                          ],
                         ),
                       ],
                     ),

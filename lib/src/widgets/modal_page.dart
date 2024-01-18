@@ -5,20 +5,21 @@ class ModalPage<T> extends Page<T> {
   final double elevation;
 
   const ModalPage({
-    required this.builder,
-    this.elevation = 10,
     super.key,
     super.name,
     super.arguments,
+    required this.builder,
+    this.elevation = 10,
   });
 
   @override
   Route<T> createRoute(BuildContext context) {
     return ModalBottomSheetRoute(
-      builder: builder,
+      enableDrag: true,
       isScrollControlled: true,
       settings: this,
       elevation: elevation,
+      builder: builder,
     );
   }
 }
