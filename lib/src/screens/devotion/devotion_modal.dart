@@ -13,7 +13,7 @@ import 'package:revelationsai/src/utils/capitalization.dart';
 import 'package:revelationsai/src/widgets/refresh_indicator.dart';
 
 class DevotionModal extends HookConsumerWidget {
-  static const _pageSize = 6;
+  static const _pageSize = 7;
 
   const DevotionModal({super.key});
 
@@ -230,6 +230,7 @@ class DevotionListItem extends HookConsumerWidget {
       key: ValueKey(devotion.id),
       color: currentDevotionId == devotion.id ? context.secondaryColor.withOpacity(0.2) : null,
       child: ListTile(
+        dense: true,
         visualDensity: VisualDensity.compact,
         title: Text(
           devotion.topic.toCapitalized(),

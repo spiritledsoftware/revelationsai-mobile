@@ -1,0 +1,76 @@
+import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:revelationsai/src/hooks/use_chat.dart';
+import 'package:revelationsai/src/providers/user/current.dart';
+import 'package:revelationsai/src/utils/build_context_extensions.dart';
+
+const claudeV2 = 'anthropic.claude-v2:1';
+const claudeV1 = 'anthropic.claude-instant-v1';
+
+const modelIdMapping = {
+  claudeV2: 'Claude v2',
+  claudeV1: 'Claude v1',
+};
+
+class ModelSelectionButton extends HookConsumerWidget {
+  final UseChatReturnObject chatHook;
+
+  const ModelSelectionButton({
+    super.key,
+    required this.chatHook,
+  });
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final currentUser = ref.watch(currentUserProvider).requireValue;
+
+    return PopupMenuButton(
+      position: PopupMenuPosition.under,
+      offset: const Offset(-10, 0),
+      itemBuilder: (context) {
+        return [
+          for (final modelId in modelIdMapping.keys) ...[
+            PopupMenuItem(
+              onTap: () {
+                if (currentUser.maxQueries <= 5 && modelId == claudeV2) {
+                  context.go("/home/upgrade");
+                  return;
+                }
+                chatHook.modelId.value = modelId;
+              },
+              child: Text(
+                modelIdMapping[modelId]!,
+                style: context.textTheme.labelSmall?.copyWith(
+                  color: context.colorScheme.onBackground,
+                ),
+              ),
+            ),
+          ],
+        ];
+      },
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: [
+          Text(
+            chatHook.modelId.value == null
+                ? currentUser.maxQueries <= 5
+                    ? modelIdMapping[claudeV1]!
+                    : modelIdMapping[claudeV2]!
+                : modelIdMapping[chatHook.modelId.value!]!,
+            style: context.textTheme.labelSmall?.copyWith(
+              color: context.colorScheme.onPrimary.withOpacity(0.7),
+            ),
+            textAlign: TextAlign.center,
+          ),
+          Icon(
+            Icons.arrow_drop_down,
+            size: 18,
+            color: context.colorScheme.onPrimary.withOpacity(0.5),
+          ),
+        ],
+      ),
+    );
+  }
+}

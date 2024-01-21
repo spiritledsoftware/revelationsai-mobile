@@ -11,6 +11,7 @@ import 'package:uuid/uuid.dart';
 
 class UseChatOptions {
   final String session;
+  final String? modelId;
   final String? chatId;
   final String initialInput;
   final List<ChatMessage>? initialMessages;
@@ -22,6 +23,7 @@ class UseChatOptions {
 
   UseChatOptions({
     required this.session,
+    this.modelId,
     this.chatId,
     this.initialInput = '',
     this.initialMessages,
@@ -34,6 +36,8 @@ class UseChatOptions {
 }
 
 class UseChatReturnObject {
+  final ValueNotifier<String?> modelId;
+
   final ValueNotifier<String?> chatId;
 
   final TextEditingController inputController;
@@ -51,6 +55,7 @@ class UseChatReturnObject {
   final Function reload;
 
   UseChatReturnObject({
+    required this.modelId,
     required this.chatId,
     required this.inputController,
     required this.inputFocusNode,
@@ -66,11 +71,13 @@ class UseChatReturnObject {
 
 class ChatRequest {
   final String session;
+  final String? modelId;
   final String? chatId;
   final List<ChatMessage> messages;
 
   ChatRequest({
     required this.session,
+    this.modelId,
     this.chatId,
     required this.messages,
   });
@@ -108,6 +115,7 @@ Future<ChatMessage> getStreamedResponse({
   final client = Client();
   final request = Request("POST", uri);
   request.body = jsonEncode({
+    'modelId': chatRequest.modelId,
     'chatId': chatRequest.chatId,
     'messages': chatRequest.messages.map((message) => message.toJson()).toList(),
   });
@@ -203,6 +211,15 @@ Future<ChatMessage> getStreamedResponse({
 }
 
 UseChatReturnObject useChat({required UseChatOptions options}) {
+  ValueNotifier<String?> modelId = useState(options.modelId);
+  useEffect(
+    () {
+      modelId.value = options.modelId;
+      return () {};
+    },
+    [options.modelId],
+  );
+
   ValueNotifier<String?> chatId = useState(options.chatId);
   useEffect(
     () {
@@ -281,6 +298,7 @@ UseChatReturnObject useChat({required UseChatOptions options}) {
     (ChatMessage message) {
       final ChatRequest chatRequest = ChatRequest(
         session: options.session,
+        modelId: modelId.value,
         chatId: chatId.value,
         messages: [...messagesRef.value, message],
       );
@@ -308,6 +326,7 @@ UseChatReturnObject useChat({required UseChatOptions options}) {
       if (lastMessage.role == Role.assistant) {
         final chatRequest = ChatRequest(
           session: options.session,
+          modelId: modelId.value,
           chatId: chatId.value,
           messages: messagesRef.value.sublist(0, messagesRef.value.length - 1),
         );
@@ -361,6 +380,7 @@ UseChatReturnObject useChat({required UseChatOptions options}) {
   );
 
   return UseChatReturnObject(
+    modelId: modelId,
     chatId: chatId,
     inputController: inputController,
     inputFocusNode: inputFocusNode,

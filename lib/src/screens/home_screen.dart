@@ -142,6 +142,44 @@ class HomeScreen extends HookConsumerWidget {
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
+                      Image.asset(
+                        context.brightness == Brightness.light
+                            ? "assets/logo/plus-logo-dark.png"
+                            : "assets/logo/plus-logo-light.png",
+                        width: context.width * 0.6,
+                      ),
+                      const SizedBox(height: 10),
+                      TextButton(
+                        style: TextButton.styleFrom(
+                          backgroundColor: context.colorScheme.primary,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                        ),
+                        onPressed: () {
+                          if (hapticFeedbackEnabled) {
+                            HapticFeedback.lightImpact();
+                          }
+                          context.go("/home/upgrade");
+                        },
+                        child: const Text("Upgrade Now"),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 20),
+                Container(
+                  margin: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                  ),
+                  padding: const EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(20),
+                    color: context.colorScheme.secondary.withOpacity(0.2),
+                  ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
                       GradientText(
                         "Ask a Question",
                         gradient: LinearGradient(

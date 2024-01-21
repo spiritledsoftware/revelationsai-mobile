@@ -3,7 +3,6 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:purchases_flutter/purchases_flutter.dart';
 import 'package:revelationsai/src/models/alert.dart';
@@ -11,7 +10,6 @@ import 'package:revelationsai/src/providers/in_app_purchases/customer_info.dart'
 import 'package:revelationsai/src/providers/in_app_purchases/packages.dart';
 import 'package:revelationsai/src/providers/user/current.dart';
 import 'package:revelationsai/src/utils/build_context_extensions.dart';
-import 'package:revelationsai/src/widgets/refresh_indicator.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
 class UpgradeScreen extends HookConsumerWidget {
@@ -23,21 +21,50 @@ class UpgradeScreen extends HookConsumerWidget {
     final packages = ref.watch(packagesProvider);
 
     final isMounted = useIsMounted();
-    final purchasesRestored = useState(false);
     final alert = useState<Alert?>(null);
 
-    final purchasesRestoreFuture = useState<Future?>(null);
-    final purchasesRestoreSnapshot = useFuture(purchasesRestoreFuture.value);
+    final purchaseFuture = useState<Future?>(null);
+    final purchaseSnapshot = useFuture(purchaseFuture.value);
+
+    final handlePurchase = useCallback(([Package? package]) {
+      if (package != null) {
+        purchaseFuture.value = Purchases.purchasePackage(package).then((purchaserInfo) {
+          debugPrint('Purchaser Info: $purchaserInfo');
+          ref.read(currentUserProvider.notifier).refresh();
+        }).catchError((e) {
+          debugPrint('Encountered error on purchase: $e');
+          final errorCode = PurchasesErrorHelper.getErrorCode(e);
+          if (errorCode != PurchasesErrorCode.purchaseCancelledError) {
+            throw e;
+          }
+        });
+      } else {
+        purchaseFuture.value = Purchases.restorePurchases().then((purchaserInfo) {
+          debugPrint('Purchaser Info: $purchaserInfo');
+          ref.read(currentUserProvider.notifier).refresh();
+        }).catchError((e) {
+          debugPrint('Encountered error on purchase: $e');
+          final errorCode = PurchasesErrorHelper.getErrorCode(e);
+          if (errorCode != PurchasesErrorCode.purchaseCancelledError) {
+            throw e;
+          }
+        });
+      }
+    }, [ref]);
 
     useEffect(() {
-      if (purchasesRestoreSnapshot.hasError && purchasesRestoreSnapshot.connectionState != ConnectionState.waiting) {
+      if (purchaseSnapshot.hasError && purchaseSnapshot.connectionState != ConnectionState.waiting) {
         alert.value = Alert(
           type: AlertType.error,
-          message: purchasesRestoreSnapshot.error.toString(),
+          message: purchaseSnapshot.error.toString(),
         );
       }
       return () {};
-    }, [purchasesRestoreSnapshot.hasError]);
+    }, [
+      purchaseSnapshot.hasError,
+      purchaseSnapshot.connectionState,
+      purchaseSnapshot.error,
+    ]);
 
     useEffect(() {
       if (alert.value != null) {
@@ -61,220 +88,325 @@ class UpgradeScreen extends HookConsumerWidget {
     }, [alert.value]);
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Plans & Pricing'),
-        actions: [
-          if (purchasesRestoreSnapshot.connectionState == ConnectionState.waiting)
-            Padding(
-              padding: const EdgeInsets.only(right: 15),
-              child: SizedBox(
-                height: 20,
-                width: 20,
-                child: SpinKitSpinningLines(
-                  lineWidth: 1,
-                  color: context.colorScheme.onPrimary,
-                ),
-              ),
-            ),
-        ],
-      ),
       body: customerInfo.hasValue && packages.hasValue
-          ? RAIRefreshIndicator(
-              onRefresh: () {
-                return Future.wait([
-                  ref.refresh(customerInfoProvider.future),
-                  ref.refresh(packagesProvider.future),
-                ]);
-              },
-              child: ListView(
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 8,
+          ? Stack(
+              children: [
+                Column(
+                  mainAxisSize: MainAxisSize.max,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Image.asset(
+                      context.brightness == Brightness.light
+                          ? 'assets/logo/plus-logo-dark.png'
+                          : 'assets/logo/plus-logo-light.png',
+                      fit: BoxFit.cover,
+                      width: context.width * 0.8,
                     ),
-                    child: ListTile(
-                      dense: true,
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 15,
-                        vertical: 5,
+                    Container(
+                      margin: const EdgeInsets.only(
+                        bottom: 30,
                       ),
-                      tileColor: context.colorScheme.secondary.withOpacity(0.2),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
-                        side: BorderSide(
-                          color: context.colorScheme.secondary,
-                          width: 2,
-                        ),
-                      ),
-                      leading: Container(
-                        padding: const EdgeInsets.only(
-                          right: 20,
-                        ),
-                        decoration: BoxDecoration(
-                          border: Border(
-                            right: BorderSide(
-                              color: context.colorScheme.onBackground,
-                              width: 2,
+                      child: Column(
+                        children: [
+                          Text.rich(
+                            TextSpan(
+                              children: [
+                                WidgetSpan(
+                                  child: Icon(
+                                    Icons.add,
+                                    size: 20,
+                                    color: context.colorScheme.onBackground,
+                                  ),
+                                  alignment: PlaceholderAlignment.middle,
+                                ),
+                                TextSpan(
+                                  children: [
+                                    WidgetSpan(
+                                      child: GestureDetector(
+                                        onTap: () {
+                                          launchUrlString("https://www.anthropic.com/news/claude-2-1");
+                                        },
+                                        child: Text(
+                                          'Anthropic Claude v2.1',
+                                          style: context.textTheme.titleMedium?.copyWith(
+                                            color: context.colorScheme.secondary,
+                                          ),
+                                        ),
+                                      ),
+                                      alignment: PlaceholderAlignment.middle,
+                                    ),
+                                    const TextSpan(text: " in chat")
+                                  ],
+                                  style: context.textTheme.titleMedium,
+                                ),
+                              ],
                             ),
                           ),
-                        ),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text(
-                              'Free',
-                              style: context.textTheme.titleMedium,
+                          Text.rich(
+                            TextSpan(
+                              children: [
+                                WidgetSpan(
+                                  child: Icon(
+                                    Icons.add,
+                                    size: 20,
+                                    color: context.colorScheme.onBackground,
+                                  ),
+                                  alignment: PlaceholderAlignment.middle,
+                                ),
+                                TextSpan(
+                                  children: [
+                                    TextSpan(
+                                      text: "Unlimited",
+                                      style: context.textTheme.titleMedium?.copyWith(
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                    const TextSpan(
+                                      text: " queries per day",
+                                    ),
+                                  ],
+                                  style: context.textTheme.titleMedium,
+                                ),
+                              ],
                             ),
-                            const SizedBox(
-                              width: 50,
-                              height: 5,
-                              child: Divider(),
+                          ),
+                          Text.rich(
+                            TextSpan(
+                              children: [
+                                WidgetSpan(
+                                  child: Icon(
+                                    Icons.add,
+                                    size: 20,
+                                    color: context.colorScheme.onBackground,
+                                  ),
+                                  alignment: PlaceholderAlignment.middle,
+                                ),
+                                TextSpan(
+                                  children: [
+                                    TextSpan(
+                                      text: "Unlimited",
+                                      style: context.textTheme.titleMedium?.copyWith(
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                    const TextSpan(
+                                      text: " images per day",
+                                    ),
+                                  ],
+                                  style: context.textTheme.titleMedium,
+                                ),
+                              ],
                             ),
-                            Text(
-                              'Lifetime',
-                              style: context.textTheme.labelMedium,
+                          ),
+                          Text.rich(
+                            TextSpan(
+                              children: [
+                                WidgetSpan(
+                                  child: Icon(
+                                    Icons.add,
+                                    size: 20,
+                                    color: context.colorScheme.onBackground,
+                                  ),
+                                  alignment: PlaceholderAlignment.middle,
+                                ),
+                                TextSpan(
+                                  text: 'Ad-free experience',
+                                  style: context.textTheme.titleMedium,
+                                ),
+                              ],
                             ),
-                          ],
-                        ),
+                          ),
+                        ],
                       ),
-                      title: Text(
-                        "Late to Sunday Service",
-                        style: context.textTheme.titleMedium,
-                      ),
-                      subtitle: const Text(
-                        'Without a subscription you can send 5 messages & generate 1 image per day, with standard ads.',
-                      ),
-                      trailing: customerInfo.value?.activeSubscriptions.isEmpty ?? true
-                          ? Container(
-                              padding: const EdgeInsets.all(8.0),
+                    ),
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        for (final package in packages.value!) ...[
+                          GestureDetector(
+                            onTap: () {
+                              handlePurchase(package);
+                            },
+                            child: Container(
+                              width: context.width * 0.4,
+                              margin: const EdgeInsets.all(8),
+                              padding: const EdgeInsets.all(8),
                               decoration: BoxDecoration(
-                                color: context.colorScheme.onBackground,
+                                color: context.colorScheme.primary,
                                 borderRadius: BorderRadius.circular(8),
+                                border: Border.all(
+                                  color: context.colorScheme.secondary,
+                                  width: 1,
+                                ),
                               ),
-                              child: Text(
-                                "Active",
-                                style: context.textTheme.labelLarge?.copyWith(
-                                  color: context.colorScheme.background,
+                              child: Column(
+                                children: [
+                                  Text(
+                                    package.storeProduct.priceString,
+                                    style: context.textTheme.titleMedium?.copyWith(
+                                      color: context.colorScheme.onPrimary,
+                                    ),
+                                  ),
+                                  Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                      vertical: 5,
+                                      horizontal: 10,
+                                    ),
+                                    child: Row(
+                                      children: [
+                                        Expanded(
+                                          child: Container(
+                                            height: 1,
+                                            color: context.secondaryColor,
+                                          ),
+                                        ),
+                                        const SizedBox(width: 5),
+                                        Text(
+                                          "per",
+                                          style: context.textTheme.bodySmall?.copyWith(
+                                            color: context.colorScheme.onPrimary,
+                                          ),
+                                        ),
+                                        const SizedBox(width: 5),
+                                        Expanded(
+                                          child: Container(
+                                            height: 1,
+                                            color: context.secondaryColor,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  Text(
+                                    (package.storeProduct.subscriptionPeriod ?? 'P1M')
+                                        .replaceFirst("P", "")
+                                        .split("")
+                                        .join(" ")
+                                        .replaceAll("1 ", "")
+                                        .replaceAll("M", "Month")
+                                        .replaceAll("Y", "Year")
+                                        .replaceAll("W", "Week")
+                                        .replaceAll("D", "Day"),
+                                    style: context.textTheme.titleMedium?.copyWith(
+                                      color: context.colorScheme.onPrimary,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          )
+                        ]
+                      ],
+                    ),
+                    Container(
+                      margin: const EdgeInsets.only(
+                        top: 30,
+                      ),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 25,
+                      ),
+                      child: Text(
+                        "All subscriptions will be automatically renewed until cancelled. You can cancel at any time in the ${Platform.isAndroid ? "Play Store" : "App Store"} settings.",
+                        textAlign: TextAlign.center,
+                        style: context.textTheme.bodySmall,
+                      ),
+                    ),
+                    Column(
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceAround,
+                          children: [
+                            if (customerInfo.value?.managementURL != null) ...[
+                              GestureDetector(
+                                onTap: () {
+                                  launchUrlString(customerInfo.value!.managementURL!);
+                                },
+                                child: Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 16,
+                                    vertical: 8,
+                                  ),
+                                  child: Text(
+                                    'Manage Subscriptions',
+                                    style: context.textTheme.labelLarge?.copyWith(
+                                      color: context.colorScheme.secondary,
+                                    ),
+                                  ),
+                                ),
+                              )
+                            ],
+                            GestureDetector(
+                              onTap: () {
+                                handlePurchase();
+                              },
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 16,
+                                  vertical: 8,
+                                ),
+                                child: Text(
+                                  'Restore Purchases',
+                                  style: context.textTheme.labelLarge?.copyWith(
+                                    color: context.colorScheme.secondary,
+                                  ),
                                 ),
                               ),
                             )
-                          : null,
-                    ),
-                  ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const SizedBox(
-                        width: 10,
-                      ),
-                      Expanded(
-                        child: Container(
-                          height: 1,
-                          color: context.colorScheme.secondary,
+                          ],
                         ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 8,
-                        ),
-                        child: Text(
-                          "Upgrades",
-                          style: context.textTheme.titleMedium,
-                        ),
-                      ),
-                      Expanded(
-                        child: Container(
-                          height: 1,
-                          color: context.colorScheme.secondary,
-                        ),
-                      ),
-                      const SizedBox(
-                        width: 10,
-                      )
-                    ],
-                  ),
-                  ListView.builder(
-                    physics: const NeverScrollableScrollPhysics(),
-                    shrinkWrap: true,
-                    itemCount: packages.requireValue.length,
-                    itemBuilder: (context, index) {
-                      return Padding(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 8,
-                        ),
-                        child: ProductTile(
-                          key: ValueKey(packages.requireValue[index].identifier),
-                          package: packages.requireValue[index],
-                          customerInfo: customerInfo.value,
-                        ),
-                      );
-                    },
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 15,
-                      vertical: 8,
-                    ),
-                    child: Text(
-                      "All subscriptions will be automatically renewed until cancelled. You can cancel at any time in the ${Platform.isAndroid ? "Play Store" : "App Store"} settings.",
-                      textAlign: TextAlign.center,
-                    ),
-                  ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: [
-                      if (customerInfo.value?.managementURL != null) ...[
-                        GestureDetector(
-                          onTap: () {
-                            launchUrlString(customerInfo.value!.managementURL!);
-                          },
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 16,
-                              vertical: 8,
-                            ),
-                            child: Text(
-                              'Manage Subscriptions',
-                              style: context.textTheme.labelLarge?.copyWith(
-                                color: context.colorScheme.secondary,
-                              ),
-                            ),
-                          ),
-                        )
                       ],
-                      GestureDetector(
-                        onTap: () {
-                          purchasesRestoreFuture.value = Purchases.restorePurchases().then((purchaserInfo) {
-                            debugPrint('Purchaser Info: $purchaserInfo');
-                            ref.read(currentUserProvider.notifier).refresh();
-                            if (isMounted()) purchasesRestored.value = true;
-                          }).catchError((e) {
-                            debugPrint('Encountered error on purchase: $e');
-                            final errorCode = PurchasesErrorHelper.getErrorCode(e);
-                            if (errorCode != PurchasesErrorCode.purchaseCancelledError) {
-                              throw e;
-                            }
-                          });
-                        },
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 8,
-                          ),
-                          child: Text(
-                            'Restore Purchases',
-                            style: context.textTheme.labelLarge?.copyWith(
-                              color: context.colorScheme.secondary,
-                            ),
-                          ),
-                        ),
-                      )
-                    ],
+                    ),
+                  ],
+                ),
+                if (purchaseSnapshot.connectionState == ConnectionState.waiting) ...[
+                  Positioned(
+                    top: context.height * 0.1,
+                    left: 0,
+                    right: 0,
+                    child: SpinKitSpinningLines(
+                      color: context.colorScheme.secondary,
+                      size: 40,
+                    ),
                   ),
                 ],
-              ),
+                if (alert.value != null) ...[
+                  Positioned(
+                    top: context.height * 0.1,
+                    left: 0,
+                    right: 0,
+                    child: Container(
+                      color: context.colorScheme.error,
+                      padding: const EdgeInsets.all(8.0),
+                      child: Text(
+                        alert.value!.message,
+                        style: TextStyle(
+                          color: context.colorScheme.onError,
+                        ),
+                        softWrap: true,
+                        maxLines: 3,
+                      ),
+                    ),
+                  ),
+                ],
+                if (purchaseSnapshot.connectionState == ConnectionState.done && purchaseSnapshot.hasData) ...[
+                  Positioned(
+                    top: context.height * 0.1,
+                    left: 0,
+                    right: 0,
+                    child: Container(
+                      color: context.primaryColor,
+                      padding: const EdgeInsets.all(8.0),
+                      child: Text(
+                        'Purchase successful!',
+                        style: TextStyle(
+                          color: context.colorScheme.onPrimary,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ],
             )
           : customerInfo.hasError || packages.hasError
               ? const Center(
@@ -289,170 +421,6 @@ class UpgradeScreen extends HookConsumerWidget {
                     size: 40,
                   ),
                 ),
-    );
-  }
-}
-
-class ProductTile extends HookConsumerWidget {
-  final Package package;
-  final CustomerInfo? customerInfo;
-
-  const ProductTile({super.key, required this.package, this.customerInfo});
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final product = package.storeProduct;
-
-    final isMounted = useIsMounted();
-    final purchased = useState(false);
-    final alert = useState<Alert?>(null);
-
-    final purchasingFuture = useState<Future?>(null);
-    final purchasingSnapshot = useFuture(purchasingFuture.value);
-
-    final scaffoldMessenger = useRef(ScaffoldMessenger.of(context));
-
-    useEffect(() {
-      if (purchasingSnapshot.hasError && purchasingSnapshot.connectionState != ConnectionState.waiting) {
-        alert.value = Alert(
-          type: AlertType.error,
-          message: purchasingSnapshot.error.toString(),
-        );
-      }
-
-      return () {};
-    }, [purchasingSnapshot.hasError]);
-
-    useEffect(() {
-      if (alert.value != null) {
-        Future(() {
-          scaffoldMessenger.value.showSnackBar(
-            SnackBar(
-              content: Flexible(
-                child: Text(
-                  alert.value!.message,
-                  style: TextStyle(color: context.colorScheme.onError),
-                ),
-              ),
-              backgroundColor: alert.value!.type == AlertType.error ? Colors.red : context.colorScheme.secondary,
-              duration: const Duration(seconds: 8),
-            ),
-          );
-          if (isMounted()) alert.value = null;
-        });
-      }
-
-      return () {};
-    }, [alert.value]);
-
-    return ListTile(
-      dense: true,
-      contentPadding: const EdgeInsets.symmetric(
-        horizontal: 15,
-        vertical: 5,
-      ),
-      tileColor: context.colorScheme.secondary.withOpacity(0.2),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(8),
-        side: BorderSide(
-          color: context.colorScheme.secondary,
-          width: 2,
-        ),
-      ),
-      leading: Container(
-        padding: const EdgeInsets.only(
-          right: 20,
-        ),
-        decoration: BoxDecoration(
-          border: Border(
-            right: BorderSide(
-              color: context.colorScheme.onBackground,
-              width: 2,
-            ),
-          ),
-        ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(
-              product.priceString,
-              style: context.textTheme.titleMedium,
-            ),
-            const SizedBox(
-              width: 50,
-              height: 5,
-              child: Divider(),
-            ),
-            Text(
-              (product.subscriptionPeriod ?? 'P1M')
-                  .replaceFirst("P", "")
-                  .split("")
-                  .join(" ")
-                  .replaceAll("M", "Month")
-                  .replaceAll("Y", "Year")
-                  .replaceAll("W", "Week")
-                  .replaceAll("D", "Day"),
-              style: context.textTheme.labelMedium,
-            ),
-          ],
-        ),
-      ),
-      title: Text(
-        product.title.split('(').first.trim(),
-        style: context.textTheme.titleMedium,
-      ),
-      subtitle: Text(
-        product.description,
-      ),
-      onTap: () {
-        purchasingFuture.value = Purchases.purchasePackage(package).then((purchaserInfo) {
-          debugPrint('Purchaser Info: $purchaserInfo');
-          if (isMounted()) purchased.value = true;
-          ref.read(currentUserProvider.notifier).refresh();
-        }).catchError((e) {
-          debugPrint('Encountered error on purchase: $e');
-          final errorCode = PurchasesErrorHelper.getErrorCode(e);
-          if (errorCode != PurchasesErrorCode.purchaseCancelledError) {
-            throw e;
-          }
-        });
-      },
-      trailing: customerInfo?.activeSubscriptions.contains(product.identifier) ?? false
-          ? Container(
-              padding: const EdgeInsets.all(8.0),
-              decoration: BoxDecoration(
-                color: context.colorScheme.onBackground,
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Text(
-                "Active",
-                style: context.textTheme.labelLarge?.copyWith(
-                  color: context.colorScheme.background,
-                ),
-              ),
-            )
-          : purchasingSnapshot.connectionState == ConnectionState.waiting
-              ? SizedBox(
-                  height: 20,
-                  width: 20,
-                  child: SpinKitSpinningLines(
-                    lineWidth: 1,
-                    color: context.colorScheme.primary,
-                  ),
-                )
-              : purchasingSnapshot.hasError
-                  ? FaIcon(
-                      FontAwesomeIcons.x,
-                      color: context.colorScheme.error,
-                      size: 15,
-                    )
-                  : purchased.value
-                      ? const FaIcon(
-                          FontAwesomeIcons.check,
-                          color: Colors.green,
-                          size: 15,
-                        )
-                      : null,
     );
   }
 }
