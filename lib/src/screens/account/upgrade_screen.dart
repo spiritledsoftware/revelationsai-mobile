@@ -88,6 +88,9 @@ class UpgradeScreen extends HookConsumerWidget {
     }, [alert.value]);
 
     return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+      ),
       body: customerInfo.hasValue && packages.hasValue
           ? Stack(
               children: [
@@ -100,11 +103,12 @@ class UpgradeScreen extends HookConsumerWidget {
                           ? 'assets/logo/plus-logo-dark.png'
                           : 'assets/logo/plus-logo-light.png',
                       fit: BoxFit.cover,
-                      width: context.width * 0.8,
+                      width: context.width * 0.9,
                     ),
                     Container(
                       margin: const EdgeInsets.only(
-                        bottom: 30,
+                        top: 10,
+                        bottom: 20,
                       ),
                       child: Column(
                         children: [
@@ -127,7 +131,7 @@ class UpgradeScreen extends HookConsumerWidget {
                                           launchUrlString("https://www.anthropic.com/news/claude-2-1");
                                         },
                                         child: Text(
-                                          'Anthropic Claude v2.1',
+                                          'Anthropic Claude v2',
                                           style: context.textTheme.titleMedium?.copyWith(
                                             color: context.colorScheme.secondary,
                                           ),
@@ -229,8 +233,10 @@ class UpgradeScreen extends HookConsumerWidget {
                               handlePurchase(package);
                             },
                             child: Container(
-                              width: context.width * 0.4,
-                              margin: const EdgeInsets.all(8),
+                              width: context.width * 0.3,
+                              margin: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                              ),
                               padding: const EdgeInsets.all(8),
                               decoration: BoxDecoration(
                                 color: context.colorScheme.primary,
@@ -361,7 +367,7 @@ class UpgradeScreen extends HookConsumerWidget {
                 ),
                 if (purchaseSnapshot.connectionState == ConnectionState.waiting) ...[
                   Positioned(
-                    top: context.height * 0.1,
+                    top: context.height * 0.05,
                     left: 0,
                     right: 0,
                     child: SpinKitSpinningLines(
@@ -372,7 +378,7 @@ class UpgradeScreen extends HookConsumerWidget {
                 ],
                 if (alert.value != null) ...[
                   Positioned(
-                    top: context.height * 0.1,
+                    top: context.height * 0.05,
                     left: 0,
                     right: 0,
                     child: Container(
@@ -391,7 +397,7 @@ class UpgradeScreen extends HookConsumerWidget {
                 ],
                 if (purchaseSnapshot.connectionState == ConnectionState.done && purchaseSnapshot.hasData) ...[
                   Positioned(
-                    top: context.height * 0.1,
+                    top: context.height * 0.05,
                     left: 0,
                     right: 0,
                     child: Container(

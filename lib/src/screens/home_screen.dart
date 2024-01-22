@@ -18,6 +18,7 @@ import 'package:revelationsai/src/widgets/branding/logo.dart';
 import 'package:revelationsai/src/widgets/colored_safe_area.dart';
 import 'package:revelationsai/src/widgets/gradient_text.dart';
 import 'package:revelationsai/src/widgets/refresh_indicator.dart';
+import 'package:url_launcher/url_launcher_string.dart';
 
 const greetings = {
   "Peace be with you",
@@ -130,41 +131,145 @@ class HomeScreen extends HookConsumerWidget {
                   ),
                 ),
                 const SizedBox(height: 20),
-                Container(
-                  margin: const EdgeInsets.symmetric(
-                    horizontal: 10,
-                  ),
-                  padding: const EdgeInsets.all(20),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(20),
-                    color: context.colorScheme.secondary.withOpacity(0.2),
-                  ),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Image.asset(
-                        context.brightness == Brightness.light
-                            ? "assets/logo/plus-logo-dark.png"
-                            : "assets/logo/plus-logo-light.png",
-                        width: context.width * 0.6,
-                      ),
-                      const SizedBox(height: 10),
-                      TextButton(
-                        style: TextButton.styleFrom(
-                          backgroundColor: context.colorScheme.primary,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(20),
-                          ),
+                GestureDetector(
+                  onTap: () {
+                    if (hapticFeedbackEnabled) {
+                      HapticFeedback.lightImpact();
+                    }
+                    context.go("/home/upgrade");
+                  },
+                  child: Container(
+                    margin: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                    ),
+                    padding: const EdgeInsets.all(20),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(20),
+                      color: context.colorScheme.secondary.withOpacity(0.2),
+                    ),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Image.asset(
+                          context.brightness == Brightness.light
+                              ? "assets/logo/plus-logo-dark.png"
+                              : "assets/logo/plus-logo-light.png",
+                          width: context.width * 0.8,
                         ),
-                        onPressed: () {
-                          if (hapticFeedbackEnabled) {
-                            HapticFeedback.lightImpact();
-                          }
-                          context.go("/home/upgrade");
-                        },
-                        child: const Text("Upgrade Now"),
-                      ),
-                    ],
+                        Column(
+                          children: [
+                            Text.rich(
+                              TextSpan(
+                                children: [
+                                  WidgetSpan(
+                                    child: Icon(
+                                      Icons.add,
+                                      size: 20,
+                                      color: context.colorScheme.onBackground,
+                                    ),
+                                    alignment: PlaceholderAlignment.middle,
+                                  ),
+                                  TextSpan(
+                                    children: [
+                                      WidgetSpan(
+                                        child: GestureDetector(
+                                          onTap: () {
+                                            launchUrlString("https://www.anthropic.com/news/claude-2-1");
+                                          },
+                                          child: Text(
+                                            'Anthropic Claude v2',
+                                            style: context.textTheme.titleMedium?.copyWith(
+                                              color: context.colorScheme.secondary,
+                                            ),
+                                          ),
+                                        ),
+                                        alignment: PlaceholderAlignment.middle,
+                                      ),
+                                      const TextSpan(text: " in chat")
+                                    ],
+                                    style: context.textTheme.titleMedium,
+                                  ),
+                                ],
+                              ),
+                            ),
+                            Text.rich(
+                              TextSpan(
+                                children: [
+                                  WidgetSpan(
+                                    child: Icon(
+                                      Icons.add,
+                                      size: 20,
+                                      color: context.colorScheme.onBackground,
+                                    ),
+                                    alignment: PlaceholderAlignment.middle,
+                                  ),
+                                  TextSpan(
+                                    children: [
+                                      TextSpan(
+                                        text: "Unlimited",
+                                        style: context.textTheme.titleMedium?.copyWith(
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                      const TextSpan(
+                                        text: " queries per day",
+                                      ),
+                                    ],
+                                    style: context.textTheme.titleMedium,
+                                  ),
+                                ],
+                              ),
+                            ),
+                            Text.rich(
+                              TextSpan(
+                                children: [
+                                  WidgetSpan(
+                                    child: Icon(
+                                      Icons.add,
+                                      size: 20,
+                                      color: context.colorScheme.onBackground,
+                                    ),
+                                    alignment: PlaceholderAlignment.middle,
+                                  ),
+                                  TextSpan(
+                                    children: [
+                                      TextSpan(
+                                        text: "Unlimited",
+                                        style: context.textTheme.titleMedium?.copyWith(
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                      const TextSpan(
+                                        text: " images per day",
+                                      ),
+                                    ],
+                                    style: context.textTheme.titleMedium,
+                                  ),
+                                ],
+                              ),
+                            ),
+                            Text.rich(
+                              TextSpan(
+                                children: [
+                                  WidgetSpan(
+                                    child: Icon(
+                                      Icons.add,
+                                      size: 20,
+                                      color: context.colorScheme.onBackground,
+                                    ),
+                                    alignment: PlaceholderAlignment.middle,
+                                  ),
+                                  TextSpan(
+                                    text: 'Ad-free experience',
+                                    style: context.textTheme.titleMedium,
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
                   ),
                 ),
                 const SizedBox(height: 20),

@@ -163,7 +163,7 @@ class SettingsModal extends HookConsumerWidget {
                   trailing: ref.watch(activeSubscriptionsProvider).when(
                         data: (value) {
                           if (value.isEmpty) {
-                            return const Text('Late to Sunday Service');
+                            return const Text('Standard');
                           }
                           return Text(value.first.storeProduct.title);
                         },
