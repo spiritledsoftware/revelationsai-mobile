@@ -21,6 +21,7 @@ import 'package:revelationsai/src/utils/in_app_review.dart';
 import 'package:revelationsai/src/widgets/chat/action_menu_button.dart';
 import 'package:revelationsai/src/widgets/chat/chat_suggestions.dart';
 import 'package:revelationsai/src/widgets/chat/message.dart';
+import 'package:revelationsai/src/widgets/chat/model_selection_button.dart';
 
 class ChatScreen extends HookConsumerWidget {
   final String? initChatId;
@@ -315,270 +316,287 @@ class ChatScreen extends HookConsumerWidget {
       };
     }, [scrollController.hasClients]);
 
-    return AnnotatedRegion<SystemUiOverlayStyle>(
-      value: context.isDarkMode ? SystemUiOverlayStyle.light : SystemUiOverlayStyle.dark,
-      child: Scaffold(
-        floatingActionButtonLocation: FloatingActionButtonLocation.miniStartTop,
-        floatingActionButton: ChatActionMenuButton(
-          chatHook: chatHook,
-          chat: chat,
-          isMounted: isMounted,
-          isRefreshingChat: isRefreshingChat,
-          refreshChatData: refreshChatData,
+    return Scaffold(
+      appBar: AppBar(
+        automaticallyImplyLeading: false,
+        centerTitle: false,
+        title: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              chat.value?.name ?? "New Chat",
+              softWrap: false,
+              overflow: TextOverflow.ellipsis,
+              style: context.textTheme.titleMedium?.copyWith(
+                color: context.colorScheme.onPrimary,
+              ),
+            ),
+            ModelSelectionButton(chatHook: chatHook),
+          ],
         ),
-        body: isLoadingChat.value
-            ? Center(
-                child: SpinKitSpinningLines(
-                  color: context.secondaryColor,
-                  size: 40,
-                ),
-              )
-            : Stack(
-                children: [
-                  Positioned.fill(
-                    child: Scrollbar(
+        actions: [
+          ChatActionMenuButton(
+            chatHook: chatHook,
+            chat: chat,
+            isMounted: isMounted,
+            isRefreshingChat: isRefreshingChat,
+            refreshChatData: refreshChatData,
+          ),
+        ],
+      ),
+      body: isLoadingChat.value
+          ? Center(
+              child: SpinKitSpinningLines(
+                color: context.secondaryColor,
+                size: 40,
+              ),
+            )
+          : Stack(
+              children: [
+                Positioned.fill(
+                  child: Scrollbar(
+                    controller: scrollController,
+                    child: ListView.builder(
                       controller: scrollController,
-                      child: ListView.builder(
-                        controller: scrollController,
-                        physics: const AlwaysScrollableScrollPhysics(
-                          parent: BouncingScrollPhysics(
-                            parent: RangeMaintainingScrollPhysics(),
-                          ),
+                      physics: const AlwaysScrollableScrollPhysics(
+                        parent: BouncingScrollPhysics(
+                          parent: RangeMaintainingScrollPhysics(),
                         ),
-                        shrinkWrap: true,
-                        reverse: true,
-                        itemCount: chatHook.messages.value.length + 2,
-                        itemBuilder: (context, index) {
-                          if (index == 0) {
-                            return const SizedBox(
-                              height: 70,
+                      ),
+                      shrinkWrap: true,
+                      reverse: true,
+                      itemCount: chatHook.messages.value.length + 2,
+                      itemBuilder: (context, index) {
+                        if (index == 0) {
+                          return const SizedBox(
+                            height: 70,
+                          );
+                        }
+
+                        if (index == chatHook.messages.value.length + 1) {
+                          final chatMessagesNotifier = ref.read(chatMessagesProvider(chatHook.chatId.value).notifier);
+                          if (chatMessagesNotifier.isLoadingNextPage()) {
+                            return SizedBox(
+                              height: 30,
+                              width: 30,
+                              child: Center(
+                                child: SpinKitSpinningLines(
+                                  color: context.colorScheme.onBackground,
+                                  size: 30,
+                                ),
+                              ),
                             );
                           }
-
-                          if (index == chatHook.messages.value.length + 1) {
-                            final chatMessagesNotifier = ref.read(chatMessagesProvider(chatHook.chatId.value).notifier);
-                            if (chatMessagesNotifier.isLoadingNextPage()) {
-                              return SizedBox(
-                                height: 30,
-                                width: 30,
-                                child: Center(
-                                  child: SpinKitSpinningLines(
-                                    color: context.colorScheme.onBackground,
-                                    size: 30,
-                                  ),
+                          if (chatMessagesNotifier.hasNextPage()) {
+                            return SizedBox(
+                              height: 30,
+                              width: 30,
+                              child: Center(
+                                child: Icon(
+                                  Icons.arrow_upward,
+                                  color: context.colorScheme.onBackground,
                                 ),
-                              );
-                            }
-                            if (chatMessagesNotifier.hasNextPage()) {
-                              return SizedBox(
-                                height: 30,
-                                width: 30,
-                                child: Center(
-                                  child: Icon(
-                                    Icons.arrow_upward,
-                                    color: context.colorScheme.onBackground,
-                                  ),
-                                ),
-                              );
-                            }
-                            return const SizedBox();
+                              ),
+                            );
                           }
+                          return const SizedBox();
+                        }
 
-                          final message = chatHook.messages.value[chatHook.messages.value.length - index];
-                          return Message(
-                            chatId: chatHook.chatId.value,
-                            message: message,
-                            isCurrentResponse: chatHook.currentResponseId.value == message.id,
-                            isLoading: chatHook.loading.value,
-                            isLastMessage: index == 1,
-                          );
-                        },
-                      ),
+                        final message = chatHook.messages.value[chatHook.messages.value.length - index];
+                        return Message(
+                          chatId: chatHook.chatId.value,
+                          message: message,
+                          isCurrentResponse: chatHook.currentResponseId.value == message.id,
+                          isLoading: chatHook.loading.value,
+                          isLastMessage: index == 1,
+                        );
+                      },
                     ),
                   ),
-                  if (chatHook.messages.value.isEmpty && currentUserPreferences.chatSuggestions) ...[
-                    Center(
-                      child: ChatSuggestions(
-                        onTap: (suggestionString) {
-                          if (currentUserPreferences.hapticFeedback) {
-                            HapticFeedback.lightImpact();
-                          }
-                          chatHook.append(
-                            ChatMessage(
-                              id: nanoid(),
-                              content: suggestionString,
-                              createdAt: DateTime.now(),
-                              role: Role.user,
-                            ),
-                          );
-                        },
-                      ),
+                ),
+                if (chatHook.messages.value.isEmpty && currentUserPreferences.chatSuggestions) ...[
+                  Center(
+                    child: ChatSuggestions(
+                      onTap: (suggestionString) {
+                        if (currentUserPreferences.hapticFeedback) {
+                          HapticFeedback.lightImpact();
+                        }
+                        chatHook.append(
+                          ChatMessage(
+                            id: nanoid(),
+                            content: suggestionString,
+                            createdAt: DateTime.now(),
+                            role: Role.user,
+                          ),
+                        );
+                      },
                     ),
-                  ],
-                  Positioned(
-                    bottom: 0,
-                    left: 0,
-                    right: 0,
-                    child: Column(
-                      children: [
-                        if (!scrollableEndIsInView.value) ...[
+                  ),
+                ],
+                Positioned(
+                  bottom: 0,
+                  left: 0,
+                  right: 0,
+                  child: Column(
+                    children: [
+                      if (!scrollableEndIsInView.value) ...[
+                        Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 5),
+                          child: IconButton(
+                            onPressed: () {
+                              if (currentUserPreferences.hapticFeedback) {
+                                HapticFeedback.lightImpact();
+                              }
+                              scrollToEnd();
+                            },
+                            style: IconButton.styleFrom(
+                              shape: const CircleBorder(),
+                              padding: const EdgeInsets.all(5),
+                              backgroundColor: context.secondaryColor,
+                              foregroundColor: context.colorScheme.onSecondary,
+                              shadowColor: context.theme.shadowColor,
+                              elevation: 5,
+                            ),
+                            icon: const Icon(
+                              Icons.arrow_downward,
+                              size: 32,
+                            ),
+                          ),
+                        ),
+                      ],
+                      Column(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 10,
+                            ),
+                            child: Opacity(
+                              opacity: 0.95,
+                              child: TextField(
+                                minLines: 1,
+                                maxLines: 4,
+                                controller: chatHook.inputController,
+                                focusNode: chatHook.inputFocusNode,
+                                onSubmitted: (_) {
+                                  submit();
+                                },
+                                onTapOutside: (event) {
+                                  chatHook.inputFocusNode.unfocus();
+                                },
+                                autocorrect: true,
+                                textCapitalization: TextCapitalization.sentences,
+                                keyboardType: TextInputType.multiline,
+                                decoration: InputDecoration(
+                                  contentPadding: const EdgeInsets.symmetric(
+                                    vertical: 10,
+                                    horizontal: 25,
+                                  ),
+                                  focusedBorder: OutlineInputBorder(
+                                    borderSide: BorderSide(
+                                      color: context.colorScheme.onBackground.withOpacity(0.2),
+                                    ),
+                                    borderRadius: BorderRadius.circular(40),
+                                  ),
+                                  enabledBorder: OutlineInputBorder(
+                                    borderSide: BorderSide(
+                                      color: context.colorScheme.onBackground.withOpacity(0.2),
+                                    ),
+                                    borderRadius: BorderRadius.circular(40),
+                                  ),
+                                  filled: true,
+                                  fillColor: context.colorScheme.background,
+                                  hintText: "Type a message",
+                                  prefixIconConstraints: const BoxConstraints(
+                                    minWidth: 0,
+                                    minHeight: 0,
+                                  ),
+                                  prefixIcon: IconButton(
+                                    visualDensity: VisualDensity.compact,
+                                    style: IconButton.styleFrom(
+                                      shape: CircleBorder(
+                                        side: BorderSide(
+                                          color: context.colorScheme.onBackground.withOpacity(0.2),
+                                        ),
+                                      ),
+                                      backgroundColor: currentUser.remainingQueries <= 5
+                                          ? context.colorScheme.error.withOpacity(0.2)
+                                          : null,
+                                    ),
+                                    onPressed: () {
+                                      context.go("/home/upgrade");
+                                    },
+                                    icon: Text(
+                                      currentUser.remainingQueries > 10
+                                          ? ">10"
+                                          : currentUser.remainingQueries.toString(),
+                                    ),
+                                  ),
+                                  suffixIcon: chatHook.loading.value
+                                      ? SizedBox(
+                                          width: 30,
+                                          height: 30,
+                                          child: SpinKitWave(
+                                            color: context.colorScheme.onBackground,
+                                            size: 15,
+                                          ),
+                                        )
+                                      : input.value.isEmpty
+                                          ? chatHook.messages.value.isNotEmpty
+                                              ? IconButton(
+                                                  visualDensity: VisualDensity.compact,
+                                                  onPressed: reload,
+                                                  icon: const FaIcon(
+                                                    FontAwesomeIcons.arrowRotateRight,
+                                                    size: 18,
+                                                  ),
+                                                )
+                                              : const SizedBox()
+                                          : IconButton(
+                                              visualDensity: VisualDensity.compact,
+                                              onPressed: submit,
+                                              icon: const Icon(
+                                                FontAwesomeIcons.arrowUp,
+                                                size: 18,
+                                              ),
+                                            ),
+                                ),
+                              ),
+                            ),
+                          ),
                           Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 5),
-                            child: IconButton(
-                              onPressed: () {
-                                if (currentUserPreferences.hapticFeedback) {
-                                  HapticFeedback.lightImpact();
-                                }
-                                scrollToEnd();
-                              },
-                              style: IconButton.styleFrom(
-                                shape: const CircleBorder(),
-                                padding: const EdgeInsets.all(5),
-                                backgroundColor: context.secondaryColor,
-                                foregroundColor: context.colorScheme.onSecondary,
-                                shadowColor: context.theme.shadowColor,
-                                elevation: 5,
+                            padding: const EdgeInsets.symmetric(
+                              vertical: 5,
+                            ),
+                            child: Text(
+                              "RevelationsAI can make mistakes. Validate all answers against the Bible.",
+                              style: context.textTheme.bodySmall?.copyWith(
+                                fontSize: 8,
+                                color: Colors.grey.shade400,
                               ),
-                              icon: const Icon(
-                                Icons.arrow_downward,
-                                size: 32,
-                              ),
+                              textAlign: TextAlign.center,
                             ),
                           ),
                         ],
-                        Column(
-                          children: [
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 10,
-                              ),
-                              child: Opacity(
-                                opacity: 0.95,
-                                child: TextField(
-                                  minLines: 1,
-                                  maxLines: 4,
-                                  controller: chatHook.inputController,
-                                  focusNode: chatHook.inputFocusNode,
-                                  onSubmitted: (_) {
-                                    submit();
-                                  },
-                                  onTapOutside: (event) {
-                                    chatHook.inputFocusNode.unfocus();
-                                  },
-                                  autocorrect: true,
-                                  textCapitalization: TextCapitalization.sentences,
-                                  keyboardType: TextInputType.multiline,
-                                  decoration: InputDecoration(
-                                    contentPadding: const EdgeInsets.symmetric(
-                                      vertical: 10,
-                                      horizontal: 25,
-                                    ),
-                                    focusedBorder: OutlineInputBorder(
-                                      borderSide: BorderSide(
-                                        color: context.colorScheme.onBackground.withOpacity(0.2),
-                                      ),
-                                      borderRadius: BorderRadius.circular(40),
-                                    ),
-                                    enabledBorder: OutlineInputBorder(
-                                      borderSide: BorderSide(
-                                        color: context.colorScheme.onBackground.withOpacity(0.2),
-                                      ),
-                                      borderRadius: BorderRadius.circular(40),
-                                    ),
-                                    filled: true,
-                                    fillColor: context.colorScheme.background,
-                                    hintText: "Type a message",
-                                    prefixIconConstraints: const BoxConstraints(
-                                      minWidth: 0,
-                                      minHeight: 0,
-                                    ),
-                                    prefixIcon: IconButton(
-                                      visualDensity: VisualDensity.compact,
-                                      style: IconButton.styleFrom(
-                                        shape: CircleBorder(
-                                          side: BorderSide(
-                                            color: context.colorScheme.onBackground.withOpacity(0.2),
-                                          ),
-                                        ),
-                                        backgroundColor: currentUser.remainingQueries <= 5
-                                            ? context.colorScheme.error.withOpacity(0.2)
-                                            : null,
-                                      ),
-                                      onPressed: () {
-                                        context.go("/home/upgrade");
-                                      },
-                                      icon: Text(
-                                        currentUser.remainingQueries > 10
-                                            ? ">10"
-                                            : currentUser.remainingQueries.toString(),
-                                      ),
-                                    ),
-                                    suffixIcon: chatHook.loading.value
-                                        ? SizedBox(
-                                            width: 30,
-                                            height: 30,
-                                            child: SpinKitWave(
-                                              color: context.colorScheme.onBackground,
-                                              size: 15,
-                                            ),
-                                          )
-                                        : input.value.isEmpty
-                                            ? chatHook.messages.value.isNotEmpty
-                                                ? IconButton(
-                                                    visualDensity: VisualDensity.compact,
-                                                    onPressed: reload,
-                                                    icon: const FaIcon(
-                                                      FontAwesomeIcons.arrowRotateRight,
-                                                      size: 18,
-                                                    ),
-                                                  )
-                                                : const SizedBox()
-                                            : IconButton(
-                                                visualDensity: VisualDensity.compact,
-                                                onPressed: submit,
-                                                icon: const Icon(
-                                                  FontAwesomeIcons.arrowUp,
-                                                  size: 18,
-                                                ),
-                                              ),
-                                  ),
-                                ),
-                              ),
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.symmetric(
-                                vertical: 5,
-                              ),
-                              child: Text(
-                                "RevelationsAI can make mistakes. Validate all answers against the Bible.",
-                                style: context.textTheme.bodySmall?.copyWith(
-                                  fontSize: 8,
-                                  color: Colors.grey.shade400,
-                                ),
-                                textAlign: TextAlign.center,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
-                  if (isRefreshingChat.value) ...[
-                    Positioned.fill(
-                      child: Container(
-                        color: Colors.black.withOpacity(0.4),
-                        child: Center(
-                          child: SpinKitSpinningLines(
-                            color: context.colorScheme.secondary,
-                            size: 60,
-                          ),
+                ),
+                if (isRefreshingChat.value) ...[
+                  Positioned.fill(
+                    child: Container(
+                      color: Colors.black.withOpacity(0.4),
+                      child: Center(
+                        child: SpinKitSpinningLines(
+                          color: context.colorScheme.secondary,
+                          size: 60,
                         ),
                       ),
                     ),
-                  ]
-                ],
-              ),
-      ),
+                  ),
+                ]
+              ],
+            ),
     );
   }
 }

@@ -13,7 +13,7 @@ import 'package:revelationsai/src/widgets/chat/create_dialog.dart';
 import 'package:revelationsai/src/widgets/refresh_indicator.dart';
 
 class ChatModal extends HookConsumerWidget {
-  static const _pageSize = 6;
+  static const _pageSize = 9;
 
   const ChatModal({super.key});
 
@@ -313,6 +313,7 @@ class ChatListItem extends HookConsumerWidget {
           color: currentChatId == chat.id ? context.secondaryColor.withOpacity(0.2) : Colors.transparent,
         ),
         child: ListTile(
+          dense: true,
           visualDensity: VisualDensity.compact,
           title: Text(
             chat.name,
