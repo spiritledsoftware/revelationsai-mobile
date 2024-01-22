@@ -25,7 +25,7 @@ class ChatSuggestions extends HookWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(
-                    'Not where to start?',
+                    'Not sure where to start?',
                     style: context.textTheme.headlineMedium?.copyWith(
                       color: context.secondaryColor,
                     ),
