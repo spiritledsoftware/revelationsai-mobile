@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -91,6 +92,7 @@ class UpgradeScreen extends HookConsumerWidget {
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         foregroundColor: context.colorScheme.onBackground,
+        systemOverlayStyle: context.isDarkMode ? SystemUiOverlayStyle.light : SystemUiOverlayStyle.dark,
       ),
       body: customerInfo.hasValue && packages.hasValue
           ? Stack(

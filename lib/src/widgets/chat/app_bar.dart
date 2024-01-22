@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:revelationsai/src/hooks/use_chat.dart';
 import 'package:revelationsai/src/models/chat.dart';
@@ -27,6 +28,7 @@ class ChatAppBar extends HookConsumerWidget implements PreferredSizeWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     return ColoredSafeArea(
       color: context.colorScheme.primary,
+      overlayStyle: SystemUiOverlayStyle.light,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 150),
         height: showToolbar.value ? preferredSize.height : 0,
