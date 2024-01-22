@@ -7,7 +7,6 @@ import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:revelationsai/src/constants/visual_density.dart';
 import 'package:revelationsai/src/providers/user/current.dart';
-import 'package:revelationsai/src/providers/user/preferences.dart';
 import 'package:revelationsai/src/utils/build_context_extensions.dart';
 import 'package:revelationsai/src/widgets/account/change_password_dialog.dart';
 import 'package:revelationsai/src/widgets/account/delete_account_dialog.dart';
@@ -21,21 +20,14 @@ class AccountScreen extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final currentUser = ref.watch(currentUserProvider).requireValue;
-    final currentUserPrefs = ref.watch(currentUserPreferencesProvider).requireValue;
-    final hapticFeedbackEnabled = currentUserPrefs.hapticFeedback;
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: context.isDarkMode ? SystemUiOverlayStyle.light : SystemUiOverlayStyle.dark,
       child: Scaffold(
-        floatingActionButtonLocation: FloatingActionButtonLocation.miniStartTop,
-        floatingActionButton: IconButton(
-          onPressed: () {
-            if (hapticFeedbackEnabled) {
-              HapticFeedback.lightImpact();
-            }
-            context.go("/home");
-          },
-          icon: const Icon(Icons.chevron_left, size: 40),
+        appBar: AppBar(
+          automaticallyImplyLeading: true,
+          backgroundColor: Colors.transparent,
+          foregroundColor: context.colorScheme.onBackground,
         ),
         body: Stack(
           children: [

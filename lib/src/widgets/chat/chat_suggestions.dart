@@ -25,7 +25,7 @@ class ChatSuggestions extends HookWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(
-                    'Not Sure What to Say?',
+                    'Not where to start?',
                     style: context.textTheme.headlineMedium?.copyWith(
                       color: context.secondaryColor,
                     ),
@@ -38,7 +38,7 @@ class ChatSuggestions extends HookWidget {
               SizedBox(
                 width: context.width * 0.6,
                 child: const Text(
-                  "Tap on any of the starter prompts from the topics below to get started.",
+                  "Tap on any of the starter prompts from the topics below.",
                   textAlign: TextAlign.center,
                 ),
               ),

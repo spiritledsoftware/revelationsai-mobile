@@ -23,7 +23,7 @@ class ChatModal extends HookConsumerWidget {
     final searchTextController = useTextEditingController();
     final searchText = useState('');
 
-    final chatsPages = ref.watch(chatsPagesProvider(
+    final watchedChatsPages = ref.watch(chatsPagesProvider(
       pageSize: _pageSize,
       queryString: searchText.value,
     ));
@@ -32,16 +32,26 @@ class ChatModal extends HookConsumerWidget {
       queryString: searchText.value,
     ).notifier);
 
+    final chatsPages = useState(watchedChatsPages.value ?? []);
+    useEffect(() {
+      chatsPages.value = watchedChatsPages.value ?? chatsPages.value;
+      return () {};
+    }, [watchedChatsPages.value]);
+
     useEffect(() {
       chatsPagesNotifier.refresh();
       return () {};
     }, []);
 
     useEffect(() {
-      searchTextController.addListener(() {
+      void closure() {
         searchText.value = searchTextController.text;
-      });
-      return () {};
+      }
+
+      searchTextController.addListener(closure);
+      return () {
+        searchTextController.removeListener(closure);
+      };
     }, [searchTextController]);
 
     return Container(
@@ -169,7 +179,7 @@ class ChatModal extends HookConsumerWidget {
               ],
             ),
           ),
-          if (chatsPagesNotifier.isLoadingInitial() || !chatsPages.hasValue) ...[
+          if (chatsPagesNotifier.isLoadingInitial() && chatsPages.value.isEmpty) ...[
             Expanded(
               child: Center(
                 child: SpinKitSpinningLines(
@@ -191,9 +201,9 @@ class ChatModal extends HookConsumerWidget {
                 },
                 child: ListView.builder(
                   physics: const AlwaysScrollableScrollPhysics(),
-                  itemCount: chatsPages.requireValue.expand((element) => element).toList().length + 1,
+                  itemCount: chatsPages.value.expand((element) => element).toList().length + 1,
                   itemBuilder: (listItemContext, index) {
-                    if (index == chatsPages.requireValue.expand((element) => element).toList().length) {
+                    if (index == chatsPages.value.expand((element) => element).toList().length) {
                       return chatsPagesNotifier.hasNextPage()
                           ? Padding(
                               padding: const EdgeInsets.symmetric(
@@ -222,7 +232,7 @@ class ChatModal extends HookConsumerWidget {
                           : const SizedBox();
                     }
 
-                    final chatsFlat = chatsPages.requireValue.expand((element) => element).toList();
+                    final chatsFlat = chatsPages.value.expand((element) => element).toList();
                     final chat = chatsFlat[index];
                     return ChatListItem(
                       key: ValueKey(chat.id),

@@ -133,11 +133,12 @@ class DevotionScreen extends HookConsumerWidget {
                 automaticallyImplyLeading: false,
                 snap: true,
                 floating: true,
+                centerTitle: false,
                 backgroundColor: context.colorScheme.primary,
                 systemOverlayStyle: SystemUiOverlayStyle.light,
                 title: loading.value || devotion.value == null
                     ? Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
+                        mainAxisAlignment: MainAxisAlignment.start,
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           const Text("Loading Devotion"),
@@ -151,6 +152,7 @@ class DevotionScreen extends HookConsumerWidget {
                         ],
                       )
                     : Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
                             devotion.value!.topic.toTitleCase(),

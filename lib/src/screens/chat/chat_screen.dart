@@ -1,5 +1,6 @@
 import 'package:another_flushbar/flushbar.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
@@ -18,10 +19,9 @@ import 'package:revelationsai/src/providers/user/preferences.dart';
 import 'package:revelationsai/src/utils/advertisement.dart';
 import 'package:revelationsai/src/utils/build_context_extensions.dart';
 import 'package:revelationsai/src/utils/in_app_review.dart';
-import 'package:revelationsai/src/widgets/chat/action_menu_button.dart';
+import 'package:revelationsai/src/widgets/chat/app_bar.dart';
 import 'package:revelationsai/src/widgets/chat/chat_suggestions.dart';
 import 'package:revelationsai/src/widgets/chat/message.dart';
-import 'package:revelationsai/src/widgets/chat/model_selection_button.dart';
 
 class ChatScreen extends HookConsumerWidget {
   final String? initChatId;
@@ -41,6 +41,7 @@ class ChatScreen extends HookConsumerWidget {
     final currentUserPreferences = ref.watch(currentUserPreferencesProvider).requireValue;
 
     final isMounted = useIsMounted();
+    final showToolbar = useState(true);
     final scrollableEndIsInView = useState(true);
     final isLoadingChat = useState(false);
     final isRefreshingChat = useState(false);
@@ -264,46 +265,56 @@ class ChatScreen extends HookConsumerWidget {
       return () {};
     }, [alert.value]);
 
-    void inputListener() {
-      if (isMounted()) {
+    useEffect(() {
+      void inputListener() {
         input.value = chatHook.inputController.text;
       }
-    }
 
-    useEffect(() {
       chatHook.inputController.addListener(inputListener);
       return () {
         chatHook.inputController.removeListener(inputListener);
       };
     }, [chatHook.inputController]);
 
-    void scrollListener() {
-      if (scrollController.position.outOfRange) {
-        return;
-      }
-
-      final chatMessagesNotifier = ref.read(chatMessagesProvider(chatHook.chatId.value).notifier);
-      if (scrollController.offset <= scrollController.position.minScrollExtent) {
-        if (isMounted()) {
-          scrollableEndIsInView.value = true;
-        }
-      } else if (scrollController.offset >= scrollController.position.maxScrollExtent &&
-          chatMessagesNotifier.hasNextPage() &&
-          !chatMessagesNotifier.isLoadingNextPage()) {
-        chatMessagesNotifier.fetchNextPage().then((value) {
-          if (isMounted()) {
-            chatHook.messages.value.addAll(value);
-          }
-        });
-      } else {
-        if (isMounted()) {
-          scrollableEndIsInView.value = false;
-        }
-      }
-    }
-
     useEffect(() {
       debugPrint("ChatScreen: scrollController.hasClients: ${scrollController.hasClients}");
+
+      void scrollListener() {
+        if (scrollController.position.userScrollDirection == ScrollDirection.forward) {
+          if (isMounted()) {
+            showToolbar.value = true;
+          }
+        } else if (scrollController.position.userScrollDirection == ScrollDirection.reverse) {
+          if (isMounted()) {
+            showToolbar.value = false;
+          }
+        }
+
+        if (scrollController.position.outOfRange) {
+          return;
+        }
+
+        final chatMessagesNotifier = ref.read(chatMessagesProvider(chatHook.chatId.value).notifier);
+        if (scrollController.offset <= scrollController.position.minScrollExtent) {
+          if (isMounted()) {
+            scrollableEndIsInView.value = true;
+            showToolbar.value = true;
+          }
+        } else if (scrollController.offset >= scrollController.position.maxScrollExtent &&
+            chatMessagesNotifier.hasNextPage() &&
+            !chatMessagesNotifier.isLoadingNextPage()) {
+          chatMessagesNotifier.fetchNextPage().then((value) {
+            if (isMounted()) {
+              chatHook.messages.value.addAll(value);
+            }
+          });
+        } else {
+          if (isMounted()) {
+            scrollableEndIsInView.value = false;
+          }
+        }
+      }
+
       if (scrollController.hasClients) {
         scrollController.addListener(scrollListener);
       } else {
@@ -311,39 +322,19 @@ class ChatScreen extends HookConsumerWidget {
           scrollableEndIsInView.value = true;
         }
       }
+
       return () {
         scrollController.removeListener(scrollListener);
       };
     }, [scrollController.hasClients]);
 
     return Scaffold(
-      appBar: AppBar(
-        automaticallyImplyLeading: false,
-        centerTitle: false,
-        title: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              chat.value?.name ?? "New Chat",
-              softWrap: false,
-              overflow: TextOverflow.ellipsis,
-              style: context.textTheme.titleMedium?.copyWith(
-                color: context.colorScheme.onPrimary,
-              ),
-            ),
-            ModelSelectionButton(chatHook: chatHook),
-          ],
-        ),
-        actions: [
-          ChatActionMenuButton(
-            chatHook: chatHook,
-            chat: chat,
-            isMounted: isMounted,
-            isRefreshingChat: isRefreshingChat,
-            refreshChatData: refreshChatData,
-          ),
-        ],
+      appBar: ChatAppBar(
+        showToolbar: showToolbar,
+        chat: chat,
+        chatHook: chatHook,
+        isRefreshingChat: isRefreshingChat,
+        refreshChatData: refreshChatData,
       ),
       body: isLoadingChat.value
           ? Center(

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:revelationsai/src/models/chat.dart';
 import 'package:revelationsai/src/providers/chat/single.dart';
@@ -92,8 +93,12 @@ class RenameDialog extends HookConsumerWidget {
                   color: context.colorScheme.error,
                 )
               : updateSnapshot.connectionState == ConnectionState.waiting
-                  ? CircularProgressIndicator.adaptive(
-                      backgroundColor: context.colorScheme.onPrimary,
+                  ? SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: SpinKitSpinningLines(
+                        color: context.secondaryColor,
+                      ),
                     )
                   : const Text("Save"),
         ),

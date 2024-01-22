@@ -12,6 +12,7 @@ import 'package:revelationsai/src/providers/devotion/latest.dart';
 import 'package:revelationsai/src/providers/user/current.dart';
 import 'package:revelationsai/src/providers/user/message/most_asked.dart';
 import 'package:revelationsai/src/providers/user/preferences.dart';
+import 'package:revelationsai/src/services/user.dart';
 import 'package:revelationsai/src/utils/build_context_extensions.dart';
 import 'package:revelationsai/src/utils/capitalization.dart';
 import 'package:revelationsai/src/widgets/branding/logo.dart';
@@ -49,6 +50,7 @@ class HomeScreen extends HookConsumerWidget {
 
     final queryTextController = useTextEditingController();
     final queryTextFocusNode = useFocusNode();
+    final queryText = useState("");
 
     final latestDevotion = ref.watch(latestDevotionProvider);
     final mostAskedUserMessages = ref.watch(mostAskedUserMessagesProvider(5));
@@ -60,6 +62,17 @@ class HomeScreen extends HookConsumerWidget {
       ]);
       return () {};
     }, []);
+
+    useEffect(() {
+      void closure() {
+        queryText.value = queryTextController.text;
+      }
+
+      queryTextController.addListener(closure);
+      return () {
+        queryTextController.removeListener(closure);
+      };
+    }, [queryTextController]);
 
     return Scaffold(
       body: ColoredSafeArea(
@@ -74,10 +87,15 @@ class HomeScreen extends HookConsumerWidget {
               centerTitle: false,
               backgroundColor: context.colorScheme.primary,
               systemOverlayStyle: SystemUiOverlayStyle.light,
-              title: const Logo(
-                colorScheme: RAIColorScheme.light,
-                width: 200,
-              ),
+              title: UserService.hasPlus(currentUser) || UserService.isAdmin(currentUser)
+                  ? Image.asset(
+                      "assets/logo/plus-logo-light.png",
+                      width: 200,
+                    )
+                  : const Logo(
+                      colorScheme: RAIColorScheme.light,
+                      width: 200,
+                    ),
               actions: [
                 IconButton(
                   onPressed: () {
@@ -130,152 +148,154 @@ class HomeScreen extends HookConsumerWidget {
                     textAlign: TextAlign.center,
                   ),
                 ),
-                const SizedBox(height: 20),
-                GestureDetector(
-                  onTap: () {
-                    if (hapticFeedbackEnabled) {
-                      HapticFeedback.lightImpact();
-                    }
-                    context.go("/home/upgrade");
-                  },
-                  child: Container(
-                    margin: const EdgeInsets.symmetric(
-                      horizontal: 10,
-                    ),
-                    padding: const EdgeInsets.all(20),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(20),
-                      color: context.colorScheme.secondary.withOpacity(0.2),
-                    ),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Image.asset(
-                          context.brightness == Brightness.light
-                              ? "assets/logo/plus-logo-dark.png"
-                              : "assets/logo/plus-logo-light.png",
-                          width: context.width * 0.8,
-                        ),
-                        Column(
-                          children: [
-                            Text.rich(
-                              TextSpan(
-                                children: [
-                                  WidgetSpan(
-                                    child: Icon(
-                                      Icons.add,
-                                      size: 20,
-                                      color: context.colorScheme.onBackground,
+                if (!UserService.hasPlus(currentUser) && !UserService.isAdmin(currentUser)) ...[
+                  GestureDetector(
+                    onTap: () {
+                      if (hapticFeedbackEnabled) {
+                        HapticFeedback.lightImpact();
+                      }
+                      context.go("/home/upgrade");
+                    },
+                    child: Container(
+                      margin: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 10,
+                      ),
+                      padding: const EdgeInsets.all(20),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(20),
+                        color: context.colorScheme.secondary.withOpacity(0.2),
+                      ),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Image.asset(
+                            context.brightness == Brightness.light
+                                ? "assets/logo/plus-logo-dark.png"
+                                : "assets/logo/plus-logo-light.png",
+                            width: context.width * 0.8,
+                          ),
+                          Column(
+                            children: [
+                              Text.rich(
+                                TextSpan(
+                                  children: [
+                                    WidgetSpan(
+                                      child: Icon(
+                                        Icons.add,
+                                        size: 20,
+                                        color: context.colorScheme.onBackground,
+                                      ),
+                                      alignment: PlaceholderAlignment.middle,
                                     ),
-                                    alignment: PlaceholderAlignment.middle,
-                                  ),
-                                  TextSpan(
-                                    children: [
-                                      WidgetSpan(
-                                        child: GestureDetector(
-                                          onTap: () {
-                                            launchUrlString("https://www.anthropic.com/news/claude-2-1");
-                                          },
-                                          child: Text(
-                                            'Anthropic Claude v2',
-                                            style: context.textTheme.titleMedium?.copyWith(
-                                              color: context.colorScheme.secondary,
+                                    TextSpan(
+                                      children: [
+                                        WidgetSpan(
+                                          child: GestureDetector(
+                                            onTap: () {
+                                              launchUrlString("https://www.anthropic.com/news/claude-2-1");
+                                            },
+                                            child: Text(
+                                              'Anthropic Claude v2.1',
+                                              style: context.textTheme.titleMedium?.copyWith(
+                                                color: context.colorScheme.secondary,
+                                              ),
                                             ),
                                           ),
+                                          alignment: PlaceholderAlignment.middle,
                                         ),
-                                        alignment: PlaceholderAlignment.middle,
-                                      ),
-                                      const TextSpan(text: " in chat")
-                                    ],
-                                    style: context.textTheme.titleMedium,
-                                  ),
-                                ],
-                              ),
-                            ),
-                            Text.rich(
-                              TextSpan(
-                                children: [
-                                  WidgetSpan(
-                                    child: Icon(
-                                      Icons.add,
-                                      size: 20,
-                                      color: context.colorScheme.onBackground,
+                                        const TextSpan(text: " in chat")
+                                      ],
+                                      style: context.textTheme.titleMedium,
                                     ),
-                                    alignment: PlaceholderAlignment.middle,
-                                  ),
-                                  TextSpan(
-                                    children: [
-                                      TextSpan(
-                                        text: "Unlimited",
-                                        style: context.textTheme.titleMedium?.copyWith(
-                                          fontWeight: FontWeight.bold,
+                                  ],
+                                ),
+                              ),
+                              Text.rich(
+                                TextSpan(
+                                  children: [
+                                    WidgetSpan(
+                                      child: Icon(
+                                        Icons.add,
+                                        size: 20,
+                                        color: context.colorScheme.onBackground,
+                                      ),
+                                      alignment: PlaceholderAlignment.middle,
+                                    ),
+                                    TextSpan(
+                                      children: [
+                                        TextSpan(
+                                          text: "Unlimited",
+                                          style: context.textTheme.titleMedium?.copyWith(
+                                            fontWeight: FontWeight.bold,
+                                          ),
                                         ),
-                                      ),
-                                      const TextSpan(
-                                        text: " queries per day",
-                                      ),
-                                    ],
-                                    style: context.textTheme.titleMedium,
-                                  ),
-                                ],
-                              ),
-                            ),
-                            Text.rich(
-                              TextSpan(
-                                children: [
-                                  WidgetSpan(
-                                    child: Icon(
-                                      Icons.add,
-                                      size: 20,
-                                      color: context.colorScheme.onBackground,
-                                    ),
-                                    alignment: PlaceholderAlignment.middle,
-                                  ),
-                                  TextSpan(
-                                    children: [
-                                      TextSpan(
-                                        text: "Unlimited",
-                                        style: context.textTheme.titleMedium?.copyWith(
-                                          fontWeight: FontWeight.bold,
+                                        const TextSpan(
+                                          text: " queries per day",
                                         ),
-                                      ),
-                                      const TextSpan(
-                                        text: " images per day",
-                                      ),
-                                    ],
-                                    style: context.textTheme.titleMedium,
-                                  ),
-                                ],
-                              ),
-                            ),
-                            Text.rich(
-                              TextSpan(
-                                children: [
-                                  WidgetSpan(
-                                    child: Icon(
-                                      Icons.add,
-                                      size: 20,
-                                      color: context.colorScheme.onBackground,
+                                      ],
+                                      style: context.textTheme.titleMedium,
                                     ),
-                                    alignment: PlaceholderAlignment.middle,
-                                  ),
-                                  TextSpan(
-                                    text: 'Ad-free experience',
-                                    style: context.textTheme.titleMedium,
-                                  ),
-                                ],
+                                  ],
+                                ),
                               ),
-                            ),
-                          ],
-                        ),
-                      ],
+                              Text.rich(
+                                TextSpan(
+                                  children: [
+                                    WidgetSpan(
+                                      child: Icon(
+                                        Icons.add,
+                                        size: 20,
+                                        color: context.colorScheme.onBackground,
+                                      ),
+                                      alignment: PlaceholderAlignment.middle,
+                                    ),
+                                    TextSpan(
+                                      children: [
+                                        TextSpan(
+                                          text: "Unlimited",
+                                          style: context.textTheme.titleMedium?.copyWith(
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                        const TextSpan(
+                                          text: " images per day",
+                                        ),
+                                      ],
+                                      style: context.textTheme.titleMedium,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              Text.rich(
+                                TextSpan(
+                                  children: [
+                                    WidgetSpan(
+                                      child: Icon(
+                                        Icons.add,
+                                        size: 20,
+                                        color: context.colorScheme.onBackground,
+                                      ),
+                                      alignment: PlaceholderAlignment.middle,
+                                    ),
+                                    TextSpan(
+                                      text: 'Ad-free experience',
+                                      style: context.textTheme.titleMedium,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
                     ),
                   ),
-                ),
-                const SizedBox(height: 20),
+                ],
                 Container(
                   margin: const EdgeInsets.symmetric(
                     horizontal: 10,
+                    vertical: 10,
                   ),
                   padding: const EdgeInsets.all(20),
                   decoration: BoxDecoration(
@@ -334,19 +354,21 @@ class HomeScreen extends HookConsumerWidget {
                             ),
                             borderRadius: BorderRadius.circular(25),
                           ),
-                          suffixIcon: IconButton(
-                            visualDensity: VisualDensity.compact,
-                            onPressed: () {
-                              if (hapticFeedbackEnabled) {
-                                HapticFeedback.lightImpact();
-                              }
-                              context.go("/chat?query=${queryTextController.text}");
-                            },
-                            icon: const FaIcon(
-                              FontAwesomeIcons.arrowUp,
-                              size: 18,
-                            ),
-                          ),
+                          suffixIcon: queryText.value.isNotEmpty
+                              ? IconButton(
+                                  visualDensity: VisualDensity.compact,
+                                  onPressed: () {
+                                    if (hapticFeedbackEnabled) {
+                                      HapticFeedback.lightImpact();
+                                    }
+                                    context.go("/chat?query=${queryTextController.text}");
+                                  },
+                                  icon: const FaIcon(
+                                    FontAwesomeIcons.arrowUp,
+                                    size: 18,
+                                  ),
+                                )
+                              : null,
                         ),
                         onTapOutside: (event) {
                           queryTextFocusNode.unfocus();
@@ -355,10 +377,10 @@ class HomeScreen extends HookConsumerWidget {
                     ],
                   ),
                 ),
-                const SizedBox(height: 20),
                 Container(
                   margin: const EdgeInsets.symmetric(
                     horizontal: 10,
+                    vertical: 10,
                   ),
                   padding: const EdgeInsets.all(20),
                   decoration: BoxDecoration(
@@ -414,6 +436,8 @@ class HomeScreen extends HookConsumerWidget {
                         error: (error, stackTrace) => Center(
                           child: Text(
                             error.toString(),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
                             style: context.textTheme.titleMedium,
                           ),
                         ),
@@ -427,10 +451,10 @@ class HomeScreen extends HookConsumerWidget {
                     ],
                   ),
                 ),
-                const SizedBox(height: 20),
                 Container(
                   margin: const EdgeInsets.symmetric(
                     horizontal: 10,
+                    vertical: 10,
                   ),
                   padding: const EdgeInsets.all(20),
                   decoration: BoxDecoration(
@@ -507,6 +531,8 @@ class HomeScreen extends HookConsumerWidget {
                         error: (error, stackTrace) => Center(
                           child: Text(
                             error.toString(),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
                             style: context.textTheme.titleMedium,
                           ),
                         ),
@@ -520,10 +546,10 @@ class HomeScreen extends HookConsumerWidget {
                     ],
                   ),
                 ),
-                const SizedBox(height: 20),
                 Container(
                   margin: const EdgeInsets.symmetric(
                     horizontal: 10,
+                    vertical: 10,
                   ),
                   padding: const EdgeInsets.all(20),
                   decoration: BoxDecoration(
@@ -582,6 +608,8 @@ class HomeScreen extends HookConsumerWidget {
                         error: (error, stackTrace) => Center(
                           child: Text(
                             error.toString(),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
                             style: context.textTheme.titleMedium,
                           ),
                         ),
@@ -595,7 +623,6 @@ class HomeScreen extends HookConsumerWidget {
                     ],
                   ),
                 ),
-                const SizedBox(height: 20),
               ],
             ),
           ),

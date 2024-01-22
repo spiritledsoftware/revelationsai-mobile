@@ -90,6 +90,7 @@ class UpgradeScreen extends HookConsumerWidget {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.transparent,
+        foregroundColor: context.colorScheme.onBackground,
       ),
       body: customerInfo.hasValue && packages.hasValue
           ? Stack(
@@ -131,7 +132,7 @@ class UpgradeScreen extends HookConsumerWidget {
                                           launchUrlString("https://www.anthropic.com/news/claude-2-1");
                                         },
                                         child: Text(
-                                          'Anthropic Claude v2',
+                                          'Anthropic Claude v2.1',
                                           style: context.textTheme.titleMedium?.copyWith(
                                             color: context.colorScheme.secondary,
                                           ),

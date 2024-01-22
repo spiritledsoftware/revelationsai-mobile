@@ -23,7 +23,7 @@ class DevotionModal extends HookConsumerWidget {
     final searchTextFocusNode = useFocusNode();
     final searchText = useState('');
 
-    final devotionsPages = ref.watch(devotionsPagesProvider(
+    final watchedDevotionsPages = ref.watch(devotionsPagesProvider(
       pageSize: _pageSize,
       queryString: searchText.value,
     ));
@@ -32,16 +32,26 @@ class DevotionModal extends HookConsumerWidget {
       queryString: searchText.value,
     ).notifier);
 
+    final devotionsPages = useState(watchedDevotionsPages.value ?? []);
+    useEffect(() {
+      devotionsPages.value = watchedDevotionsPages.value ?? devotionsPages.value;
+      return () {};
+    }, [watchedDevotionsPages.value]);
+
     useEffect(() {
       devotionsPagesNotifier.refresh();
       return () {};
     }, []);
 
     useEffect(() {
-      searchTextController.addListener(() {
+      void closure() {
         searchText.value = searchTextController.text;
-      });
-      return () {};
+      }
+
+      searchTextController.addListener(closure);
+      return () {
+        searchTextController.removeListener(closure);
+      };
     }, [searchTextController]);
 
     return Container(
@@ -147,7 +157,7 @@ class DevotionModal extends HookConsumerWidget {
               ],
             ),
           ),
-          if (devotionsPagesNotifier.isLoadingInitial() || !devotionsPages.hasValue) ...[
+          if (devotionsPagesNotifier.isLoadingInitial() && devotionsPages.value.isEmpty) ...[
             Expanded(
               child: Center(
                 child: SpinKitSpinningLines(
@@ -169,9 +179,9 @@ class DevotionModal extends HookConsumerWidget {
                 },
                 child: ListView.builder(
                   physics: const AlwaysScrollableScrollPhysics(),
-                  itemCount: devotionsPages.requireValue.expand((element) => element).toList().length + 1,
+                  itemCount: devotionsPages.value.expand((element) => element).toList().length + 1,
                   itemBuilder: (listItemContext, index) {
-                    final devotionsFlat = devotionsPages.requireValue.expand((element) => element).toList();
+                    final devotionsFlat = devotionsPages.value.expand((element) => element).toList();
                     if (index == devotionsFlat.length) {
                       return devotionsPagesNotifier.hasNextPage()
                           ? Padding(

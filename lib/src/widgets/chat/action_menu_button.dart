@@ -17,7 +17,6 @@ class ChatActionMenuButton extends HookConsumerWidget {
   final UseChatReturnObject chatHook;
   final ValueNotifier<Chat?> chat;
   final ValueNotifier<bool> isRefreshingChat;
-  final bool Function() isMounted;
   final Future<void> Function() refreshChatData;
 
   const ChatActionMenuButton({
@@ -25,7 +24,6 @@ class ChatActionMenuButton extends HookConsumerWidget {
     required this.chatHook,
     required this.chat,
     required this.isRefreshingChat,
-    required this.isMounted,
     required this.refreshChatData,
   });
 
@@ -34,6 +32,8 @@ class ChatActionMenuButton extends HookConsumerWidget {
     final currentUserPreferences = ref.watch(currentUserPreferencesProvider).requireValue;
 
     final mainMenuKey = useState(GlobalKey<PopupMenuButtonState>());
+
+    final isMounted = useIsMounted();
 
     return PopupMenuButton(
       key: mainMenuKey.value,

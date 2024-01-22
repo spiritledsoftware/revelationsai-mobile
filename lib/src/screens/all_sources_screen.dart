@@ -22,7 +22,7 @@ class SourcesScreen extends HookConsumerWidget {
     final searchTextController = useTextEditingController();
     final searchText = useState('');
 
-    final dataSources = ref.watch(dataSourcesPagesProvider(
+    final watchedDataSources = ref.watch(dataSourcesPagesProvider(
       queryString: searchText.value,
       pageSize: pageSize,
     ));
@@ -31,11 +31,21 @@ class SourcesScreen extends HookConsumerWidget {
       pageSize: pageSize,
     ).notifier);
 
+    final dataSources = useState(watchedDataSources.value ?? []);
     useEffect(() {
-      searchTextController.addListener(() {
-        searchText.value = searchTextController.text;
-      });
+      dataSources.value = watchedDataSources.value ?? dataSources.value;
       return () {};
+    }, [watchedDataSources.value]);
+
+    useEffect(() {
+      void closure() {
+        searchText.value = searchTextController.text;
+      }
+
+      searchTextController.addListener(closure);
+      return () {
+        searchTextController.removeListener(closure);
+      };
     }, [searchTextController]);
 
     return Scaffold(
@@ -107,71 +117,66 @@ class SourcesScreen extends HookConsumerWidget {
                 ),
               ),
               Expanded(
-                child: dataSources.when(
-                  data: (data) {
-                    final sources = data.expand((element) => element).toList();
-                    return RAIRefreshIndicator(
-                      onRefresh: () async {
-                        await dataSourcesNotifier.refresh();
-                      },
-                      child: ListView.builder(
-                        itemCount: sources.length + 1,
-                        itemBuilder: (context, index) {
-                          if (index == sources.length) {
-                            return dataSourcesNotifier.hasNextPage()
-                                ? Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 16,
-                                      vertical: 8,
-                                    ),
-                                    child: ElevatedButton(
-                                      onPressed: () {
-                                        if (dataSourcesNotifier.isLoadingNextPage()) {
-                                          return;
-                                        }
-                                        dataSourcesNotifier.fetchNextPage();
-                                      },
-                                      child: dataSourcesNotifier.isLoadingNextPage()
-                                          ? SizedBox(
-                                              height: 20,
-                                              width: 20,
-                                              child: SpinKitSpinningLines(
-                                                color: context.secondaryColor,
-                                                size: 20,
-                                              ),
-                                            )
-                                          : const Text('Load more'),
-                                    ),
-                                  )
-                                : const SizedBox();
-                          }
-
-                          final dataSource = sources[index];
-                          return ListTile(
-                            onTap: () async {
-                              await launchUrlString(
-                                dataSource.url,
-                                mode: LaunchMode.externalApplication,
-                              );
-                            },
-                            title: Text(dataSource.title ?? dataSource.name),
-                            subtitle: Text(dataSource.author ?? Uri.parse(dataSource.url).origin),
-                            trailing: const FaIcon(
-                              FontAwesomeIcons.arrowUpRightFromSquare,
-                              size: 18,
-                            ),
-                          );
+                child: dataSourcesNotifier.isLoadingInitial() && dataSources.value.isEmpty
+                    ? SpinKitSpinningLines(
+                        color: context.secondaryColor,
+                        size: 40,
+                      )
+                    : RAIRefreshIndicator(
+                        onRefresh: () async {
+                          await dataSourcesNotifier.refresh();
                         },
+                        child: ListView.builder(
+                          itemCount: dataSources.value.expand((element) => element).length + 1,
+                          itemBuilder: (context, index) {
+                            final sources = dataSources.value.expand((element) => element).toList();
+                            if (index == sources.length) {
+                              return dataSourcesNotifier.hasNextPage()
+                                  ? Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 16,
+                                        vertical: 8,
+                                      ),
+                                      child: ElevatedButton(
+                                        onPressed: () {
+                                          if (dataSourcesNotifier.isLoadingNextPage()) {
+                                            return;
+                                          }
+                                          dataSourcesNotifier.fetchNextPage();
+                                        },
+                                        child: dataSourcesNotifier.isLoadingNextPage()
+                                            ? SizedBox(
+                                                height: 20,
+                                                width: 20,
+                                                child: SpinKitSpinningLines(
+                                                  color: context.secondaryColor,
+                                                  size: 20,
+                                                ),
+                                              )
+                                            : const Text('Load more'),
+                                      ),
+                                    )
+                                  : const SizedBox();
+                            }
+
+                            final dataSource = sources[index];
+                            return ListTile(
+                              onTap: () async {
+                                await launchUrlString(
+                                  dataSource.url,
+                                  mode: LaunchMode.externalApplication,
+                                );
+                              },
+                              title: Text(dataSource.title ?? dataSource.name),
+                              subtitle: Text(dataSource.author ?? Uri.parse(dataSource.url).origin),
+                              trailing: const FaIcon(
+                                FontAwesomeIcons.arrowUpRightFromSquare,
+                                size: 18,
+                              ),
+                            );
+                          },
+                        ),
                       ),
-                    );
-                  },
-                  loading: () => Center(
-                    child: SpinKitSpinningLines(
-                      color: context.secondaryColor,
-                    ),
-                  ),
-                  error: (error, stackTrace) => Center(child: Text(error.toString())),
-                ),
               ),
             ],
           ),

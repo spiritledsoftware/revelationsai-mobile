@@ -5,7 +5,6 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:newrelic_mobile/config.dart';
@@ -23,8 +22,7 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
 }
 
 Future<void> main() async {
-  final binding = WidgetsFlutterBinding.ensureInitialized();
-  FlutterNativeSplash.preserve(widgetsBinding: binding);
+  WidgetsFlutterBinding.ensureInitialized();
 
   debugPrint('Initializing Firebase');
   await Firebase.initializeApp(
@@ -42,15 +40,16 @@ Future<void> main() async {
     }
   });
 
-  await MobileAds.instance.initialize();
-  const testDeviceId = String.fromEnvironment('TEST_DEVICE_ID', defaultValue: "");
-  if (testDeviceId.isNotEmpty) {
-    await MobileAds.instance.updateRequestConfiguration(
-      RequestConfiguration(
-        testDeviceIds: [testDeviceId],
-      ),
-    );
-  }
+  await MobileAds.instance.initialize().then((value) async {
+    const testDeviceId = String.fromEnvironment('TEST_DEVICE_ID', defaultValue: "");
+    if (testDeviceId.isNotEmpty) {
+      await MobileAds.instance.updateRequestConfiguration(
+        RequestConfiguration(
+          testDeviceIds: [testDeviceId],
+        ),
+      );
+    }
+  });
 
   String? initLocation;
   final initMessage = await FirebaseMessaging.instance.getInitialMessage();

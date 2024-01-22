@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:go_router/go_router.dart';
 import 'package:revelationsai/src/providers/advertisements/interstitial_ad.dart';
 import 'package:revelationsai/src/providers/chat/current_id.dart';
@@ -55,9 +54,6 @@ class RouterListenable extends _$RouterListenable implements Listenable {
       debugPrint("Router is loading");
       return isSplash ? null : "/?redirect=${Uri.encodeComponent("${state.uri.path}?${state.uri.query}")}";
     }
-
-    debugPrint("Router initialized, removing splash screen...");
-    FlutterNativeSplash.remove();
 
     debugPrint("Router path: ${state.uri.path}");
 

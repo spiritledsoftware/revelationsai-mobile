@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -195,8 +196,12 @@ class ChangePasswordDialog extends HookConsumerWidget {
                   color: context.colorScheme.error,
                 )
               : updateSnapshot.connectionState == ConnectionState.waiting
-                  ? CircularProgressIndicator.adaptive(
-                      backgroundColor: context.colorScheme.onPrimary,
+                  ? SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: SpinKitSpinningLines(
+                        color: context.colorScheme.onPrimary,
+                      ),
                     )
                   : const Text("Change"),
         ),
