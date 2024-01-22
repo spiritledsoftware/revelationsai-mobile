@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:revelationsai/src/hooks/use_chat.dart';
 import 'package:revelationsai/src/providers/user/current.dart';
+import 'package:revelationsai/src/services/user.dart';
 import 'package:revelationsai/src/utils/build_context_extensions.dart';
 
 const claudeV2 = 'anthropic.claude-v2:1';
@@ -33,7 +34,7 @@ class ModelSelectionButton extends HookConsumerWidget {
           for (final modelId in modelIdMapping.keys) ...[
             PopupMenuItem(
               onTap: () {
-                if (currentUser.maxQueries <= 5 && modelId == claudeV2) {
+                if (modelId == claudeV2 && !UserService.hasPlus(currentUser) && !UserService.isAdmin(currentUser)) {
                   context.go("/home/upgrade");
                   return;
                 }
@@ -55,10 +56,10 @@ class ModelSelectionButton extends HookConsumerWidget {
         children: [
           Text(
             chatHook.modelId.value == null
-                ? currentUser.maxQueries <= 5
-                    ? modelIdMapping[claudeV1]!
-                    : modelIdMapping[claudeV2]!
-                : modelIdMapping[chatHook.modelId.value!]!,
+                ? UserService.hasPlus(currentUser) || UserService.isAdmin(currentUser)
+                    ? modelIdMapping[claudeV2]!
+                    : modelIdMapping[claudeV1]!
+                : modelIdMapping[chatHook.modelId.value!] ?? chatHook.modelId.value!,
             style: context.textTheme.labelSmall?.copyWith(
               color: context.colorScheme.onPrimary.withOpacity(0.7),
             ),

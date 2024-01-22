@@ -146,4 +146,12 @@ class UserService {
       throw res.exception;
     }
   }
+
+  static bool hasPlus(UserInfo user) {
+    return user.roles.where((element) => element.name == "rc:plus").isNotEmpty;
+  }
+
+  static bool isAdmin(UserInfo user) {
+    return user.roles.where((element) => element.name == "admin").isNotEmpty;
+  }
 }
