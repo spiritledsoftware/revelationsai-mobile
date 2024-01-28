@@ -149,7 +149,7 @@ class ChatActionMenuButton extends HookConsumerWidget {
                   width: 10,
                 ),
                 Text(
-                  "New Chat",
+                  "New",
                   style: TextStyle(
                     color: context.colorScheme.onBackground,
                   ),
@@ -188,7 +188,7 @@ class ChatActionMenuButton extends HookConsumerWidget {
                   width: 10,
                 ),
                 Text(
-                  "Rename Chat",
+                  "Rename",
                   style: TextStyle(
                     color: context.colorScheme.onBackground,
                   ),
@@ -220,7 +220,7 @@ class ChatActionMenuButton extends HookConsumerWidget {
                   width: 10,
                 ),
                 Text(
-                  "Delete Chat",
+                  "Delete",
                   style: TextStyle(color: Colors.red),
                 ),
               ],

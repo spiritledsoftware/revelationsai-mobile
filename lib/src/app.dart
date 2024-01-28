@@ -11,7 +11,7 @@ import 'package:revelationsai/src/providers/chat/current_id.dart';
 import 'package:revelationsai/src/providers/devotion/current_id.dart';
 import 'package:revelationsai/src/providers/user/preferences.dart';
 import 'package:revelationsai/src/routes/routes.dart';
-import 'package:revelationsai/src/screens/splash_screen.dart';
+import 'package:revelationsai/src/screens/error_screen.dart';
 
 import 'routes/router_listenable.dart';
 
@@ -50,7 +50,7 @@ class RAIApp extends HookConsumerWidget {
         redirect: routerListenableNotifier.redirect,
         errorPageBuilder: (context, state) {
           return const NoTransitionPage(
-            child: SplashScreen(),
+            child: ErrorScreen(),
           );
         },
       ),

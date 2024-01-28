@@ -154,7 +154,8 @@ Future<ChatMessage> getStreamedResponse({
           Uuid.isValidUUID(fromString: response.headers["x-ai-response-id"]!)
       ? response.headers["x-ai-response-id"]
       : null;
-  reply = reply.copyWith(uuid: aiResponseUuid);
+  String? modelId = response.headers.containsKey("x-model-id") ? response.headers["x-model-id"] : null;
+  reply = reply.copyWith(uuid: aiResponseUuid, modelId: modelId);
 
   final appendFutures = <Future>[];
   final subscription = response.stream.transform(utf8.decoder).listen(

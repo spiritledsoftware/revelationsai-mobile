@@ -24,6 +24,8 @@ class ChatMessage with _$ChatMessage {
     required String content,
     required Role role,
     String? name,
+    String? modelId,
+    @Default([]) List<String> searchQueries,
     @Index() String? chatId,
   }) = _ChatMessage;
 

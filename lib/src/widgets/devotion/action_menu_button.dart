@@ -31,7 +31,7 @@ class DevotionActionMenuButton extends HookConsumerWidget {
 
     return PopupMenuButton(
       position: PopupMenuPosition.under,
-      offset: const Offset(0, 15),
+      offset: const Offset(0, 5),
       color: (context.brightness == Brightness.light ? Colors.grey.shade200 : context.colorScheme.primary)
           .withOpacity(0.97),
       shape: const RoundedRectangleBorder(

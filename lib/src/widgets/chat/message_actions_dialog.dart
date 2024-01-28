@@ -3,8 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:revelationsai/src/constants/llm.dart';
 import 'package:revelationsai/src/constants/visual_density.dart';
 import 'package:revelationsai/src/models/ai_response/reaction.dart';
 import 'package:revelationsai/src/models/chat/message.dart';
@@ -110,7 +112,7 @@ class MessageActionsDialog extends HookConsumerWidget {
                         });
                       },
                       visualDensity: RAIVisualDensity.tightest,
-                      iconSize: 18,
+                      iconSize: 16,
                       icon: AnimatedCrossFade(
                         duration: const Duration(milliseconds: 200),
                         crossFadeState: copied.value ? CrossFadeState.showFirst : CrossFadeState.showSecond,
@@ -148,7 +150,7 @@ class MessageActionsDialog extends HookConsumerWidget {
                         );
                       },
                       visualDensity: RAIVisualDensity.tightest,
-                      iconSize: 20,
+                      iconSize: 18,
                       icon: const Icon(CupertinoIcons.share_up),
                     ),
                     if (message.role == Role.assistant) ...[
@@ -162,7 +164,7 @@ class MessageActionsDialog extends HookConsumerWidget {
                           );
                         },
                         visualDensity: RAIVisualDensity.tightest,
-                        iconSize: 20,
+                        iconSize: 18,
                         icon: AnimatedCrossFade(
                           duration: const Duration(milliseconds: 200),
                           crossFadeState: reactions
@@ -196,7 +198,7 @@ class MessageActionsDialog extends HookConsumerWidget {
                           );
                         },
                         visualDensity: RAIVisualDensity.tightest,
-                        iconSize: 20,
+                        iconSize: 18,
                         icon: AnimatedCrossFade(
                           duration: const Duration(milliseconds: 200),
                           crossFadeState: reactions
@@ -217,11 +219,50 @@ class MessageActionsDialog extends HookConsumerWidget {
                     ],
                   ],
                 ),
-                Text(
-                  DateFormat()
-                      .add_yMd()
-                      .addPattern(DateFormat.HOUR_MINUTE)
-                      .format((message.createdAt ?? DateTime.now()).toLocal()),
+                Row(
+                  children: [
+                    if (message.modelId != null) ...[
+                      GestureDetector(
+                        onTap: () {
+                          Navigator.of(context).pop();
+                          context.push("/home/upgrade");
+                        },
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 6,
+                            vertical: 4,
+                          ),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(15),
+                            border: Border.all(
+                              color: context.colorScheme.onBackground.withOpacity(0.4),
+                            ),
+                          ),
+                          child: Text(
+                            modelIdMapping[message.modelId] ?? message.modelId!,
+                            style: context.textTheme.bodySmall,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                    ],
+                    Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        Text(
+                          DateFormat().addPattern("M/d/yy").format((message.createdAt ?? DateTime.now()).toLocal()),
+                          style: context.textTheme.bodySmall,
+                        ),
+                        Text(
+                          DateFormat()
+                              .addPattern(DateFormat.HOUR_MINUTE)
+                              .format((message.createdAt ?? DateTime.now()).toLocal()),
+                          style: context.textTheme.bodySmall,
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
               ],
             ),

@@ -4,6 +4,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:revelationsai/src/constants/llm.dart';
 import 'package:revelationsai/src/constants/visual_density.dart';
 import 'package:revelationsai/src/hooks/use_screenshot_controller.dart';
 import 'package:revelationsai/src/models/chat/message.dart';
@@ -77,13 +78,22 @@ class Message extends HookConsumerWidget {
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.end,
             children: [
+              if (message.modelId != null) ...[
+                Text(
+                  modelIdMapping[message.modelId!] ?? message.modelId!,
+                  style: context.textTheme.bodySmall,
+                ),
+              ],
               Text(
                 DateFormat().add_yMd().format((message.createdAt ?? DateTime.now()).toLocal()),
+                style: context.textTheme.bodySmall,
               ),
-              Text(DateFormat()
-                  .addPattern(DateFormat.HOUR_MINUTE)
-                  .format((message.createdAt ?? DateTime.now()).toLocal()))
+              Text(
+                DateFormat().addPattern(DateFormat.HOUR_MINUTE).format((message.createdAt ?? DateTime.now()).toLocal()),
+                style: context.textTheme.bodySmall,
+              )
             ],
           ),
         ),
@@ -179,11 +189,12 @@ class Message extends HookConsumerWidget {
                             style: context.textTheme.bodyMedium,
                           ),
                           if (isLastMessage && !isCurrentResponse && !isLoading) ...[
-                            const SizedBox(height: 10),
+                            const SizedBox(height: 5),
                             Text(
-                              "Double tap or hold to see options",
+                              "Double tap for options",
                               style: context.textTheme.bodySmall?.copyWith(
                                 color: context.colorScheme.onBackground.withOpacity(0.5),
+                                fontSize: 10,
                               ),
                             ),
                           ],

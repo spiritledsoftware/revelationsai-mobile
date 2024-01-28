@@ -1,18 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:revelationsai/src/constants/llm.dart';
 import 'package:revelationsai/src/hooks/use_chat.dart';
 import 'package:revelationsai/src/providers/user/current.dart';
 import 'package:revelationsai/src/services/user.dart';
 import 'package:revelationsai/src/utils/build_context_extensions.dart';
-
-const claudeV2 = 'anthropic.claude-v2:1';
-const claudeV1 = 'anthropic.claude-instant-v1';
-
-const modelIdMapping = {
-  claudeV2: 'Claude v2.1',
-  claudeV1: 'Claude v1',
-};
 
 class ModelSelectionButton extends HookConsumerWidget {
   final UseChatReturnObject chatHook;
