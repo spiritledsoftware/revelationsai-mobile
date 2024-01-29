@@ -361,7 +361,7 @@ class HomeScreen extends HookConsumerWidget {
                                     if (hapticFeedbackEnabled) {
                                       HapticFeedback.lightImpact();
                                     }
-                                    context.go("/chat?query=${queryTextController.text}");
+                                    context.go("/chat?query=${Uri.encodeQueryComponent(queryTextController.text)}");
                                   },
                                   icon: const FaIcon(
                                     FontAwesomeIcons.arrowUp,

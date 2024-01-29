@@ -54,6 +54,7 @@ class ChatScreen extends HookConsumerWidget {
     final chatHook = useChat(
       options: UseChatOptions(
         session: currentUser.session,
+        modelId: currentUserPreferences.modelId,
         hapticFeedback: currentUserPreferences.hapticFeedback,
         onFinish: (_) async {
           await Future.delayed(const Duration(seconds: 2), () async {

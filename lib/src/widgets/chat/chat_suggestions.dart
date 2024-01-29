@@ -46,7 +46,7 @@ class ChatSuggestions extends HookWidget {
                 height: 20,
               ),
               ChatSuggestionTopic(
-                topic: "Jesus Christ",
+                topic: "👑 Jesus Christ",
                 suggestions: const [
                   "Who is Jesus Christ?",
                   "What did Jesus Christ do?",
@@ -57,10 +57,8 @@ class ChatSuggestions extends HookWidget {
                 onTap: onTap,
               ),
               ChatSuggestionTopic(
-                topic: "God's Character",
+                topic: "🕊️ God",
                 suggestions: const [
-                  'What does "God is love" mean?',
-                  "How is God just?",
                   "Explain God's holiness.",
                   "What does it mean that God is omniscient?",
                   "What does it mean that God is omnipresent?",
@@ -71,7 +69,7 @@ class ChatSuggestions extends HookWidget {
                 onTap: onTap,
               ),
               ChatSuggestionTopic(
-                topic: "The Bible",
+                topic: "📖 The Bible",
                 suggestions: const [
                   "What is the Bible?",
                   "What is the Bible about?",
@@ -82,7 +80,7 @@ class ChatSuggestions extends HookWidget {
                 onTap: onTap,
               ),
               ChatSuggestionTopic(
-                topic: "The Holy Spirit",
+                topic: "🔥 The Holy Spirit",
                 suggestions: const [
                   "Who is the Holy Spirit?",
                   "What does the Holy Spirit do?",
@@ -93,7 +91,7 @@ class ChatSuggestions extends HookWidget {
                 onTap: onTap,
               ),
               ChatSuggestionTopic(
-                topic: "Prayer",
+                topic: "🙏🏻 Prayer",
                 suggestions: const [
                   "How do I pray?",
                   "What is prayer?",

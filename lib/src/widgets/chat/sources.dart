@@ -7,9 +7,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:revelationsai/src/constants/visual_density.dart';
 import 'package:revelationsai/src/models/chat/message.dart';
 import 'package:revelationsai/src/providers/ai_response/source_document.dart';
-import 'package:revelationsai/src/providers/user/preferences.dart';
 import 'package:revelationsai/src/utils/build_context_extensions.dart';
-import 'package:revelationsai/src/widgets/chat/source_info_dialog.dart';
 import 'package:url_launcher/link.dart';
 
 class Sources extends HookConsumerWidget {
@@ -31,8 +29,6 @@ class Sources extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final currentUserPrefs = ref.watch(currentUserPreferencesProvider).requireValue;
-
     final sourceDocuments = ref.watch(aiResponseSourceDocumentsProvider(message.uuid));
 
     return SizedBox(
@@ -105,21 +101,6 @@ class Sources extends HookConsumerWidget {
                   width: 300,
                   margin: const EdgeInsets.symmetric(horizontal: 5),
                   child: ListTile(
-                    onLongPress: () {
-                      if (currentUserPrefs.hapticFeedback) {
-                        HapticFeedback.lightImpact();
-                      }
-                      showCupertinoModalPopup(
-                        context: context,
-                        builder: (context) {
-                          return FractionallySizedBox(
-                            heightFactor: 0.90,
-                            widthFactor: 1.00,
-                            child: SourceInfoPreview(sourceDocument: source),
-                          );
-                        },
-                      );
-                    },
                     onTap: () {
                       followLink!();
                     },

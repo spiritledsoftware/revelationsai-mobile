@@ -7,12 +7,14 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:revelationsai/src/constants/colors.dart';
+import 'package:revelationsai/src/constants/llm.dart';
 import 'package:revelationsai/src/constants/website.dart';
 import 'package:revelationsai/src/models/user.dart';
 import 'package:revelationsai/src/models/user/request.dart';
 import 'package:revelationsai/src/providers/in_app_purchases/customer_info.dart';
 import 'package:revelationsai/src/providers/user/current.dart';
 import 'package:revelationsai/src/providers/user/preferences.dart';
+import 'package:revelationsai/src/services/user.dart';
 import 'package:revelationsai/src/utils/build_context_extensions.dart';
 import 'package:revelationsai/src/widgets/account/user_avatar.dart';
 import 'package:revelationsai/src/widgets/branding/circular_logo.dart';
@@ -24,6 +26,9 @@ class SettingsModal extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final currentUserPreferences = ref.watch(currentUserPreferencesProvider).requireValue;
+    final currentUser = ref.watch(currentUserProvider).requireValue;
+
     return Container(
       decoration: BoxDecoration(
         color: context.theme.canvasColor,
@@ -151,8 +156,7 @@ class SettingsModal extends HookConsumerWidget {
                     noShadow: true,
                   ),
                   title: const Text('Manage Account'),
-                  trailing: Text(ref.watch(currentUserProvider).requireValue.name ??
-                      ref.watch(currentUserProvider).requireValue.email),
+                  trailing: Text(currentUser.name ?? currentUser.email),
                   onTap: () {
                     context.push("/home/account");
                   },
@@ -199,13 +203,10 @@ class SettingsModal extends HookConsumerWidget {
                       : const Icon(Icons.dark_mode_outlined),
                   title: const Text('Theme Mode'),
                   trailing: DropdownButton(
-                    value: ref.watch(currentUserPreferencesProvider).requireValue.themeMode,
+                    value: currentUserPreferences.themeMode,
                     onChanged: (value) {
                       ref.read(currentUserPreferencesProvider.notifier).updatePrefs(
-                            ref
-                                .read(currentUserPreferencesProvider)
-                                .requireValue
-                                .copyWith(themeMode: value as ThemeMode),
+                            currentUserPreferences.copyWith(themeMode: value as ThemeMode),
                           );
                     },
                     items: const <DropdownMenuItem>[
@@ -225,14 +226,45 @@ class SettingsModal extends HookConsumerWidget {
                   ),
                 ),
                 ListTile(
-                  leading: const FaIcon(FontAwesomeIcons.bookBible),
+                  // AI icon
+                  leading: const FaIcon(
+                    FontAwesomeIcons.robot,
+                    size: 18,
+                  ),
+                  title: const Text('Language Model'),
+                  trailing: DropdownButton(
+                    value: currentUserPreferences.modelId ??
+                        (UserService.hasPlus(currentUser) || UserService.isAdmin(currentUser) ? claudeV2 : claudeV1),
+                    onChanged: (value) {
+                      final currentUser = ref.read(currentUserProvider).requireValue;
+                      if (value == claudeV2 && !UserService.hasPlus(currentUser) && !UserService.isAdmin(currentUser)) {
+                        context.go("/home/upgrade");
+                        return;
+                      }
+                      ref
+                          .read(currentUserPreferencesProvider.notifier)
+                          .updatePrefs(currentUserPreferences.copyWith(modelId: value as String));
+                    },
+                    items: modelIdMapping.entries.map((modelId) {
+                      return DropdownMenuItem(
+                        value: modelId.key,
+                        child: Text(modelId.value),
+                      );
+                    }).toList(),
+                  ),
+                ),
+                ListTile(
+                  leading: const FaIcon(
+                    FontAwesomeIcons.bookBible,
+                    size: 18,
+                  ),
                   title: const Text('Bible Translation'),
                   trailing: DropdownButton(
-                    value: ref.watch(currentUserProvider).requireValue.translation,
+                    value: currentUser.translation,
                     onChanged: (value) async {
-                      await ref.read(currentUserProvider.notifier).updateUser(
-                            UpdateUserRequest(translation: value as Translation),
-                          );
+                      await ref
+                          .read(currentUserProvider.notifier)
+                          .updateUser(UpdateUserRequest(translation: value as Translation));
                     },
                     items: Translation.values.map((translation) {
                       return DropdownMenuItem(
@@ -250,11 +282,11 @@ class SettingsModal extends HookConsumerWidget {
                       Text('Haptic Feedback'),
                     ],
                   ),
-                  value: ref.watch(currentUserPreferencesProvider).requireValue.hapticFeedback,
+                  value: currentUserPreferences.hapticFeedback,
                   onChanged: (value) {
-                    ref.read(currentUserPreferencesProvider.notifier).updatePrefs(
-                          ref.read(currentUserPreferencesProvider).requireValue.copyWith(hapticFeedback: value),
-                        );
+                    ref
+                        .read(currentUserPreferencesProvider.notifier)
+                        .updatePrefs(currentUserPreferences.copyWith(hapticFeedback: value));
                   },
                 ),
                 SwitchListTile.adaptive(
@@ -265,11 +297,11 @@ class SettingsModal extends HookConsumerWidget {
                       Text('Chat Suggestions'),
                     ],
                   ),
-                  value: ref.watch(currentUserPreferencesProvider).requireValue.chatSuggestions,
+                  value: currentUserPreferences.chatSuggestions,
                   onChanged: (value) {
-                    ref.read(currentUserPreferencesProvider.notifier).updatePrefs(
-                          ref.read(currentUserPreferencesProvider).requireValue.copyWith(chatSuggestions: value),
-                        );
+                    ref
+                        .read(currentUserPreferencesProvider.notifier)
+                        .updatePrefs(currentUserPreferences.copyWith(chatSuggestions: value));
                   },
                 ),
               ],

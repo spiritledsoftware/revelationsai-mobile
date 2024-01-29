@@ -3,17 +3,12 @@
 # The default execution directory of this script is the ci_scripts directory.
 cd $CI_PRIMARY_REPOSITORY_PATH # change working directory to the root of your cloned repo.
 
-DOMAIN_PREFIX=""
 DOMAIN_NAME="revelationsai.com"
-# Get website url based on pr number
-if [[ "$CI_PULL_REQUEST_NUMBER" != "" ]]; then
-  DOMAIN_PREFIX="pr-${CI_PULL_REQUEST_NUMBER}.test."
-fi
 
-WEBSITE_URL="https://${DOMAIN_PREFIX}${DOMAIN_NAME}"
-AUTH_URL="https://auth.${DOMAIN_PREFIX}${DOMAIN_NAME}"
-API_URL="https://api.${DOMAIN_PREFIX}${DOMAIN_NAME}"
-CHAT_API_URL="https://chat.api.${DOMAIN_PREFIX}${DOMAIN_NAME}"
+WEBSITE_URL="https://${DOMAIN_NAME}"
+AUTH_URL="https://auth.${DOMAIN_NAME}"
+API_URL="https://api.${DOMAIN_NAME}"
+CHAT_API_URL="https://chat.api.${DOMAIN_NAME}"
 
 echo "Working with the following environment variables:"
 echo "WEBSITE_URL: $WEBSITE_URL"

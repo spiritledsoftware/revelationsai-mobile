@@ -80,24 +80,26 @@ class ChatActionMenuButton extends HookConsumerWidget {
                 });
               }
             },
-            child: Row(
-              mainAxisSize: MainAxisSize.max,
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: [
-                Icon(
-                  CupertinoIcons.arrow_2_circlepath,
-                  color: context.colorScheme.onBackground,
-                ),
-                const SizedBox(
-                  width: 10,
-                ),
-                Text(
-                  "Refresh",
-                  style: TextStyle(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  Icon(
+                    CupertinoIcons.arrow_2_circlepath,
                     color: context.colorScheme.onBackground,
                   ),
-                ),
-              ],
+                  const SizedBox(
+                    width: 10,
+                  ),
+                  Text(
+                    "Refresh",
+                    style: TextStyle(
+                      color: context.colorScheme.onBackground,
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
           PopupMenuItem(
@@ -107,24 +109,26 @@ class ChatActionMenuButton extends HookConsumerWidget {
               }
               context.go('${context.path}/history');
             },
-            child: Row(
-              mainAxisSize: MainAxisSize.max,
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: [
-                Icon(
-                  CupertinoIcons.clock,
-                  color: context.colorScheme.onBackground,
-                ),
-                const SizedBox(
-                  width: 10,
-                ),
-                Text(
-                  "History",
-                  style: TextStyle(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  Icon(
+                    CupertinoIcons.clock,
                     color: context.colorScheme.onBackground,
                   ),
-                ),
-              ],
+                  const SizedBox(
+                    width: 10,
+                  ),
+                  Text(
+                    "History",
+                    style: TextStyle(
+                      color: context.colorScheme.onBackground,
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
           PopupMenuItem(
@@ -137,24 +141,26 @@ class ChatActionMenuButton extends HookConsumerWidget {
                 },
               );
             },
-            child: Row(
-              mainAxisSize: MainAxisSize.max,
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: [
-                Icon(
-                  CupertinoIcons.add,
-                  color: context.colorScheme.onBackground,
-                ),
-                const SizedBox(
-                  width: 10,
-                ),
-                Text(
-                  "New",
-                  style: TextStyle(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  Icon(
+                    CupertinoIcons.add,
                     color: context.colorScheme.onBackground,
                   ),
-                ),
-              ],
+                  const SizedBox(
+                    width: 10,
+                  ),
+                  Text(
+                    "New",
+                    style: TextStyle(
+                      color: context.colorScheme.onBackground,
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
           PopupMenuItem(
@@ -176,24 +182,26 @@ class ChatActionMenuButton extends HookConsumerWidget {
                 });
               }
             },
-            child: Row(
-              mainAxisSize: MainAxisSize.max,
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: [
-                Icon(
-                  CupertinoIcons.pencil,
-                  color: context.colorScheme.onBackground,
-                ),
-                const SizedBox(
-                  width: 10,
-                ),
-                Text(
-                  "Rename",
-                  style: TextStyle(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  Icon(
+                    CupertinoIcons.pencil,
                     color: context.colorScheme.onBackground,
                   ),
-                ),
-              ],
+                  const SizedBox(
+                    width: 10,
+                  ),
+                  Text(
+                    "Rename",
+                    style: TextStyle(
+                      color: context.colorScheme.onBackground,
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
           PopupMenuItem(
@@ -208,22 +216,24 @@ class ChatActionMenuButton extends HookConsumerWidget {
                 context.go("/chat");
               }
             },
-            child: const Row(
-              mainAxisSize: MainAxisSize.max,
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: [
-                Icon(
-                  CupertinoIcons.trash,
-                  color: Colors.red,
-                ),
-                SizedBox(
-                  width: 10,
-                ),
-                Text(
-                  "Delete",
-                  style: TextStyle(color: Colors.red),
-                ),
-              ],
+            child: const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 8),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  Icon(
+                    CupertinoIcons.trash,
+                    color: Colors.red,
+                  ),
+                  SizedBox(
+                    width: 10,
+                  ),
+                  Text(
+                    "Delete",
+                    style: TextStyle(color: Colors.red),
+                  ),
+                ],
+              ),
             ),
           ),
         ];

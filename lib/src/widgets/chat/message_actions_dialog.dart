@@ -13,6 +13,7 @@ import 'package:revelationsai/src/models/chat/message.dart';
 import 'package:revelationsai/src/providers/ai_response/reaction.dart';
 import 'package:revelationsai/src/providers/user/preferences.dart';
 import 'package:revelationsai/src/utils/build_context_extensions.dart';
+import 'package:revelationsai/src/utils/capitalization.dart';
 import 'package:revelationsai/src/utils/markdown.dart';
 import 'package:revelationsai/src/widgets/chat/markdown.dart';
 import 'package:revelationsai/src/widgets/chat/reaction_comment_dialog.dart';
@@ -239,7 +240,7 @@ class MessageActionsDialog extends HookConsumerWidget {
                             ),
                           ),
                           child: Text(
-                            modelIdMapping[message.modelId] ?? message.modelId!,
+                            (modelIdMapping[message.modelId] ?? message.modelId!).toTitleCase(),
                             style: context.textTheme.bodySmall,
                           ),
                         ),

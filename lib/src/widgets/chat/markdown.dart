@@ -48,7 +48,7 @@ class ChatMessageMarkdown extends HookWidget {
           h6: context.textTheme.bodyLarge,
           p: context.textTheme.bodyMedium,
           a: context.textTheme.bodyMedium?.copyWith(
-            color: context.colorScheme.secondary,
+            color: context.brightness == Brightness.dark ? context.colorScheme.secondary : Colors.blue.shade600,
           ),
           blockquote: context.textTheme.bodySmall,
           blockquoteDecoration: BoxDecoration(

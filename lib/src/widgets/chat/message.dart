@@ -10,6 +10,7 @@ import 'package:revelationsai/src/hooks/use_screenshot_controller.dart';
 import 'package:revelationsai/src/models/chat/message.dart';
 import 'package:revelationsai/src/providers/user/preferences.dart';
 import 'package:revelationsai/src/utils/build_context_extensions.dart';
+import 'package:revelationsai/src/utils/capitalization.dart';
 import 'package:revelationsai/src/widgets/account/user_avatar.dart';
 import 'package:revelationsai/src/widgets/branding/circular_logo.dart';
 import 'package:revelationsai/src/widgets/chat/markdown.dart';
@@ -82,7 +83,7 @@ class Message extends HookConsumerWidget {
             children: [
               if (message.modelId != null) ...[
                 Text(
-                  modelIdMapping[message.modelId!] ?? message.modelId!,
+                  (modelIdMapping[message.modelId!] ?? message.modelId!).toTitleCase(),
                   style: context.textTheme.bodySmall,
                 ),
               ],

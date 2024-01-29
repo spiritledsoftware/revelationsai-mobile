@@ -12,6 +12,7 @@ class UserPreferences with _$UserPreferences {
     required bool hapticFeedback,
     required bool chatSuggestions,
     required ThemeMode themeMode,
+    String? modelId,
   }) = _UserPreferences;
 
   factory UserPreferences.defaults() => UserPreferences(
