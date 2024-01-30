@@ -32,10 +32,9 @@ class UserService {
 
   static Future<String> getRefreshedToken(String session) async {
     Response res = await get(
-      Uri.parse('${API.url}/auth/refresh-token'),
+      Uri.parse('${API.url}/auth/session/refresh'),
       headers: <String, String>{
         'Authorization': 'Bearer $session',
-        'Content-Type': 'application/json; charset=UTF-8',
       },
     );
 
@@ -44,7 +43,7 @@ class UserService {
     }
 
     final data = jsonDecode(utf8.decode(res.bodyBytes));
-    return data['refreshSession'];
+    return data['session'];
   }
 
   static Future<User> updateUser({

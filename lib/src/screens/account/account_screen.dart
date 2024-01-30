@@ -236,10 +236,10 @@ class AccountScreen extends HookConsumerWidget {
                     Column(
                       children: [
                         Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text(
-                              'Queries:',
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                'Queries:',
                               style: context.textTheme.titleMedium,
                             ),
                             const SizedBox(

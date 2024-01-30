@@ -5,6 +5,7 @@ import 'package:flutter_app_badger/flutter_app_badger.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:go_router/go_router.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:revelationsai/src/constants/visual_density.dart';
@@ -18,9 +19,9 @@ import 'package:revelationsai/src/providers/devotion/reaction.dart';
 import 'package:revelationsai/src/providers/devotion/reaction_count.dart';
 import 'package:revelationsai/src/providers/devotion/single.dart';
 import 'package:revelationsai/src/providers/devotion/source_document.dart';
-import 'package:revelationsai/src/utils/advertisement.dart';
 import 'package:revelationsai/src/utils/build_context_extensions.dart';
 import 'package:revelationsai/src/utils/capitalization.dart';
+import 'package:revelationsai/src/widgets/advertisement/native_ad.dart';
 import 'package:revelationsai/src/widgets/colored_safe_area.dart';
 import 'package:revelationsai/src/widgets/devotion/action_menu_button.dart';
 import 'package:revelationsai/src/widgets/network_image.dart';
@@ -43,6 +44,13 @@ class DevotionScreen extends HookConsumerWidget {
     final sourceDocs = useState<List<SourceDocument>>([]);
     final images = useState<List<DevotionImage>>([]);
     final reactionCounts = useState<Map<DevotionReactionType, int>>({});
+
+    final advertisement = useRef(const NativeAdvertisement(
+      padding: EdgeInsets.only(
+        top: 20,
+      ),
+      type: TemplateType.small,
+    ));
 
     final fetchDevoData = useCallback((String? devoId) async {
       await Future.wait([
@@ -98,7 +106,7 @@ class DevotionScreen extends HookConsumerWidget {
           loading.value = false;
           await Future(() => refreshDevoData());
         }
-      }).whenComplete(() async => await showAdvertisementLogic(ref));
+      });
       return () {};
     }, [devotionId]);
 
@@ -196,15 +204,15 @@ class DevotionScreen extends HookConsumerWidget {
                       scrollDirection: Axis.vertical,
                       shrinkWrap: true,
                       children: [
+                        advertisement.value,
                         Container(
-                          margin: const EdgeInsets.only(top: 20),
+                          margin: const EdgeInsets.only(
+                            top: 20,
+                          ),
                           alignment: Alignment.center,
                           child: SelectableText(
                             devotion.value!.bibleReading.split(" - ").first,
-                            style: const TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.w600,
-                            ),
+                            style: context.textTheme.titleLarge,
                           ),
                         ),
                         const SizedBox(
@@ -216,13 +224,13 @@ class DevotionScreen extends HookConsumerWidget {
                         Container(
                           margin: const EdgeInsets.only(top: 20),
                           alignment: Alignment.center,
-                          child: const SelectableText(
+                          child: SelectableText(
                             "Summary",
-                            style: TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.w500,
-                            ),
+                            style: context.textTheme.titleLarge,
                           ),
+                        ),
+                        const SizedBox(
+                          height: 5,
                         ),
                         SelectableText(
                           devotion.value!.summary,
@@ -230,13 +238,13 @@ class DevotionScreen extends HookConsumerWidget {
                         Container(
                           margin: const EdgeInsets.only(top: 20),
                           alignment: Alignment.center,
-                          child: const SelectableText(
+                          child: SelectableText(
                             "Reflection",
-                            style: TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.w500,
-                            ),
+                            style: context.textTheme.titleLarge,
                           ),
+                        ),
+                        const SizedBox(
+                          height: 5,
                         ),
                         SelectableText(
                           devotion.value!.reflection!,
@@ -246,13 +254,13 @@ class DevotionScreen extends HookConsumerWidget {
                             top: 20,
                           ),
                           alignment: Alignment.center,
-                          child: const SelectableText(
+                          child: SelectableText(
                             "Prayer",
-                            style: TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.w500,
-                            ),
+                            style: context.textTheme.titleLarge,
                           ),
+                        ),
+                        const SizedBox(
+                          height: 5,
                         ),
                         SelectableText(
                           devotion.value!.prayer!,
@@ -263,12 +271,9 @@ class DevotionScreen extends HookConsumerWidget {
                               top: 20,
                             ),
                             alignment: Alignment.center,
-                            child: const Text(
+                            child: Text(
                               "Generated Image(s)",
-                              style: TextStyle(
-                                fontSize: 20,
-                                fontWeight: FontWeight.w500,
-                              ),
+                              style: context.textTheme.titleLarge,
                             ),
                           ),
                           Container(
@@ -278,9 +283,7 @@ class DevotionScreen extends HookConsumerWidget {
                             alignment: Alignment.center,
                             child: Text(
                               images.value[0].caption ?? "No caption",
-                              style: const TextStyle(
-                                fontSize: 12,
-                              ),
+                              style: context.textTheme.bodySmall,
                             ),
                           ),
                           Wrap(
@@ -303,12 +306,9 @@ class DevotionScreen extends HookConsumerWidget {
                               top: 20,
                             ),
                             alignment: Alignment.center,
-                            child: const Text(
+                            child: Text(
                               "Dive Deeper",
-                              style: TextStyle(
-                                fontSize: 20,
-                                fontWeight: FontWeight.w500,
-                              ),
+                              style: context.textTheme.titleLarge,
                             ),
                           ),
                           ...devotion.value!.diveDeeperQueries.map((query) {
@@ -334,12 +334,9 @@ class DevotionScreen extends HookConsumerWidget {
                         Container(
                           margin: const EdgeInsets.only(bottom: 20),
                           child: ExpansionTile(
-                            title: const Text(
+                            title: Text(
                               "Sources",
-                              style: TextStyle(
-                                fontSize: 20,
-                                fontWeight: FontWeight.w500,
-                              ),
+                              style: context.textTheme.titleLarge,
                             ),
                             children: [
                               ListView.builder(
@@ -358,18 +355,15 @@ class DevotionScreen extends HookConsumerWidget {
                                     builder: (context, followLink) => ListTile(
                                       dense: true,
                                       visualDensity: RAIVisualDensity.tightest,
-                                      leading: const Icon(
-                                        CupertinoIcons.link,
-                                        size: 15,
+                                      leading: Text(
+                                        "${index + 1}.",
+                                        style: context.textTheme.labelLarge,
                                       ),
                                       title: Text(
                                         sourceDoc.hasTitle ? sourceDoc.title! : sourceDoc.name,
                                         maxLines:
-                                            sourceDoc.hasTitle && sourceDoc.hasAuthor ? 1 : 2, // leave room for author
+                                            sourceDoc.hasTitle && sourceDoc.hasAuthor ? 2 : 1, // leave room for author
                                         overflow: TextOverflow.ellipsis,
-                                        style: const TextStyle(
-                                          fontSize: 12,
-                                        ),
                                       ),
                                       subtitle: Column(
                                         mainAxisSize: MainAxisSize.min,
@@ -391,6 +385,10 @@ class DevotionScreen extends HookConsumerWidget {
                                             ),
                                           ],
                                         ],
+                                      ),
+                                      trailing: const Icon(
+                                        CupertinoIcons.chevron_right,
+                                        size: 18,
                                       ),
                                       onTap: followLink,
                                     ),

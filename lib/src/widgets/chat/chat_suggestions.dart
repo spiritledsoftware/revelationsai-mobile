@@ -1,15 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:revelationsai/src/utils/build_context_extensions.dart';
+import 'package:revelationsai/src/widgets/advertisement/native_ad.dart';
 
-class ChatSuggestions extends HookWidget {
+class ChatSuggestions extends HookConsumerWidget {
   final void Function(String suggestionString) onTap;
 
   const ChatSuggestions({super.key, required this.onTap});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return SafeArea(
       child: Container(
         padding: const EdgeInsets.only(
@@ -20,6 +23,7 @@ class ChatSuggestions extends HookWidget {
         child: SingleChildScrollView(
           child: Column(
             mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -100,7 +104,11 @@ class ChatSuggestions extends HookWidget {
                   "What is the Lord's Prayer?",
                 ],
                 onTap: onTap,
-              )
+              ),
+              NativeAdvertisement(
+                type: TemplateType.small,
+                width: context.width * 0.95,
+              ),
             ],
           ),
         ),

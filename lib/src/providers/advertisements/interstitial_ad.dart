@@ -11,11 +11,11 @@ part 'interstitial_ad.g.dart';
 class InterstitialAds extends _$InterstitialAds {
   final _adUnitId = Platform.isIOS
       ? kDebugMode
-          ? AdMob.testIosAdUnitId
-          : AdMob.iosAdUnitId
+          ? AdMob.testIosInterstitialAdUnitId
+          : AdMob.iosInterstitialAdUnitId
       : kDebugMode
-          ? AdMob.testAndroidAdUnitId
-          : AdMob.androidAdUnitId;
+          ? AdMob.testAndroidInterstitialAdUnitId
+          : AdMob.androidInterstitialAdUnitId;
 
   @override
   FutureOr<InterstitialAd?> build() async {

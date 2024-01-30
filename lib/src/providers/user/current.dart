@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
@@ -21,10 +22,13 @@ class CurrentUser extends _$CurrentUser {
   late SharedPreferences _sharedPreferences;
   static const _sharedPrefsKey = 'token';
 
+  Timer? _refreshTimer = null;
+
   @override
   FutureOr<UserInfo> build() async {
     _sharedPreferences = await SharedPreferences.getInstance();
     _persistenceRefreshLogic();
+    _periodicRefreshLogic();
     return await _loginRecoveryAttempt();
   }
 
@@ -227,6 +231,13 @@ class CurrentUser extends _$CurrentUser {
       if (next.hasValue) {
         _sharedPreferences.setString(_sharedPrefsKey, next.value!.session);
       }
+    });
+  }
+
+  void _periodicRefreshLogic() {
+    _refreshTimer ??= Timer.periodic(const Duration(seconds: 60), (timer) {
+      debugPrint("Refreshing user info");
+      ref.invalidateSelf();
     });
   }
 

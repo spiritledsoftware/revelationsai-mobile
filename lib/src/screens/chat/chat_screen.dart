@@ -55,9 +55,11 @@ class ChatScreen extends HookConsumerWidget {
       options: UseChatOptions(
         session: currentUser.session,
         modelId: currentUserPreferences.modelId,
+        chatId: initChatId,
         hapticFeedback: currentUserPreferences.hapticFeedback,
         onFinish: (_) async {
-          await Future.delayed(const Duration(seconds: 2), () async {
+          ref.invalidate(currentUserProvider);
+          await Future.delayed(const Duration(seconds: 3), () async {
             final showedReview = await inAppReviewLogic();
             if (!showedReview) {
               await showAdvertisementLogic(ref);
@@ -96,41 +98,11 @@ class ChatScreen extends HookConsumerWidget {
     ]);
 
     final submit = useCallback(() {
-      if (currentUser.remainingQueries < 1) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              "You have no remaining queries. Please upgrade your account.",
-              style: context.textTheme.bodyMedium?.copyWith(
-                color: context.colorScheme.onError,
-              ),
-            ),
-            backgroundColor: context.colorScheme.error,
-          ),
-        );
-        context.go("/home/upgrade");
-        return;
-      }
       scrollToEnd();
       chatHook.handleSubmit();
     }, [context, currentUser, chatHook.handleSubmit, scrollToEnd]);
 
     final reload = useCallback(() {
-      if (currentUser.remainingQueries < 1) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              "You have no remaining queries. Please upgrade your account.",
-              style: context.textTheme.bodyMedium?.copyWith(
-                color: context.colorScheme.onError,
-              ),
-            ),
-            backgroundColor: context.colorScheme.error,
-          ),
-        );
-        context.go("/home/upgrade");
-        return;
-      }
       scrollToEnd();
       chatHook.reload();
     }, [context, currentUser, chatHook.reload, scrollToEnd]);
@@ -162,57 +134,6 @@ class ChatScreen extends HookConsumerWidget {
     }, [initQuery]);
 
     useEffect(() {
-      ref.read(singleChatProvider(chatHook.chatId.value).future).then((value) {
-        if (isMounted()) {
-          chat.value = value;
-        }
-      }).catchError((error) {
-        debugPrint("Failed to get chat: $error");
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              "Failed to get chat: $error",
-              style: TextStyle(
-                color: context.colorScheme.onError,
-              ),
-              maxLines: 3,
-              overflow: TextOverflow.ellipsis,
-            ),
-            backgroundColor: context.colorScheme.error,
-          ),
-        );
-        ref.read(currentChatIdProvider.notifier).update(null);
-        context.go("/chat");
-      });
-
-      if (!chatHook.loading.value) {
-        isLoadingChat.value = true;
-        ref.read(chatMessagesProvider(chatHook.chatId.value).future).then((value) {
-          if (isMounted()) {
-            chatHook.messages.value = value.expand((element) => element).toList();
-          }
-        }).catchError((error) {
-          debugPrint("Failed to get chat messages: $error");
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(
-                "Failed to get chat messages: $error",
-                style: TextStyle(
-                  color: context.colorScheme.onError,
-                ),
-                maxLines: 3,
-                overflow: TextOverflow.ellipsis,
-              ),
-              backgroundColor: context.colorScheme.error,
-            ),
-          );
-        }).whenComplete(() async {
-          if (isMounted()) {
-            isLoadingChat.value = false;
-            await Future(() => refreshChatData());
-          }
-        });
-      }
       Future(() {
         ref.read(currentChatIdProvider.notifier).update(chatHook.chatId.value);
       });
@@ -516,7 +437,7 @@ class ChatScreen extends HookConsumerWidget {
                                           : null,
                                     ),
                                     onPressed: () {
-                                      context.go("/home/upgrade");
+                                      context.push("/home/upgrade");
                                     },
                                     icon: Text(
                                       currentUser.remainingQueries > 10

@@ -122,12 +122,13 @@ class UpgradeScreen extends HookConsumerWidget {
                                   child: Icon(
                                     Icons.add,
                                     size: 20,
-                                    color: context.colorScheme.onBackground,
+                                    color: context.secondaryColor,
                                   ),
                                   alignment: PlaceholderAlignment.middle,
                                 ),
                                 TextSpan(
                                   children: [
+                                    const TextSpan(text: "Unlock "),
                                     WidgetSpan(
                                       child: GestureDetector(
                                         onTap: () {
@@ -142,7 +143,6 @@ class UpgradeScreen extends HookConsumerWidget {
                                       ),
                                       alignment: PlaceholderAlignment.middle,
                                     ),
-                                    const TextSpan(text: " in chat")
                                   ],
                                   style: context.textTheme.titleMedium,
                                 ),
@@ -156,7 +156,7 @@ class UpgradeScreen extends HookConsumerWidget {
                                   child: Icon(
                                     Icons.add,
                                     size: 20,
-                                    color: context.colorScheme.onBackground,
+                                    color: context.secondaryColor,
                                   ),
                                   alignment: PlaceholderAlignment.middle,
                                 ),
@@ -184,7 +184,7 @@ class UpgradeScreen extends HookConsumerWidget {
                                   child: Icon(
                                     Icons.add,
                                     size: 20,
-                                    color: context.colorScheme.onBackground,
+                                    color: context.secondaryColor,
                                   ),
                                   alignment: PlaceholderAlignment.middle,
                                 ),
@@ -212,7 +212,7 @@ class UpgradeScreen extends HookConsumerWidget {
                                   child: Icon(
                                     Icons.add,
                                     size: 20,
-                                    color: context.colorScheme.onBackground,
+                                    color: context.secondaryColor,
                                   ),
                                   alignment: PlaceholderAlignment.middle,
                                 ),
