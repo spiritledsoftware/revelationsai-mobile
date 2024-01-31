@@ -1,7 +1,7 @@
-name: Android Build
-concurrency: android
+name: PR Android Build
+concurrency: pr
 on:
-  push:
+  pull_request:
     branches: [master]
     paths:
       - android/**
