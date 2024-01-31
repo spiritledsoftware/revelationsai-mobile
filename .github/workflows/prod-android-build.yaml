@@ -1,5 +1,5 @@
-name: Android Build
-concurrency: android
+name: Prod Android Build
+concurrency: prod
 on:
   push:
     branches: [master]
