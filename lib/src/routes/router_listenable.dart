@@ -50,7 +50,7 @@ class RouterListenable extends _$RouterListenable implements Listenable {
     }
 
     final isSplash = state.uri.path == "/";
-    if (this.state.isLoading) {
+    if (this.state.isLoading && !this.state.hasValue) {
       debugPrint("Router is loading");
       return isSplash ? null : "/?redirect=${Uri.encodeComponent("${state.uri.path}?${state.uri.query}")}";
     }
