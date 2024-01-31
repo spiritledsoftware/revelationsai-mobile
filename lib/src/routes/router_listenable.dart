@@ -63,26 +63,10 @@ class RouterListenable extends _$RouterListenable implements Listenable {
       return _isAuth ? redirect : "/auth/sign-in";
     }
 
-    final isChatBase = state.uri.path == chatBasePath;
-    final isDevotionBase = state.uri.path == devotionsBasePath;
-
-    final currentChatId = ref.read(currentChatIdProvider);
-    final chatPath = "$chatBasePath/${currentChatId ?? ""}";
-
     final isLoggingIn = state.uri.path.startsWith("/auth");
-    if (isLoggingIn) return _isAuth ? "/home" : null;
-
-    if (isChatBase && currentChatId != null && state.uri.queryParameters["query"] == null) {
-      debugPrint("Redirecting to $chatPath");
-      return chatPath;
-    }
-
-    final currentDevotionId = ref.read(currentDevotionIdProvider);
-    if (isDevotionBase && currentDevotionId != null) {
-      final devoPath = "$devotionsBasePath/$currentDevotionId";
-      debugPrint("Redirecting to $devoPath");
-      return devoPath;
-    }
+    if (isLoggingIn) {
+			return _isAuth ? "/home" : null;
+		}
 
     return _isAuth ? null : "/";
   }
