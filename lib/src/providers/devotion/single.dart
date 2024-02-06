@@ -7,15 +7,16 @@ part 'single.g.dart';
 
 @riverpod
 class SingleDevotion extends _$SingleDevotion {
-  late String _id;
+  String? _id;
 
   @override
   FutureOr<Devotion> build(String? devotionId) async {
-    _id = devotionId ?? await ref.watch(devotionsPagesProvider().selectAsync((data) => data.first.first.id));
+    _id ??= devotionId ?? await ref.watch(devotionsPagesProvider().selectAsync((data) => data.first.first.id));
     return await ref.devotions.get(_id);
   }
 
   Future<Devotion> refresh() async {
+		_id ??= devotionId ?? await ref.watch(devotionsPagesProvider().selectAsync((data) => data.first.first.id));
     final devotion = await ref.devotions.refresh(_id);
     state = AsyncData(devotion);
     return devotion;
