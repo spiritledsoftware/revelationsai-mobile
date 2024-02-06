@@ -17,7 +17,7 @@ class SingleDevotion extends _$SingleDevotion {
 
   Future<Devotion> refresh() async {
 		_id ??= devotionId ?? await ref.watch(devotionsPagesProvider().selectAsync((data) => data.first.first.id));
-    final devotion = await ref.devotions.refresh(_id);
+    final devotion = await ref.devotions.refresh(_id!);
     state = AsyncData(devotion);
     return devotion;
   }
