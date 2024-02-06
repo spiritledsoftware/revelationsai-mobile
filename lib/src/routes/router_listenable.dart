@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:revelationsai/src/providers/advertisements/interstitial_ad.dart';
-import 'package:revelationsai/src/providers/chat/current_id.dart';
-import 'package:revelationsai/src/providers/devotion/current_id.dart';
 import 'package:revelationsai/src/providers/in_app_purchases/purchases_config.dart';
 import 'package:revelationsai/src/providers/repo_initialization.dart';
 import 'package:revelationsai/src/providers/user/current.dart';
@@ -65,8 +63,8 @@ class RouterListenable extends _$RouterListenable implements Listenable {
 
     final isLoggingIn = state.uri.path.startsWith("/auth");
     if (isLoggingIn) {
-			return _isAuth ? "/home" : null;
-		}
+      return _isAuth ? "/home" : null;
+    }
 
     return _isAuth ? null : "/";
   }

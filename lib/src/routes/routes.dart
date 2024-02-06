@@ -151,10 +151,12 @@ List<RouteBase> getRoutes({
                   pageBuilder: (context, state) {
                     return ModalPage(
                       builder: (_) {
-                        return const FractionallySizedBox(
+                        return FractionallySizedBox(
                           widthFactor: 1.0,
                           heightFactor: 0.90,
-                          child: ChatModal(),
+                          child: ChatModal(
+                            activeId: state.uri.queryParameters['activeId'],
+                          ),
                         );
                       },
                     );
@@ -174,10 +176,12 @@ List<RouteBase> getRoutes({
                       pageBuilder: (context, state) {
                         return ModalPage(
                           builder: (_) {
-                            return const FractionallySizedBox(
+                            return FractionallySizedBox(
                               widthFactor: 1.0,
                               heightFactor: 0.90,
-                              child: ChatModal(),
+                              child: ChatModal(
+                                activeId: state.uri.queryParameters['activeId'] ?? state.pathParameters['id'],
+                              ),
                             );
                           },
                         );
@@ -224,10 +228,12 @@ List<RouteBase> getRoutes({
                   pageBuilder: (context, state) {
                     return ModalPage(
                       builder: (_) {
-                        return const FractionallySizedBox(
+                        return FractionallySizedBox(
                           widthFactor: 1.0,
                           heightFactor: 0.90,
-                          child: DevotionModal(),
+                          child: DevotionModal(
+                            activeId: state.uri.queryParameters['activeId'],
+                          ),
                         );
                       },
                     );
@@ -246,10 +252,12 @@ List<RouteBase> getRoutes({
                       pageBuilder: (context, state) {
                         return ModalPage(
                           builder: (_) {
-                            return const FractionallySizedBox(
+                            return FractionallySizedBox(
                               widthFactor: 1.0,
                               heightFactor: 0.90,
-                              child: DevotionModal(),
+                              child: DevotionModal(
+                                activeId: state.uri.queryParameters['activeId'] ?? state.pathParameters['id'],
+                              ),
                             );
                           },
                         );

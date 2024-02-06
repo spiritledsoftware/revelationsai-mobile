@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:revelationsai/src/utils/build_context_extensions.dart';
-import 'package:revelationsai/src/widgets/advertisement/native_ad.dart';
 
 class ChatSuggestions extends HookConsumerWidget {
   final void Function(String suggestionString) onTap;
@@ -104,10 +102,6 @@ class ChatSuggestions extends HookConsumerWidget {
                   "What is the Lord's Prayer?",
                 ],
                 onTap: onTap,
-              ),
-              NativeAdvertisement(
-                type: TemplateType.small,
-                width: context.width * 0.95,
               ),
             ],
           ),

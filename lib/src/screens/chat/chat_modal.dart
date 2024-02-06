@@ -15,7 +15,12 @@ import 'package:revelationsai/src/widgets/refresh_indicator.dart';
 class ChatModal extends HookConsumerWidget {
   static const _pageSize = 9;
 
-  const ChatModal({super.key});
+  final String? activeId;
+
+  const ChatModal({
+    super.key,
+    this.activeId,
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -238,6 +243,7 @@ class ChatModal extends HookConsumerWidget {
                       key: ValueKey(chat.id),
                       chat: chat,
                       searchQuery: searchText.value,
+                      activeId: activeId,
                     );
                   },
                 ),
@@ -253,13 +259,17 @@ class ChatModal extends HookConsumerWidget {
 class ChatListItem extends HookConsumerWidget {
   final Chat chat;
   final String? searchQuery;
+  final String? activeId;
 
-  const ChatListItem({super.key, required this.chat, this.searchQuery});
+  const ChatListItem({
+    super.key,
+    required this.chat,
+    this.searchQuery,
+    this.activeId,
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final currentChatId = ref.watch(currentChatIdProvider);
-
     return Dismissible(
       key: ValueKey(chat.id),
       background: Container(
@@ -313,14 +323,14 @@ class ChatListItem extends HookConsumerWidget {
               queryString: searchQuery,
             ).notifier)
             .deleteChat(chat.id);
-        if (currentChatId == chat.id) {
+        if (activeId == chat.id) {
           ref.read(currentChatIdProvider.notifier).update(null);
           context.go('/chat/history');
         }
       },
       child: Container(
         decoration: BoxDecoration(
-          color: currentChatId == chat.id ? context.secondaryColor.withOpacity(0.2) : Colors.transparent,
+          color: activeId == chat.id ? context.secondaryColor.withOpacity(0.2) : Colors.transparent,
         ),
         child: ListTile(
           dense: true,
@@ -334,7 +344,7 @@ class ChatListItem extends HookConsumerWidget {
           subtitle: Text(
             DateFormat.yMMMd().addPattern(DateFormat.HOUR_MINUTE).format(chat.updatedAt.toLocal()),
           ),
-          trailing: currentChatId == chat.id
+          trailing: activeId == chat.id
               ? Icon(
                   Icons.check,
                   color: context.secondaryColor,

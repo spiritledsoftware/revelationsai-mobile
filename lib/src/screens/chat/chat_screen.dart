@@ -43,7 +43,6 @@ class ChatScreen extends HookConsumerWidget {
     final isMounted = useIsMounted();
     final showToolbar = useState(true);
     final scrollableEndIsInView = useState(true);
-    final isLoadingChat = useState(false);
     final isRefreshingChat = useState(false);
     final alert = useState<Alert?>(null);
     final input = useState("");
@@ -85,6 +84,9 @@ class ChatScreen extends HookConsumerWidget {
       return () {};
     }, [watchedChatMessages.value]);
 
+    final isLoadingChat = (watchedChat.isLoading && !watchedChat.hasValue) ||
+        (watchedChatMessages.isLoading && !watchedChatMessages.hasValue);
+
     final scrollToEnd = useCallback(() {
       if (scrollController.hasClients) {
         scrollController.animateTo(
@@ -115,11 +117,6 @@ class ChatScreen extends HookConsumerWidget {
     }, [ref, chatHook.chatId.value]);
 
     useEffect(() {
-      chatHook.chatId.value = initChatId;
-      return () {};
-    }, [initChatId]);
-
-    useEffect(() {
       if (initQuery != null && initQuery!.isNotEmpty) {
         chatHook.append(
           ChatMessage(
@@ -141,8 +138,6 @@ class ChatScreen extends HookConsumerWidget {
     }, [chatHook.chatId.value]);
 
     useEffect(() {
-      debugPrint(
-          "ChatScreen: chatHook.loading.value: ${chatHook.loading.value} chatHook.currentResponseId.value: ${chatHook.currentResponseId.value} chatHook.error.value: ${chatHook.error.value}");
       if (!chatHook.loading.value && chatHook.error.value == null) {
         debugPrint("Refreshing chat data since chat is idle.");
         Future(() => refreshChatData());
@@ -151,7 +146,6 @@ class ChatScreen extends HookConsumerWidget {
     }, [chatHook.loading.value, chatHook.error.value]);
 
     useEffect(() {
-      debugPrint("ChatScreen: chatHook.error.value: ${chatHook.error.value}");
       if (chatHook.error.value != null) {
         if (isMounted()) {
           alert.value = Alert(
@@ -164,7 +158,6 @@ class ChatScreen extends HookConsumerWidget {
     }, [chatHook.error.value]);
 
     useEffect(() {
-      debugPrint("ChatScreen: alert.value: ${alert.value}");
       if (alert.value != null) {
         Future(() {
           Flushbar(
@@ -199,8 +192,6 @@ class ChatScreen extends HookConsumerWidget {
     }, [chatHook.inputController]);
 
     useEffect(() {
-      debugPrint("ChatScreen: scrollController.hasClients: ${scrollController.hasClients}");
-
       void scrollListener() {
         if (scrollController.position.userScrollDirection == ScrollDirection.forward) {
           if (isMounted()) {
@@ -258,7 +249,7 @@ class ChatScreen extends HookConsumerWidget {
         isRefreshingChat: isRefreshingChat,
         refreshChatData: refreshChatData,
       ),
-      body: isLoadingChat.value
+      body: isLoadingChat
           ? Center(
               child: SpinKitSpinningLines(
                 color: context.secondaryColor,

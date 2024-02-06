@@ -49,7 +49,7 @@ class DevotionScreen extends HookConsumerWidget {
       padding: EdgeInsets.only(
         top: 20,
       ),
-      type: TemplateType.small,
+      type: TemplateType.medium,
     ));
 
     final fetchDevoData = useCallback((String? devoId) async {
@@ -204,7 +204,6 @@ class DevotionScreen extends HookConsumerWidget {
                       scrollDirection: Axis.vertical,
                       shrinkWrap: true,
                       children: [
-                        advertisement.value,
                         Container(
                           margin: const EdgeInsets.only(
                             top: 20,
@@ -300,6 +299,7 @@ class DevotionScreen extends HookConsumerWidget {
                                 .toList(),
                           )
                         ],
+                        advertisement.value,
                         if (devotion.value!.diveDeeperQueries.isNotEmpty) ...[
                           Container(
                             margin: const EdgeInsets.only(

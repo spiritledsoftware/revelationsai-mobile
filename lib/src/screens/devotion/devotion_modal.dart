@@ -6,7 +6,6 @@ import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:revelationsai/src/models/devotion.dart';
-import 'package:revelationsai/src/providers/devotion/current_id.dart';
 import 'package:revelationsai/src/providers/devotion/pages.dart';
 import 'package:revelationsai/src/utils/build_context_extensions.dart';
 import 'package:revelationsai/src/utils/capitalization.dart';
@@ -15,7 +14,12 @@ import 'package:revelationsai/src/widgets/refresh_indicator.dart';
 class DevotionModal extends HookConsumerWidget {
   static const _pageSize = 7;
 
-  const DevotionModal({super.key});
+  final String? activeId;
+
+  const DevotionModal({
+    super.key,
+    this.activeId,
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -215,6 +219,7 @@ class DevotionModal extends HookConsumerWidget {
                     return DevotionListItem(
                       key: ValueKey(devotion.id),
                       devotion: devotion,
+                      activeId: activeId,
                     );
                   },
                 ),
@@ -229,16 +234,19 @@ class DevotionModal extends HookConsumerWidget {
 
 class DevotionListItem extends HookConsumerWidget {
   final Devotion devotion;
+  final String? activeId;
 
-  const DevotionListItem({super.key, required this.devotion});
+  const DevotionListItem({
+    super.key,
+    required this.devotion,
+    this.activeId,
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final currentDevotionId = ref.watch(currentDevotionIdProvider);
-
     return Container(
       key: ValueKey(devotion.id),
-      color: currentDevotionId == devotion.id ? context.secondaryColor.withOpacity(0.2) : null,
+      color: activeId == devotion.id ? context.secondaryColor.withOpacity(0.2) : null,
       child: ListTile(
         dense: true,
         visualDensity: VisualDensity.compact,
@@ -257,7 +265,7 @@ class DevotionListItem extends HookConsumerWidget {
             ),
           ],
         ),
-        trailing: currentDevotionId == devotion.id
+        trailing: activeId == devotion.id
             ? Icon(
                 Icons.check,
                 color: context.secondaryColor,

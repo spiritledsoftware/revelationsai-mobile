@@ -316,6 +316,7 @@ class HomeScreen extends HookConsumerWidget {
                     ),
                   ),
                 ],
+                advertisement.value,
                 HomeScreenCard(
                   title: "Ask a Question",
                   child: TextField(
@@ -538,7 +539,6 @@ class HomeScreen extends HookConsumerWidget {
                     ),
                   ),
                 ),
-                advertisement.value,
               ],
             ),
           ),
