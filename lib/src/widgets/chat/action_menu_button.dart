@@ -107,7 +107,8 @@ class ChatActionMenuButton extends HookConsumerWidget {
               if (currentUserPreferences.hapticFeedback) {
                 HapticFeedback.lightImpact();
               }
-              context.go('${context.path}/history?activeId=${chatHook.chatId.value}');
+              context.go(
+                  '${context.path}/history${chatHook.chatId.value != null ? "?activeId=${chatHook.chatId.value}" : ""}');
             },
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 8),

@@ -50,7 +50,7 @@ class DevotionActionMenuButton extends HookConsumerWidget {
             if (currentUserPrefs.hapticFeedback) {
               HapticFeedback.lightImpact();
             }
-            context.go("${context.path}/history${devotion.value?.id != null ? "?activeId${devotion.value?.id}" : ""}");
+            context.go('${context.path}/history${devotion.value?.id != null ? "?activeId${devotion.value?.id}" : ""}');
           },
           child: Row(
             mainAxisSize: MainAxisSize.min,
