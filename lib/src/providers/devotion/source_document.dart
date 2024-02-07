@@ -1,5 +1,5 @@
 import 'package:revelationsai/src/models/source_document.dart';
-import 'package:revelationsai/src/providers/devotion/pages.dart';
+import 'package:revelationsai/src/providers/devotion/latest.dart';
 import 'package:revelationsai/src/providers/devotion/repositories.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -7,16 +7,15 @@ part 'source_document.g.dart';
 
 @riverpod
 class DevotionSourceDocuments extends _$DevotionSourceDocuments {
-  late String _id;
-
   @override
-  FutureOr<List<SourceDocument>> build(String? devotionId) async {
-    _id = devotionId ?? await ref.watch(devotionsPagesProvider().selectAsync((data) => data.first.first.id));
-    return ref.devotionSourceDocuments.getByDevotionId(_id);
+  FutureOr<List<SourceDocument>> build(String? id) async {
+    id ??= await ref.watch(latestDevotionProvider.future).then((devotion) => devotion.id);
+    return ref.devotionSourceDocuments.getByDevotionId(id!);
   }
 
   Future<List<SourceDocument>> refresh() async {
-    final sourceDocs = await ref.devotionSourceDocuments.refreshByDevotionId(_id);
+    id ??= await ref.read(latestDevotionProvider.notifier).refresh().then((devotion) => devotion.id);
+    final sourceDocs = await ref.devotionSourceDocuments.refreshByDevotionId(id!);
     state = AsyncData(sourceDocs);
     return sourceDocs;
   }

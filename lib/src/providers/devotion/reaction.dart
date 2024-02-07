@@ -1,5 +1,5 @@
 import 'package:revelationsai/src/models/devotion/reaction.dart';
-import 'package:revelationsai/src/providers/devotion/pages.dart';
+import 'package:revelationsai/src/providers/devotion/latest.dart';
 import 'package:revelationsai/src/providers/devotion/reaction_count.dart';
 import 'package:revelationsai/src/providers/devotion/repositories.dart';
 import 'package:revelationsai/src/providers/user/current.dart';
@@ -10,25 +10,27 @@ part 'reaction.g.dart';
 
 @riverpod
 class DevotionReactions extends _$DevotionReactions {
-  late String _id;
-
   @override
-  FutureOr<List<DevotionReaction>> build(String? devotionId) async {
-    _id = devotionId ?? await ref.watch(devotionsPagesProvider().selectAsync((data) => data.first.first.id));
-    return await ref.devotionReactions.getByDevotionId(_id);
+  FutureOr<List<DevotionReaction>> build(String? id) async {
+    id ??= await ref.watch(latestDevotionProvider.future).then((devotion) => devotion.id);
+    return await ref.devotionReactions.getByDevotionId(id!);
   }
 
   Future<void> createReaction({
     required DevotionReactionType reactionType,
     String? comment,
   }) async {
+    if (id == null) {
+      throw Exception('Devotion ID is not set');
+    }
+
     final previousState = state;
 
     final reaction = DevotionReaction(
       id: const Uuid().v4(),
       createdAt: DateTime.now(),
       updatedAt: DateTime.now(),
-      devotionId: _id,
+      devotionId: id!,
       userId: ref.read(currentUserProvider).requireValue.id,
       reaction: reactionType,
     );
@@ -38,10 +40,10 @@ class DevotionReactions extends _$DevotionReactions {
       reaction,
     ]);
 
-    return await ref.devotionReactions.createForDevotionId(_id, reactionType, comment: comment).then(
+    return await ref.devotionReactions.createForDevotionId(id!, reactionType, comment: comment).then(
       (value) {
         refresh();
-        ref.read(devotionReactionCountsProvider(_id).notifier).increment(reactionType);
+        ref.read(devotionReactionCountsProvider(id).notifier).increment(reactionType);
       },
     ).catchError(
       (error) {
@@ -52,7 +54,8 @@ class DevotionReactions extends _$DevotionReactions {
   }
 
   Future<List<DevotionReaction>> refresh() async {
-    final reactions = await ref.devotionReactions.refreshByDevotionId(_id);
+    id ??= await ref.read(latestDevotionProvider.notifier).refresh().then((devotion) => devotion.id);
+    final reactions = await ref.devotionReactions.refreshByDevotionId(id!);
     state = AsyncData(reactions);
     return reactions;
   }
