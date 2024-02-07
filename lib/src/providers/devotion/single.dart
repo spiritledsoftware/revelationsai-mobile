@@ -7,7 +7,8 @@ part 'single.g.dart';
 
 @riverpod
 class SingleDevotion extends _$SingleDevotion {
-  late String? _id;
+
+	String? _id;
 
   @override
   FutureOr<Devotion> build(String? devotionId) async {
