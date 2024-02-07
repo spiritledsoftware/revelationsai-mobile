@@ -84,7 +84,7 @@ class ChatScreen extends HookConsumerWidget {
       return () {};
     }, [watchedChatMessages.value]);
 
-    final isLoadingChat = (watchedChat.isLoading && !watchedChat.hasValue) ||
+    final isLoadingChat = (watchedChat.isLoading && !watchedChat.hasValue) &&
         (watchedChatMessages.isLoading && !watchedChatMessages.hasValue);
 
     final scrollToEnd = useCallback(() {
