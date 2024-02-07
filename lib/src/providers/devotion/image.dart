@@ -7,16 +7,18 @@ part 'image.g.dart';
 
 @riverpod
 class DevotionImages extends _$DevotionImages {
-  late String _id;
+
+	String? _id;
 
   @override
   FutureOr<List<DevotionImage>> build(String? devotionId) async {
     _id = devotionId ?? await ref.watch(devotionsPagesProvider().selectAsync((data) => data.first.first.id));
-    return await ref.devotionImages.getByDevotionId(_id);
+    return await ref.devotionImages.getByDevotionId(_id!);
   }
 
   Future<List<DevotionImage>> refresh() async {
-    final images = await ref.devotionImages.refreshByDevotionId(_id);
+		_id = devotionId ?? await ref.watch(devotionsPagesProvider().selectAsync((data) => data.first.first.id));
+    final images = await ref.devotionImages.refreshByDevotionId(_id!);
     state = AsyncData(images);
     return images;
   }
