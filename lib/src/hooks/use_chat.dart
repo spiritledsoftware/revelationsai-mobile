@@ -157,40 +157,20 @@ Future<ChatMessage> getStreamedResponse({
   String? modelId = response.headers.containsKey("x-model-id") ? response.headers["x-model-id"] : null;
   reply = reply.copyWith(uuid: aiResponseUuid, modelId: modelId);
 
-  final appendFutures = <Future>[];
-  final subscription = response.stream.transform(utf8.decoder).listen(
-    (value) async {
-      appendFutures.add(
-        Future.sync(() async {
-          if (appendFutures.isNotEmpty) await appendFutures.last;
+  final subscription = response.stream.transform(utf8.decoder).listen((value) {
+    for (int i = 0; i < value.length; i++) {
+      reply = reply.copyWith(content: "${reply.content}${value[i]}");
+      messages.value = [
+        ...chatRequest.messages,
+        reply,
+      ];
+      if (hapticFeedback) {
+        HapticFeedback.lightImpact();
+      }
+    }
+  });
 
-          // split chunk into words
-          final words = value.split(' ').toList(growable: false);
-          for (int i = 0; i < words.length; i++) {
-            await Future.delayed(
-              const Duration(milliseconds: 20),
-              () {
-                final addSpace = i != 0;
-                reply = reply.copyWith(content: "${reply.content}${addSpace ? " " : ""}${words[i]}");
-                messages.value = [
-                  ...chatRequest.messages,
-                  reply,
-                ];
-                if (hapticFeedback && i % 3 == 0) {
-                  HapticFeedback.lightImpact();
-                }
-              },
-            );
-          }
-        }),
-      );
-    },
-  );
-
-  await subscription.asFuture().then((_) async {
-    await Future.wait(appendFutures);
-    appendFutures.clear();
-  }).then((_) {
+  await subscription.asFuture().then((_) {
     if (onFinish != null) onFinish(reply);
     currentResponseId.value = null;
   }).onError((error, stackTrace) {
@@ -205,7 +185,7 @@ Future<ChatMessage> getStreamedResponse({
       ),
     ];
     currentResponseId.value = null;
-    throw error ?? Exception('An unknown error occured');
+    throw error ?? Exception('An unknown error occurred');
   });
 
   return reply;

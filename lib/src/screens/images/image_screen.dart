@@ -26,7 +26,6 @@ class ImageScreen extends HookConsumerWidget {
     final imageNotifier = ref.watch(singleUserGeneratedImageProvider(id).notifier);
     final image = ref.watch(singleUserGeneratedImageProvider(id));
 
-    final isMounted = useIsMounted();
     final showImageActions = useState(false);
     final loadingDownload = useState(false);
     final downloaded = useState(false);
@@ -118,7 +117,7 @@ class ImageScreen extends HookConsumerWidget {
                   children: [
                     GestureDetector(
                       onTap: () {
-                        if (isMounted()) showImageActions.value = !showImageActions.value;
+                        if (context.mounted) showImageActions.value = !showImageActions.value;
                       },
                       child: Stack(
                         children: [
@@ -147,7 +146,7 @@ class ImageScreen extends HookConsumerWidget {
                                       if (loadingDownload.value || downloaded.value) {
                                         return;
                                       }
-                                      if (isMounted()) {
+                                      if (context.mounted) {
                                         loadingDownload.value = true;
                                       }
                                       final res = await http.get(Uri.parse(image.url!));
@@ -156,12 +155,12 @@ class ImageScreen extends HookConsumerWidget {
                                         name: image.id,
                                         quality: 100,
                                       );
-                                      if (isMounted()) {
+                                      if (context.mounted) {
                                         downloaded.value = true;
                                         loadingDownload.value = false;
                                       }
                                       Future.delayed(const Duration(seconds: 5), () {
-                                        if (isMounted()) {
+                                        if (context.mounted) {
                                           downloaded.value = false;
                                         }
                                       });

@@ -36,7 +36,6 @@ class MessageActionsDialog extends HookConsumerWidget {
     final reactions =
         message.role == Role.assistant ? ref.watch(aiResponseReactionsProvider(message.uuid)).value : null;
 
-    final isMounted = useIsMounted();
     final copied = useState(false);
 
     useEffect(() {
@@ -101,7 +100,7 @@ class MessageActionsDialog extends HookConsumerWidget {
                             text: markdownToText(message.content),
                           ),
                         ).then((value) {
-                          if (isMounted()) {
+                          if (context.mounted) {
                             if (hapticFeedback) {
                               HapticFeedback.lightImpact();
                             }
@@ -109,7 +108,7 @@ class MessageActionsDialog extends HookConsumerWidget {
                           }
                         });
                         Future.delayed(const Duration(seconds: 3), () {
-                          if (isMounted()) copied.value = false;
+                          if (context.mounted) copied.value = false;
                         });
                       },
                       visualDensity: RAIVisualDensity.tightest,

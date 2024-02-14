@@ -33,8 +33,6 @@ class ChatActionMenuButton extends HookConsumerWidget {
 
     final mainMenuKey = useState(GlobalKey<PopupMenuButtonState>());
 
-    final isMounted = useIsMounted();
-
     return PopupMenuButton(
       key: mainMenuKey.value,
       position: PopupMenuPosition.under,
@@ -76,7 +74,7 @@ class ChatActionMenuButton extends HookConsumerWidget {
                   ref.read(currentChatIdProvider.notifier).update(null);
                   context.go("/chat");
                 }).whenComplete(() {
-                  if (isMounted()) isRefreshingChat.value = false;
+                  if (context.mounted) isRefreshingChat.value = false;
                 });
               }
             },

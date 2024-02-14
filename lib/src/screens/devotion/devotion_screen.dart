@@ -38,7 +38,6 @@ class DevotionScreen extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final isMounted = useIsMounted();
     final loading = useState(false);
     final devotion = useState<Devotion?>(null);
     final sourceDocs = useState<List<SourceDocument>>([]);
@@ -66,14 +65,14 @@ class DevotionScreen extends HookConsumerWidget {
         // final foundReactions = value[3] as List<DevotionReaction>;
         final foundReactionCounts = value[4] as Map<DevotionReactionType, int>;
 
-        if (isMounted()) {
+        if (context.mounted) {
           devotion.value = foundDevo;
           sourceDocs.value = foundSourceDocs;
           images.value = foundImages;
           reactionCounts.value = foundReactionCounts;
         }
       });
-    }, [ref, isMounted]);
+    }, [ref, context.mounted]);
 
     final refreshDevoData = useCallback(() async {
       await Future.wait([
@@ -89,20 +88,20 @@ class DevotionScreen extends HookConsumerWidget {
         // final foundReactions = value[3] as List<DevotionReaction>;
         final foundReactionCounts = value[4] as Map<DevotionReactionType, int>;
 
-        if (isMounted()) {
+        if (context.mounted) {
           devotion.value = foundDevo;
           sourceDocs.value = foundSourceDocs;
           images.value = foundImages;
           reactionCounts.value = foundReactionCounts;
         }
       });
-    }, [ref, isMounted]);
+    }, [ref, context.mounted]);
 
     useEffect(() {
       debugPrint("DevotionScreen: useEffect: devotionId: $devotionId");
       loading.value = true;
       fetchDevoData(devotionId).whenComplete(() async {
-        if (isMounted()) {
+        if (context.mounted) {
           loading.value = false;
           await Future(() => refreshDevoData());
         }
@@ -177,7 +176,6 @@ class DevotionScreen extends HookConsumerWidget {
                   DevotionActionMenuButton(
                     devotion: devotion,
                     reactionCounts: reactionCounts,
-                    isMounted: isMounted,
                   ),
                 ],
               ),

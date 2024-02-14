@@ -10,8 +10,12 @@
     "flushbar",
     "Hnsw",
     "langchain",
+    "Prefs",
+    "revelationsai",
     "REVENUECAT",
     "Riverpod",
+    "spinkit",
+    "sublist",
     "unfocus",
     "upstash"
   ],

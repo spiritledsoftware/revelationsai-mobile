@@ -40,7 +40,6 @@ class ChatScreen extends HookConsumerWidget {
     final currentUser = ref.watch(currentUserProvider).requireValue;
     final currentUserPreferences = ref.watch(currentUserPreferencesProvider).requireValue;
 
-    final isMounted = useIsMounted();
     final showToolbar = useState(true);
     final scrollableEndIsInView = useState(true);
     final isRefreshingChat = useState(false);
@@ -70,7 +69,7 @@ class ChatScreen extends HookConsumerWidget {
 
     final watchedChat = ref.watch(singleChatProvider(chatHook.chatId.value));
     useEffect(() {
-      if (isMounted()) {
+      if (context.mounted) {
         chat.value = watchedChat.value;
       }
       return () {};
@@ -78,13 +77,14 @@ class ChatScreen extends HookConsumerWidget {
 
     final watchedChatMessages = ref.watch(chatMessagesProvider(chatHook.chatId.value));
     useEffect(() {
-      if (isMounted() && !chatHook.loading.value) {
+      if (context.mounted && !chatHook.loading.value) {
         chatHook.messages.value = watchedChatMessages.value?.expand((element) => element).toList() ?? [];
       }
       return () {};
     }, [watchedChatMessages.value]);
 
-    final isLoadingChat = initChatId != null && (watchedChat.isLoading && !watchedChat.hasValue) &&
+    final isLoadingChat = initChatId != null &&
+        (watchedChat.isLoading && !watchedChat.hasValue) &&
         (watchedChatMessages.isLoading && !watchedChatMessages.hasValue);
 
     final scrollToEnd = useCallback(() {
@@ -147,7 +147,7 @@ class ChatScreen extends HookConsumerWidget {
 
     useEffect(() {
       if (chatHook.error.value != null) {
-        if (isMounted()) {
+        if (context.mounted) {
           alert.value = Alert(
             type: AlertType.error,
             message: chatHook.error.value!.toString().replaceFirst("Exception: ", ""),
@@ -172,7 +172,7 @@ class ChatScreen extends HookConsumerWidget {
             animationDuration: const Duration(milliseconds: 200),
           ).show(context);
         }).whenComplete(() {
-          if (isMounted()) {
+          if (context.mounted) {
             alert.value = null;
           }
         });
@@ -194,11 +194,11 @@ class ChatScreen extends HookConsumerWidget {
     useEffect(() {
       void scrollListener() {
         if (scrollController.position.userScrollDirection == ScrollDirection.forward) {
-          if (isMounted()) {
+          if (context.mounted) {
             showToolbar.value = true;
           }
         } else if (scrollController.position.userScrollDirection == ScrollDirection.reverse) {
-          if (isMounted()) {
+          if (context.mounted) {
             showToolbar.value = false;
           }
         }
@@ -209,7 +209,7 @@ class ChatScreen extends HookConsumerWidget {
 
         final chatMessagesNotifier = ref.read(chatMessagesProvider(chatHook.chatId.value).notifier);
         if (scrollController.offset <= scrollController.position.minScrollExtent) {
-          if (isMounted()) {
+          if (context.mounted) {
             scrollableEndIsInView.value = true;
             showToolbar.value = true;
           }
@@ -217,12 +217,12 @@ class ChatScreen extends HookConsumerWidget {
             chatMessagesNotifier.hasNextPage() &&
             !chatMessagesNotifier.isLoadingNextPage()) {
           chatMessagesNotifier.fetchNextPage().then((value) {
-            if (isMounted()) {
+            if (context.mounted) {
               chatHook.messages.value.addAll(value);
             }
           });
         } else {
-          if (isMounted()) {
+          if (context.mounted) {
             scrollableEndIsInView.value = false;
           }
         }
@@ -231,7 +231,7 @@ class ChatScreen extends HookConsumerWidget {
       if (scrollController.hasClients) {
         scrollController.addListener(scrollListener);
       } else {
-        if (isMounted()) {
+        if (context.mounted) {
           scrollableEndIsInView.value = true;
         }
       }

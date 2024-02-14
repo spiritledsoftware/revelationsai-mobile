@@ -22,7 +22,7 @@ class CurrentUser extends _$CurrentUser {
   late SharedPreferences _sharedPreferences;
   static const _sharedPrefsKey = 'token';
 
-  Timer? _refreshTimer = null;
+  Timer? _refreshTimer;
 
   @override
   FutureOr<UserInfo> build() async {

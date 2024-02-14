@@ -21,7 +21,6 @@ class UpgradeScreen extends HookConsumerWidget {
     final customerInfo = ref.watch(customerInfoProvider);
     final packages = ref.watch(packagesProvider);
 
-    final isMounted = useIsMounted();
     final alert = useState<Alert?>(null);
 
     final purchaseFuture = useState<Future?>(null);
@@ -81,7 +80,7 @@ class UpgradeScreen extends HookConsumerWidget {
               duration: const Duration(seconds: 8),
             ),
           );
-          if (isMounted()) alert.value = null;
+          if (context.mounted) alert.value = null;
         });
       }
 

@@ -16,13 +16,11 @@ import 'package:share_plus/share_plus.dart';
 class DevotionActionMenuButton extends HookConsumerWidget {
   final ValueNotifier<Devotion?> devotion;
   final ValueNotifier<Map<DevotionReactionType, int>> reactionCounts;
-  final bool Function() isMounted;
 
   const DevotionActionMenuButton({
     super.key,
     required this.devotion,
     required this.reactionCounts,
-    required this.isMounted,
   });
 
   @override
@@ -99,7 +97,7 @@ class DevotionActionMenuButton extends HookConsumerWidget {
                 .then(
               (value) {
                 ref.read(devotionReactionCountsProvider(devotion.value!.id).notifier).refresh().then((value) {
-                  if (isMounted()) {
+                  if (context.mounted) {
                     reactionCounts.value = value;
                   }
                 });
@@ -153,7 +151,7 @@ class DevotionActionMenuButton extends HookConsumerWidget {
             ).then(
               (value) {
                 ref.read(devotionReactionCountsProvider(devotion.value!.id).notifier).refresh().then((value) {
-                  if (isMounted()) {
+                  if (context.mounted) {
                     reactionCounts.value = value;
                   }
                 });
