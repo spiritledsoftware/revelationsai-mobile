@@ -7,11 +7,12 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:revelationsai/src/constants/colors.dart';
-import 'package:revelationsai/src/constants/llm.dart';
 import 'package:revelationsai/src/constants/website.dart';
+import 'package:revelationsai/src/models/model_info.dart';
 import 'package:revelationsai/src/models/user.dart';
 import 'package:revelationsai/src/models/user/request.dart';
 import 'package:revelationsai/src/providers/in_app_purchases/customer_info.dart';
+import 'package:revelationsai/src/providers/model_infos.dart';
 import 'package:revelationsai/src/providers/user/current.dart';
 import 'package:revelationsai/src/providers/user/preferences.dart';
 import 'package:revelationsai/src/services/user.dart';
@@ -28,6 +29,7 @@ class SettingsModal extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final currentUserPreferences = ref.watch(currentUserPreferencesProvider).requireValue;
     final currentUser = ref.watch(currentUserProvider).requireValue;
+    final modelInfos = ref.watch(modelInfosProvider).requireValue;
 
     return Container(
       decoration: BoxDecoration(
@@ -234,21 +236,25 @@ class SettingsModal extends HookConsumerWidget {
                   title: const Text('Language Model'),
                   trailing: DropdownButton(
                     value: currentUserPreferences.modelId ??
-                        (UserService.hasPlus(currentUser) || UserService.isAdmin(currentUser) ? claudeV2 : claudeV1),
+                        (UserService.hasPlus(currentUser) || UserService.isAdmin(currentUser)
+                            ? modelInfos.entries.firstWhere((element) => element.value.tier == ModelTier.plus).key
+                            : modelInfos.entries.firstWhere((element) => element.value.tier == ModelTier.free).key),
                     onChanged: (value) {
                       final currentUser = ref.read(currentUserProvider).requireValue;
-                      if (value == claudeV2 && !UserService.hasPlus(currentUser) && !UserService.isAdmin(currentUser)) {
-                        context.go("/home/upgrade");
+                      if (modelInfos[value]!.tier == ModelTier.plus &&
+                          !UserService.hasPlus(currentUser) &&
+                          !UserService.isAdmin(currentUser)) {
+                        context.push("/home/upgrade");
                         return;
                       }
                       ref
                           .read(currentUserPreferencesProvider.notifier)
                           .updatePrefs(currentUserPreferences.copyWith(modelId: value as String));
                     },
-                    items: modelIdMapping.entries.map((modelId) {
+                    items: modelInfos.entries.map((modelInfo) {
                       return DropdownMenuItem(
-                        value: modelId.key,
-                        child: Text(modelId.value),
+                        value: modelInfo.key,
+                        child: Text(modelInfo.value.name),
                       );
                     }).toList(),
                   ),

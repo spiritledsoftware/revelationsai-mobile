@@ -134,8 +134,25 @@ class UpgradeScreen extends HookConsumerWidget {
                                           launchUrlString("https://www.anthropic.com/news/claude-2-1");
                                         },
                                         child: Text(
-                                          'Anthropic Claude v2.1',
+                                          'Claude v2.1',
                                           style: context.textTheme.titleMedium?.copyWith(
+                                            fontWeight: FontWeight.bold,
+                                            color: context.colorScheme.secondary,
+                                          ),
+                                        ),
+                                      ),
+                                      alignment: PlaceholderAlignment.middle,
+                                    ),
+                                    const TextSpan(text: " and "),
+                                    WidgetSpan(
+                                      child: GestureDetector(
+                                        onTap: () {
+                                          launchUrlString("https://openai.com/gpt-4");
+                                        },
+                                        child: Text(
+                                          'GPT-4',
+                                          style: context.textTheme.titleMedium?.copyWith(
+                                            fontWeight: FontWeight.bold,
                                             color: context.colorScheme.secondary,
                                           ),
                                         ),

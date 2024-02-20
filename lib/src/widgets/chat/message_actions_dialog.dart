@@ -6,14 +6,13 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:intl/intl.dart';
-import 'package:revelationsai/src/constants/llm.dart';
 import 'package:revelationsai/src/constants/visual_density.dart';
 import 'package:revelationsai/src/models/ai_response/reaction.dart';
 import 'package:revelationsai/src/models/chat/message.dart';
 import 'package:revelationsai/src/providers/ai_response/reaction.dart';
+import 'package:revelationsai/src/providers/model_infos.dart';
 import 'package:revelationsai/src/providers/user/preferences.dart';
 import 'package:revelationsai/src/utils/build_context_extensions.dart';
-import 'package:revelationsai/src/utils/capitalization.dart';
 import 'package:revelationsai/src/utils/markdown.dart';
 import 'package:revelationsai/src/widgets/chat/markdown.dart';
 import 'package:revelationsai/src/widgets/chat/reaction_comment_dialog.dart';
@@ -30,6 +29,7 @@ class MessageActionsDialog extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final hapticFeedback = ref.watch(currentUserPreferencesProvider).requireValue.hapticFeedback;
+    final modelInfos = ref.watch(modelInfosProvider).requireValue;
 
     final reactionsNotifier =
         message.role == Role.assistant ? ref.watch(aiResponseReactionsProvider(message.uuid).notifier) : null;
@@ -239,7 +239,7 @@ class MessageActionsDialog extends HookConsumerWidget {
                             ),
                           ),
                           child: Text(
-                            (modelIdMapping[message.modelId] ?? message.modelId!).toTitleCase(),
+                            modelInfos[message.modelId]?.name ?? message.modelId!,
                             style: context.textTheme.bodySmall,
                           ),
                         ),

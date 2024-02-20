@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:revelationsai/src/providers/advertisements/interstitial_ad.dart';
 import 'package:revelationsai/src/providers/in_app_purchases/purchases_config.dart';
+import 'package:revelationsai/src/providers/model_infos.dart';
 import 'package:revelationsai/src/providers/repo_initialization.dart';
 import 'package:revelationsai/src/providers/user/current.dart';
 import 'package:revelationsai/src/providers/user/preferences.dart';
@@ -21,17 +22,20 @@ class RouterListenable extends _$RouterListenable implements Listenable {
   @override
   Future<void> build() async {
     await Future.wait([
-      ref.watch(currentUserProvider.future).then((value) async {
-        await ref.watch(repositoryInitializationProvider.future);
-        await ref.watch(purchasesConfigProvider.future);
-        _isAuth = true;
-        return;
-      }).catchError((_) {
-        _isAuth = false;
-        return;
-      }),
+      ref.watch(currentUserProvider.future),
       ref.watch(currentUserPreferencesProvider.future),
-    ]);
+    ]).then((value) async {
+      await Future.wait([
+        ref.watch(repositoryInitializationProvider.future),
+        ref.watch(purchasesConfigProvider.future),
+        ref.watch(modelInfosProvider.future)
+      ]);
+      _isAuth = true;
+      return;
+    }).catchError((_) {
+      _isAuth = false;
+      return;
+    });
 
     await ref.read(interstitialAdsProvider.future);
 

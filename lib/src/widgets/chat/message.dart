@@ -4,10 +4,10 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:intl/intl.dart';
-import 'package:revelationsai/src/constants/llm.dart';
 import 'package:revelationsai/src/constants/visual_density.dart';
 import 'package:revelationsai/src/hooks/use_screenshot_controller.dart';
 import 'package:revelationsai/src/models/chat/message.dart';
+import 'package:revelationsai/src/providers/model_infos.dart';
 import 'package:revelationsai/src/providers/user/preferences.dart';
 import 'package:revelationsai/src/utils/build_context_extensions.dart';
 import 'package:revelationsai/src/utils/capitalization.dart';
@@ -38,6 +38,7 @@ class Message extends HookConsumerWidget {
     final hapticFeedback = ref.watch(
       currentUserPreferencesProvider.select((value) => value.value?.hapticFeedback ?? true),
     );
+    final modelInfos = ref.watch(modelInfosProvider).requireValue;
 
     final screenshotController = useScreenshotController();
 
@@ -83,7 +84,7 @@ class Message extends HookConsumerWidget {
             children: [
               if (message.modelId != null) ...[
                 Text(
-                  (modelIdMapping[message.modelId!] ?? message.modelId!).toTitleCase(),
+                  (modelInfos[message.modelId!]?.name ?? message.modelId!).toTitleCase(),
                   style: context.textTheme.bodySmall,
                 ),
               ],
