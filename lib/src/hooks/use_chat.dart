@@ -165,7 +165,13 @@ Future<ChatMessage> getStreamedResponse({
         reply,
       ];
       if (hapticFeedback) {
-        HapticFeedback.lightImpact();
+        if (i < 5) {
+          HapticFeedback.heavyImpact();
+        } else if (i < 15) {
+          HapticFeedback.mediumImpact();
+        } else if (i < 45) {
+          HapticFeedback.lightImpact();
+        }
       }
     }
   });
