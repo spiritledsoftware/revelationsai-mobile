@@ -157,23 +157,23 @@ Future<ChatMessage> getStreamedResponse({
   String? modelId = response.headers.containsKey("x-model-id") ? response.headers["x-model-id"] : null;
   reply = reply.copyWith(uuid: aiResponseUuid, modelId: modelId);
 
+  int i = 0;
   final subscription = response.stream.transform(utf8.decoder).listen((value) {
-    for (int i = 0; i < value.length; i++) {
-      reply = reply.copyWith(content: "${reply.content}${value[i]}");
-      messages.value = [
-        ...chatRequest.messages,
-        reply,
-      ];
-      if (hapticFeedback) {
-        if (i < 5) {
-          HapticFeedback.heavyImpact();
-        } else if (i < 10) {
-          HapticFeedback.mediumImpact();
-        } else if (i < 20) {
-          HapticFeedback.lightImpact();
-        }
+    reply = reply.copyWith(content: "${reply.content}$value");
+    messages.value = [
+      ...chatRequest.messages,
+      reply,
+    ];
+    if (hapticFeedback) {
+      if (i < 5) {
+        HapticFeedback.heavyImpact();
+      } else if (i < 10) {
+        HapticFeedback.mediumImpact();
+      } else if (i < 20) {
+        HapticFeedback.lightImpact();
       }
     }
+    i++;
   });
 
   await subscription.asFuture().then((_) {
