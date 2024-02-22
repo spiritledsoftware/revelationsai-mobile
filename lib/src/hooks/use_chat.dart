@@ -166,16 +166,17 @@ Future<ChatMessage> getStreamedResponse({
     ];
     if (hapticFeedback) {
       // Slowly decrease the intensity of the haptic feedback
-      if (i < 64) {
+      if (i < 32) {
         HapticFeedback.heavyImpact();
-      } else if (i < 128) {
+      } else if (i < 64) {
         HapticFeedback.mediumImpact();
-      } else if (i < 256) {
+      } else if (i < 128) {
         HapticFeedback.lightImpact();
-      } else if ((i < 512 && i % 2 == 0) ||
-          (i < 1024 && i % 4 == 0) ||
-          (i < 2048 && i % 8 == 0) ||
-          (i < 4096 && i % 16 == 0)) {
+      } else if ((i < 256 && i % 2 == 0) ||
+          (i < 512 && i % 4 == 0) ||
+          (i < 1024 && i % 8 == 0) ||
+          (i < 2048 && i % 16 == 0) ||
+          (i < 4096 && i % 32 == 0)) {
         HapticFeedback.lightImpact();
       }
     }
