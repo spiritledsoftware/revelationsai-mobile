@@ -215,7 +215,7 @@ class HomeScreen extends HookConsumerWidget {
                                                   "https://www.anthropic.com/news/claude-3-family");
                                             },
                                             child: Text(
-                                              'Claude 3 Opus',
+                                              'Claude-3 Opus',
                                               style: context
                                                   .textTheme.titleMedium
                                                   ?.copyWith(
