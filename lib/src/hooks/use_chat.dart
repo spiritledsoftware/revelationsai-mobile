@@ -117,7 +117,8 @@ Future<ChatMessage> getStreamedResponse({
   request.body = jsonEncode({
     'modelId': chatRequest.modelId,
     'chatId': chatRequest.chatId,
-    'messages': chatRequest.messages.map((message) => message.toJson()).toList(),
+    'messages':
+        chatRequest.messages.map((message) => message.toJson()).toList(),
   });
   request.headers.addAll(
     <String, String>{
@@ -139,22 +140,31 @@ Future<ChatMessage> getStreamedResponse({
         chatId: chatId.value,
       ),
     ];
-    final data = jsonDecode(await response.stream.transform(utf8.decoder).join());
-    throw Exception(data['error'] ?? data['message'] ?? 'Something went wrong. Please try again.');
+    final data =
+        jsonDecode(await response.stream.transform(utf8.decoder).join());
+    throw Exception(data['error'] ??
+        data['message'] ??
+        'Something went wrong. Please try again.');
   }
 
-  response.headers.containsKey("x-chat-id") ? chatId.value = response.headers["x-chat-id"] : chatId.value = null;
+  response.headers.containsKey("x-chat-id")
+      ? chatId.value = response.headers["x-chat-id"]
+      : chatId.value = null;
 
   response.headers.containsKey("x-user-message-id") &&
           Uuid.isValidUUID(fromString: response.headers["x-user-message-id"]!)
-      ? chatRequest.messages.last = chatRequest.messages.last.copyWith(uuid: response.headers["x-user-message-id"])
-      : chatRequest.messages.last = chatRequest.messages.last.copyWith(uuid: null);
+      ? chatRequest.messages.last = chatRequest.messages.last
+          .copyWith(uuid: response.headers["x-user-message-id"])
+      : chatRequest.messages.last =
+          chatRequest.messages.last.copyWith(uuid: null);
 
   String? aiResponseUuid = response.headers.containsKey("x-ai-response-id") &&
           Uuid.isValidUUID(fromString: response.headers["x-ai-response-id"]!)
       ? response.headers["x-ai-response-id"]
       : null;
-  String? modelId = response.headers.containsKey("x-model-id") ? response.headers["x-model-id"] : null;
+  String? modelId = response.headers.containsKey("x-model-id")
+      ? response.headers["x-model-id"]
+      : null;
   reply = reply.copyWith(uuid: aiResponseUuid, modelId: modelId);
 
   int i = 0;
@@ -223,7 +233,8 @@ UseChatReturnObject useChat({required UseChatOptions options}) {
     [options.chatId],
   );
 
-  ValueNotifier<List<ChatMessage>> messages = useState(options.initialMessages ?? []);
+  ValueNotifier<List<ChatMessage>> messages =
+      useState(options.initialMessages ?? []);
   useEffect(
     () {
       messages.value = options.initialMessages ?? [];
@@ -247,7 +258,8 @@ UseChatReturnObject useChat({required UseChatOptions options}) {
 
   ValueNotifier<String?> currentResponseId = useState(null);
 
-  TextEditingController inputController = useTextEditingController(text: options.initialInput);
+  TextEditingController inputController =
+      useTextEditingController(text: options.initialInput);
   useEffect(
     () {
       inputController.text = options.initialInput;

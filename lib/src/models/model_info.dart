@@ -3,12 +3,7 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 part 'model_info.freezed.dart';
 part 'model_info.g.dart';
 
-enum ModelProvider {
-  bedrock,
-  openai,
-  fireworks,
-  google,
-}
+enum ModelProvider { bedrock, openai, anthropic, google }
 
 enum ModelTier {
   free,
@@ -26,5 +21,6 @@ class ModelInfo with _$ModelInfo {
     required ModelTier tier,
   }) = _ModelInfo;
 
-  factory ModelInfo.fromJson(Map<String, dynamic> json) => _$ModelInfoFromJson(json);
+  factory ModelInfo.fromJson(Map<String, dynamic> json) =>
+      _$ModelInfoFromJson(json);
 }

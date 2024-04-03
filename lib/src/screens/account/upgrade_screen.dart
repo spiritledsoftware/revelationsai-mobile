@@ -28,7 +28,8 @@ class UpgradeScreen extends HookConsumerWidget {
 
     final handlePurchase = useCallback(([Package? package]) {
       if (package != null) {
-        purchaseFuture.value = Purchases.purchasePackage(package).then((purchaserInfo) {
+        purchaseFuture.value =
+            Purchases.purchasePackage(package).then((purchaserInfo) {
           debugPrint('Purchaser Info: $purchaserInfo');
           ref.read(currentUserProvider.notifier).refresh();
         }).catchError((e) {
@@ -39,7 +40,8 @@ class UpgradeScreen extends HookConsumerWidget {
           }
         });
       } else {
-        purchaseFuture.value = Purchases.restorePurchases().then((purchaserInfo) {
+        purchaseFuture.value =
+            Purchases.restorePurchases().then((purchaserInfo) {
           debugPrint('Purchaser Info: $purchaserInfo');
           ref.read(currentUserProvider.notifier).refresh();
         }).catchError((e) {
@@ -53,7 +55,8 @@ class UpgradeScreen extends HookConsumerWidget {
     }, [ref]);
 
     useEffect(() {
-      if (purchaseSnapshot.hasError && purchaseSnapshot.connectionState != ConnectionState.waiting) {
+      if (purchaseSnapshot.hasError &&
+          purchaseSnapshot.connectionState != ConnectionState.waiting) {
         alert.value = Alert(
           type: AlertType.error,
           message: purchaseSnapshot.error.toString(),
@@ -75,8 +78,9 @@ class UpgradeScreen extends HookConsumerWidget {
                 alert.value!.message,
                 style: TextStyle(color: context.colorScheme.onError),
               ),
-              backgroundColor:
-                  alert.value!.type == AlertType.error ? context.colorScheme.error : context.colorScheme.secondary,
+              backgroundColor: alert.value!.type == AlertType.error
+                  ? context.colorScheme.error
+                  : context.colorScheme.secondary,
               duration: const Duration(seconds: 8),
             ),
           );
@@ -91,7 +95,9 @@ class UpgradeScreen extends HookConsumerWidget {
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         foregroundColor: context.colorScheme.onBackground,
-        systemOverlayStyle: context.isDarkMode ? SystemUiOverlayStyle.light : SystemUiOverlayStyle.dark,
+        systemOverlayStyle: context.isDarkMode
+            ? SystemUiOverlayStyle.light
+            : SystemUiOverlayStyle.dark,
       ),
       body: customerInfo.hasValue && packages.hasValue
           ? Stack(
@@ -131,13 +137,16 @@ class UpgradeScreen extends HookConsumerWidget {
                                     WidgetSpan(
                                       child: GestureDetector(
                                         onTap: () {
-                                          launchUrlString("https://www.anthropic.com/news/claude-2-1");
+                                          launchUrlString(
+                                              "https://www.anthropic.com/news/claude-3-family");
                                         },
                                         child: Text(
-                                          'Claude v2.1',
-                                          style: context.textTheme.titleMedium?.copyWith(
+                                          'Claude 3 Opus',
+                                          style: context.textTheme.titleMedium
+                                              ?.copyWith(
                                             fontWeight: FontWeight.bold,
-                                            color: context.colorScheme.secondary,
+                                            color:
+                                                context.colorScheme.secondary,
                                           ),
                                         ),
                                       ),
@@ -147,13 +156,16 @@ class UpgradeScreen extends HookConsumerWidget {
                                     WidgetSpan(
                                       child: GestureDetector(
                                         onTap: () {
-                                          launchUrlString("https://openai.com/gpt-4");
+                                          launchUrlString(
+                                              "https://openai.com/gpt-4");
                                         },
                                         child: Text(
-                                          'GPT-4',
-                                          style: context.textTheme.titleMedium?.copyWith(
+                                          'GPT-4 Turbo',
+                                          style: context.textTheme.titleMedium
+                                              ?.copyWith(
                                             fontWeight: FontWeight.bold,
-                                            color: context.colorScheme.secondary,
+                                            color:
+                                                context.colorScheme.secondary,
                                           ),
                                         ),
                                       ),
@@ -180,7 +192,8 @@ class UpgradeScreen extends HookConsumerWidget {
                                   children: [
                                     TextSpan(
                                       text: "Unlimited",
-                                      style: context.textTheme.titleMedium?.copyWith(
+                                      style: context.textTheme.titleMedium
+                                          ?.copyWith(
                                         fontWeight: FontWeight.bold,
                                       ),
                                     ),
@@ -208,7 +221,8 @@ class UpgradeScreen extends HookConsumerWidget {
                                   children: [
                                     TextSpan(
                                       text: "Unlimited",
-                                      style: context.textTheme.titleMedium?.copyWith(
+                                      style: context.textTheme.titleMedium
+                                          ?.copyWith(
                                         fontWeight: FontWeight.bold,
                                       ),
                                     ),
@@ -269,7 +283,8 @@ class UpgradeScreen extends HookConsumerWidget {
                                 children: [
                                   Text(
                                     package.storeProduct.priceString,
-                                    style: context.textTheme.titleMedium?.copyWith(
+                                    style:
+                                        context.textTheme.titleMedium?.copyWith(
                                       color: context.colorScheme.onPrimary,
                                     ),
                                   ),
@@ -289,8 +304,10 @@ class UpgradeScreen extends HookConsumerWidget {
                                         const SizedBox(width: 5),
                                         Text(
                                           "per",
-                                          style: context.textTheme.bodySmall?.copyWith(
-                                            color: context.colorScheme.onPrimary,
+                                          style: context.textTheme.bodySmall
+                                              ?.copyWith(
+                                            color:
+                                                context.colorScheme.onPrimary,
                                           ),
                                         ),
                                         const SizedBox(width: 5),
@@ -304,7 +321,8 @@ class UpgradeScreen extends HookConsumerWidget {
                                     ),
                                   ),
                                   Text(
-                                    (package.storeProduct.subscriptionPeriod ?? 'P1M')
+                                    (package.storeProduct.subscriptionPeriod ??
+                                            'P1M')
                                         .replaceFirst("P", "")
                                         .split("")
                                         .join(" ")
@@ -313,7 +331,8 @@ class UpgradeScreen extends HookConsumerWidget {
                                         .replaceAll("Y", "Year")
                                         .replaceAll("W", "Week")
                                         .replaceAll("D", "Day"),
-                                    style: context.textTheme.titleMedium?.copyWith(
+                                    style:
+                                        context.textTheme.titleMedium?.copyWith(
                                       color: context.colorScheme.onPrimary,
                                     ),
                                   ),
@@ -345,7 +364,8 @@ class UpgradeScreen extends HookConsumerWidget {
                             if (customerInfo.value?.managementURL != null) ...[
                               GestureDetector(
                                 onTap: () {
-                                  launchUrlString(customerInfo.value!.managementURL!);
+                                  launchUrlString(
+                                      customerInfo.value!.managementURL!);
                                 },
                                 child: Padding(
                                   padding: const EdgeInsets.symmetric(
@@ -354,7 +374,8 @@ class UpgradeScreen extends HookConsumerWidget {
                                   ),
                                   child: Text(
                                     'Manage Subscriptions',
-                                    style: context.textTheme.labelLarge?.copyWith(
+                                    style:
+                                        context.textTheme.labelLarge?.copyWith(
                                       color: context.colorScheme.secondary,
                                     ),
                                   ),
@@ -384,7 +405,8 @@ class UpgradeScreen extends HookConsumerWidget {
                     ),
                   ],
                 ),
-                if (purchaseSnapshot.connectionState == ConnectionState.waiting) ...[
+                if (purchaseSnapshot.connectionState ==
+                    ConnectionState.waiting) ...[
                   Positioned(
                     top: context.height * 0.05,
                     left: 0,
@@ -414,7 +436,8 @@ class UpgradeScreen extends HookConsumerWidget {
                     ),
                   ),
                 ],
-                if (purchaseSnapshot.connectionState == ConnectionState.done && purchaseSnapshot.hasData) ...[
+                if (purchaseSnapshot.connectionState == ConnectionState.done &&
+                    purchaseSnapshot.hasData) ...[
                   Positioned(
                     top: context.height * 0.05,
                     left: 0,

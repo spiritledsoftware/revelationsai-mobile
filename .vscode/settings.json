@@ -1,6 +1,8 @@
 {
-  "search.exclude": {
-    "**/.sst": true
+  "files.exclude": {
+    "**/.dart_tool": true,
+    "**/*.g.dart": true,
+    "**/*.freezed.dart": true
   },
   "cSpell.words": [
     "autocorrect",
@@ -19,22 +21,6 @@
     "unfocus",
     "upstash"
   ],
-  "java.configuration.updateBuildConfiguration": "automatic",
-  "eslint.workingDirectories": [
-    ".",
-    "packages/core",
-    "packages/functions",
-    "packages/website",
-    "packages/auth-ui"
-  ],
-  "eslint.validate": [
-    "javascript",
-    "javascriptreact",
-    "typescript",
-    "typescriptreact",
-    "svelte"
-  ],
-  "java.compile.nullAnalysis.mode": "automatic",
   "workbench.colorCustomizations": {
     "activityBar.activeBackground": "#1f6fd0",
     "activityBar.background": "#1f6fd0",

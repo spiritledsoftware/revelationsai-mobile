@@ -32,7 +32,8 @@ class RouterListenable extends _$RouterListenable implements Listenable {
       ]);
       _isAuth = true;
       return;
-    }).catchError((_) {
+    }).catchError((err, stackTrace) {
+      debugPrint("User is not authenticated $err $stackTrace");
       _isAuth = false;
       return;
     });
@@ -54,7 +55,9 @@ class RouterListenable extends _$RouterListenable implements Listenable {
     final isSplash = state.uri.path == "/";
     if (this.state.isLoading && !this.state.hasValue) {
       debugPrint("Router is loading");
-      return isSplash ? null : "/?redirect=${Uri.encodeComponent("${state.uri.path}?${state.uri.query}")}";
+      return isSplash
+          ? null
+          : "/?redirect=${Uri.encodeComponent("${state.uri.path}?${state.uri.query}")}";
     }
 
     debugPrint("Router path: ${state.uri.path}");

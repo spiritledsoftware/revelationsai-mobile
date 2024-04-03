@@ -24,17 +24,21 @@ class MessageActionsDialog extends HookConsumerWidget {
   final ChatMessage message;
   final ScreenshotController? screenshotController;
 
-  const MessageActionsDialog({super.key, required this.message, this.screenshotController});
+  const MessageActionsDialog(
+      {super.key, required this.message, this.screenshotController});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final hapticFeedback = ref.watch(currentUserPreferencesProvider).requireValue.hapticFeedback;
+    final hapticFeedback =
+        ref.watch(currentUserPreferencesProvider).requireValue.hapticFeedback;
     final modelInfos = ref.watch(modelInfosProvider).requireValue;
 
-    final reactionsNotifier =
-        message.role == Role.assistant ? ref.watch(aiResponseReactionsProvider(message.uuid).notifier) : null;
-    final reactions =
-        message.role == Role.assistant ? ref.watch(aiResponseReactionsProvider(message.uuid)).value : null;
+    final reactionsNotifier = message.role == Role.assistant
+        ? ref.watch(aiResponseReactionsProvider(message.uuid).notifier)
+        : null;
+    final reactions = message.role == Role.assistant
+        ? ref.watch(aiResponseReactionsProvider(message.uuid)).value
+        : null;
 
     final copied = useState(false);
 
@@ -112,10 +116,12 @@ class MessageActionsDialog extends HookConsumerWidget {
                         });
                       },
                       visualDensity: RAIVisualDensity.tightest,
-                      iconSize: 16,
+                      iconSize: 14,
                       icon: AnimatedCrossFade(
                         duration: const Duration(milliseconds: 200),
-                        crossFadeState: copied.value ? CrossFadeState.showFirst : CrossFadeState.showSecond,
+                        crossFadeState: copied.value
+                            ? CrossFadeState.showFirst
+                            : CrossFadeState.showSecond,
                         firstChild: const FaIcon(
                           FontAwesomeIcons.check,
                           color: Colors.green,
@@ -146,11 +152,12 @@ class MessageActionsDialog extends HookConsumerWidget {
                             ),
                           ],
                           subject: "Message from RevelationsAI",
-                          text: "Check out this message from RevelationsAI!\n\nhttps://revelationsai.com",
+                          text:
+                              "Check out this message from RevelationsAI!\n\nhttps://revelationsai.com",
                         );
                       },
                       visualDensity: RAIVisualDensity.tightest,
-                      iconSize: 18,
+                      iconSize: 16,
                       icon: const Icon(CupertinoIcons.share_up),
                     ),
                     if (message.role == Role.assistant) ...[
@@ -164,11 +171,13 @@ class MessageActionsDialog extends HookConsumerWidget {
                           );
                         },
                         visualDensity: RAIVisualDensity.tightest,
-                        iconSize: 18,
+                        iconSize: 16,
                         icon: AnimatedCrossFade(
                           duration: const Duration(milliseconds: 200),
                           crossFadeState: reactions
-                                      ?.where((element) => element.reaction == AiResponseReactionType.LIKE)
+                                      ?.where((element) =>
+                                          element.reaction ==
+                                          AiResponseReactionType.LIKE)
                                       .isNotEmpty ??
                                   false
                               ? CrossFadeState.showFirst
@@ -198,11 +207,13 @@ class MessageActionsDialog extends HookConsumerWidget {
                           );
                         },
                         visualDensity: RAIVisualDensity.tightest,
-                        iconSize: 18,
+                        iconSize: 16,
                         icon: AnimatedCrossFade(
                           duration: const Duration(milliseconds: 200),
                           crossFadeState: reactions
-                                      ?.where((element) => element.reaction == AiResponseReactionType.DISLIKE)
+                                      ?.where((element) =>
+                                          element.reaction ==
+                                          AiResponseReactionType.DISLIKE)
                                       .isNotEmpty ??
                                   false
                               ? CrossFadeState.showFirst
@@ -235,30 +246,40 @@ class MessageActionsDialog extends HookConsumerWidget {
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(15),
                             border: Border.all(
-                              color: context.colorScheme.onBackground.withOpacity(0.4),
+                              color: context.colorScheme.onBackground
+                                  .withOpacity(0.4),
                             ),
                           ),
                           child: Text(
-                            modelInfos[message.modelId]?.name ?? message.modelId!,
-                            style: context.textTheme.bodySmall,
+                            modelInfos[message.modelId]?.name ??
+                                message.modelId!,
+                            style: context.textTheme.bodySmall?.copyWith(
+                              fontSize: 10,
+                            ),
                           ),
                         ),
                       ),
-                      const SizedBox(width: 10),
                     ],
+                    const SizedBox(width: 5),
                     Column(
                       mainAxisSize: MainAxisSize.min,
                       crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
                         Text(
-                          DateFormat().addPattern("M/d/yy").format((message.createdAt ?? DateTime.now()).toLocal()),
-                          style: context.textTheme.bodySmall,
+                          DateFormat().addPattern("M/d/yy").format(
+                              (message.createdAt ?? DateTime.now()).toLocal()),
+                          style: context.textTheme.bodySmall?.copyWith(
+                            fontSize: 10,
+                          ),
                         ),
                         Text(
                           DateFormat()
                               .addPattern(DateFormat.HOUR_MINUTE)
-                              .format((message.createdAt ?? DateTime.now()).toLocal()),
-                          style: context.textTheme.bodySmall,
+                              .format((message.createdAt ?? DateTime.now())
+                                  .toLocal()),
+                          style: context.textTheme.bodySmall?.copyWith(
+                            fontSize: 10,
+                          ),
                         ),
                       ],
                     ),

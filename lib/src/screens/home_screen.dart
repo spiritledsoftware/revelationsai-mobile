@@ -42,9 +42,10 @@ class HomeScreen extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final currentUser = ref.watch(currentUserProvider.select((value) => value.requireValue));
-    final hapticFeedbackEnabled =
-        ref.watch(currentUserPreferencesProvider.select((value) => value.value?.hapticFeedback ?? true));
+    final currentUser =
+        ref.watch(currentUserProvider.select((value) => value.requireValue));
+    final hapticFeedbackEnabled = ref.watch(currentUserPreferencesProvider
+        .select((value) => value.value?.hapticFeedback ?? true));
 
     final greeting = useRef(greetings.elementAt(
       DateTime.now().millisecondsSinceEpoch % greetings.length,
@@ -57,7 +58,8 @@ class HomeScreen extends HookConsumerWidget {
     final latestDevotion = ref.watch(latestDevotionProvider);
     final mostAskedUserMessages = ref.watch(mostAskedUserMessagesProvider(5));
 
-    final advertisement = useRef(const NativeAdvertisement(type: TemplateType.medium));
+    final advertisement =
+        useRef(const NativeAdvertisement(type: TemplateType.medium));
 
     useEffect(() {
       Future.wait([
@@ -91,7 +93,8 @@ class HomeScreen extends HookConsumerWidget {
               centerTitle: false,
               backgroundColor: context.colorScheme.primary,
               systemOverlayStyle: SystemUiOverlayStyle.light,
-              title: UserService.hasPlus(currentUser) || UserService.isAdmin(currentUser)
+              title: UserService.hasPlus(currentUser) ||
+                      UserService.isAdmin(currentUser)
                   ? Image.asset(
                       "assets/logo/plus-logo-light.png",
                       width: 200,
@@ -152,7 +155,8 @@ class HomeScreen extends HookConsumerWidget {
                     textAlign: TextAlign.center,
                   ),
                 ),
-                if (!UserService.hasPlus(currentUser) && !UserService.isAdmin(currentUser)) ...[
+                if (!UserService.hasPlus(currentUser) &&
+                    !UserService.isAdmin(currentUser)) ...[
                   GestureDetector(
                     onTap: () {
                       if (hapticFeedbackEnabled) {
@@ -207,36 +211,46 @@ class HomeScreen extends HookConsumerWidget {
                                         WidgetSpan(
                                           child: GestureDetector(
                                             onTap: () {
-                                              launchUrlString("https://www.anthropic.com/news/claude-2-1");
+                                              launchUrlString(
+                                                  "https://www.anthropic.com/news/claude-3-family");
                                             },
                                             child: Text(
-                                              'Claude v2.1',
-                                              style: context.textTheme.titleMedium?.copyWith(
+                                              'Claude 3 Opus',
+                                              style: context
+                                                  .textTheme.titleMedium
+                                                  ?.copyWith(
                                                 fontWeight: FontWeight.bold,
                                                 color: context.secondaryColor,
                                               ),
                                             ),
                                           ),
-                                          alignment: PlaceholderAlignment.middle,
+                                          alignment:
+                                              PlaceholderAlignment.middle,
                                         ),
                                         const TextSpan(text: " and "),
                                         WidgetSpan(
                                           child: GestureDetector(
                                             onTap: () {
-                                              launchUrlString("https://openai.com/gpt-4");
+                                              launchUrlString(
+                                                  "https://openai.com/gpt-4");
                                             },
                                             child: Text(
-                                              'GPT-4',
-                                              style: context.textTheme.titleMedium?.copyWith(
+                                              'GPT-4 Turbo',
+                                              style: context
+                                                  .textTheme.titleMedium
+                                                  ?.copyWith(
                                                 fontWeight: FontWeight.bold,
-                                                color: context.colorScheme.secondary,
+                                                color: context
+                                                    .colorScheme.secondary,
                                               ),
                                             ),
                                           ),
-                                          alignment: PlaceholderAlignment.middle,
+                                          alignment:
+                                              PlaceholderAlignment.middle,
                                         ),
                                       ],
-                                      style: context.textTheme.titleMedium?.copyWith(
+                                      style: context.textTheme.titleMedium
+                                          ?.copyWith(
                                         color: context.colorScheme.onPrimary,
                                       ),
                                     ),
@@ -258,16 +272,19 @@ class HomeScreen extends HookConsumerWidget {
                                       children: [
                                         TextSpan(
                                           text: "Unlimited",
-                                          style: context.textTheme.titleMedium?.copyWith(
+                                          style: context.textTheme.titleMedium
+                                              ?.copyWith(
                                             fontWeight: FontWeight.bold,
-                                            color: context.colorScheme.onPrimary,
+                                            color:
+                                                context.colorScheme.onPrimary,
                                           ),
                                         ),
                                         const TextSpan(
                                           text: " queries per day",
                                         ),
                                       ],
-                                      style: context.textTheme.titleMedium?.copyWith(
+                                      style: context.textTheme.titleMedium
+                                          ?.copyWith(
                                         color: context.colorScheme.onPrimary,
                                       ),
                                     ),
@@ -289,16 +306,19 @@ class HomeScreen extends HookConsumerWidget {
                                       children: [
                                         TextSpan(
                                           text: "Unlimited",
-                                          style: context.textTheme.titleMedium?.copyWith(
+                                          style: context.textTheme.titleMedium
+                                              ?.copyWith(
                                             fontWeight: FontWeight.bold,
-                                            color: context.colorScheme.onPrimary,
+                                            color:
+                                                context.colorScheme.onPrimary,
                                           ),
                                         ),
                                         const TextSpan(
                                           text: " images per day",
                                         ),
                                       ],
-                                      style: context.textTheme.titleMedium?.copyWith(
+                                      style: context.textTheme.titleMedium
+                                          ?.copyWith(
                                         color: context.colorScheme.onPrimary,
                                       ),
                                     ),
@@ -318,7 +338,8 @@ class HomeScreen extends HookConsumerWidget {
                                     ),
                                     TextSpan(
                                       text: 'Ad-free experience',
-                                      style: context.textTheme.titleMedium?.copyWith(
+                                      style: context.textTheme.titleMedium
+                                          ?.copyWith(
                                         color: context.colorScheme.onPrimary,
                                       ),
                                     ),
@@ -353,13 +374,15 @@ class HomeScreen extends HookConsumerWidget {
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderSide: BorderSide(
-                          color: context.colorScheme.onBackground.withOpacity(0.8),
+                          color:
+                              context.colorScheme.onBackground.withOpacity(0.8),
                         ),
                         borderRadius: BorderRadius.circular(25),
                       ),
                       enabledBorder: OutlineInputBorder(
                         borderSide: BorderSide(
-                          color: context.colorScheme.onBackground.withOpacity(0.8),
+                          color:
+                              context.colorScheme.onBackground.withOpacity(0.8),
                         ),
                         borderRadius: BorderRadius.circular(25),
                       ),
@@ -370,7 +393,8 @@ class HomeScreen extends HookConsumerWidget {
                                 if (hapticFeedbackEnabled) {
                                   HapticFeedback.lightImpact();
                                 }
-                                context.go("/chat?query=${Uri.encodeQueryComponent(queryTextController.text)}");
+                                context.go(
+                                    "/chat?query=${Uri.encodeQueryComponent(queryTextController.text)}");
                               },
                               icon: const FaIcon(
                                 FontAwesomeIcons.arrowUp,
@@ -453,7 +477,8 @@ class HomeScreen extends HookConsumerWidget {
                                       if (hapticFeedbackEnabled) {
                                         HapticFeedback.lightImpact();
                                       }
-                                      context.go("/chat?query=${Uri.encodeQueryComponent(query)}");
+                                      context.go(
+                                          "/chat?query=${Uri.encodeQueryComponent(query)}");
                                     },
                                     leading: Icon(
                                       CupertinoIcons.chat_bubble_fill,
@@ -462,7 +487,8 @@ class HomeScreen extends HookConsumerWidget {
                                     ),
                                     title: Text(
                                       query,
-                                      style: context.textTheme.bodySmall?.copyWith(
+                                      style:
+                                          context.textTheme.bodySmall?.copyWith(
                                         color: context.colorScheme.onPrimary,
                                       ),
                                     ),
@@ -478,7 +504,8 @@ class HomeScreen extends HookConsumerWidget {
                                 ListTile(
                                   title: Text(
                                     "No dive deeper queries found for this devotion",
-                                    style: context.textTheme.bodySmall?.copyWith(
+                                    style:
+                                        context.textTheme.bodySmall?.copyWith(
                                       color: context.colorScheme.onPrimary,
                                     ),
                                   ),
@@ -515,7 +542,8 @@ class HomeScreen extends HookConsumerWidget {
                         final message = messages[index];
                         return ListTile(
                           onTap: () {
-                            context.go("/chat?query=${Uri.encodeQueryComponent(message)}");
+                            context.go(
+                                "/chat?query=${Uri.encodeQueryComponent(message)}");
                           },
                           leading: Text(
                             "#${(index + 1).toString()}",
