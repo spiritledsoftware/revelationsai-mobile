@@ -256,6 +256,7 @@ class HomeScreen extends HookConsumerWidget {
                                     ),
                                   ],
                                 ),
+                                textAlign: TextAlign.center,
                               ),
                               Text.rich(
                                 TextSpan(
@@ -290,6 +291,7 @@ class HomeScreen extends HookConsumerWidget {
                                     ),
                                   ],
                                 ),
+                                textAlign: TextAlign.center,
                               ),
                               Text.rich(
                                 TextSpan(

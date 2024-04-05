@@ -1,5 +1,6 @@
 import 'package:another_flushbar/flushbar.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:go_router/go_router.dart';
@@ -25,7 +26,8 @@ class RAIApp extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final routerListenableNotifier = ref.watch(routerListenableProvider.notifier);
+    final routerListenableNotifier =
+        ref.watch(routerListenableProvider.notifier);
 
     final rootNavigatorKey = useRef(GlobalKey<NavigatorState>());
     final shellHomeNavigatorKey = useRef(GlobalKey<NavigatorState>());
@@ -35,7 +37,7 @@ class RAIApp extends HookConsumerWidget {
 
     final router = useMemoized(
       () => GoRouter(
-        observers: [NewRelicNavigationObserver()],
+        observers: kDebugMode ? null : [NewRelicNavigationObserver()],
         navigatorKey: rootNavigatorKey.value,
         refreshListenable: routerListenableNotifier,
         debugLogDiagnostics: true,
@@ -68,7 +70,8 @@ class RAIApp extends HookConsumerWidget {
     );
 
     final onMessage = useCallback((RemoteMessage message) {
-      debugPrint('Handling message: ${message.messageId} ${message.data.toString()}');
+      debugPrint(
+          'Handling message: ${message.messageId} ${message.data.toString()}');
       switch (message.data['task']) {
         case 'daily-devo':
           final id = message.data['id'] ?? '';
@@ -107,7 +110,8 @@ class RAIApp extends HookConsumerWidget {
             dismissDirection: FlushbarDismissDirection.VERTICAL,
             animationDuration: const Duration(milliseconds: 200),
             onTap: (flushbar) {
-              router.go('/?redirect=${Uri.encodeComponent('/chat?query=$query')}');
+              router.go(
+                  '/?redirect=${Uri.encodeComponent('/chat?query=$query')}');
               flushbar.dismiss();
             },
           ).show(rootNavigatorKey.value.currentContext!);
@@ -118,7 +122,8 @@ class RAIApp extends HookConsumerWidget {
     }, [router, rootNavigatorKey.value]);
 
     final onMessageOpenedApp = useCallback((RemoteMessage message) {
-      debugPrint('Handling message opened app: ${message.messageId} ${message.data.toString()}');
+      debugPrint(
+          'Handling message opened app: ${message.messageId} ${message.data.toString()}');
       switch (message.data['task']) {
         case 'daily-devo':
           final id = message.data['id'] ?? '';
@@ -149,7 +154,8 @@ class RAIApp extends HookConsumerWidget {
         title: 'RevelationsAI',
         theme: RAITheme.light,
         darkTheme: RAITheme.dark,
-        themeMode: ref.watch(currentUserPreferencesProvider).value?.themeMode ?? ThemeMode.system,
+        themeMode: ref.watch(currentUserPreferencesProvider).value?.themeMode ??
+            ThemeMode.system,
         routerConfig: router,
       ),
     );

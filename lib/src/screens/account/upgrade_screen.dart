@@ -176,6 +176,7 @@ class UpgradeScreen extends HookConsumerWidget {
                                 ),
                               ],
                             ),
+                            textAlign: TextAlign.center,
                           ),
                           Text.rich(
                             TextSpan(
