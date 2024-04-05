@@ -36,7 +36,7 @@ flutter build ios --config-only \
   --dart-define "API_URL=$API_URL" \
   --dart-define "CHAT_API_URL=$CHAT_API_URL" \
   --dart-define "REVENUECAT_APP_STORE_API_KEY=$REVENUECAT_APP_STORE_API_KEY" \
-  --dart-define "NEW_RELIC_IOS_APP_TOKEN=$NEW_RELIC_IOS_APP_TOKEN"
+  --dart-define "SENTRY_DSN=$SENTRY_DSN"
 
 # Install CocoaPods using Homebrew.
 HOMEBREW_NO_AUTO_UPDATE=1 # disable homebrew's automatic updates.

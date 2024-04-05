@@ -25,7 +25,7 @@ env:
 
   REVENUECAT_PLAY_STORE_API_KEY: ${{ secrets.REVENUECAT_PLAY_STORE_API_KEY }}
 
-  NEW_RELIC_ANDROID_APP_TOKEN: ${{ secrets.NEW_RELIC_ANDROID_APP_TOKEN }}
+  SENTRY_DSN: ${{ vars.SENTRY_DSN }}
 
   ENCODED_ANDROID_KEYSTORE: ${{ secrets.ENCODED_ANDROID_KEYSTORE }}
   ANDROID_STORE_PASSWORD: ${{ secrets.ANDROID_STORE_PASSWORD }}
@@ -84,7 +84,7 @@ jobs:
             --dart-define API_URL=$API_URL \
             --dart-define CHAT_API_URL=$CHAT_API_URL \
             --dart-define REVENUECAT_PLAY_STORE_API_KEY=$REVENUECAT_PLAY_STORE_API_KEY \
-            --dart-define NEW_RELIC_ANDROID_APP_TOKEN=$NEW_RELIC_ANDROID_APP_TOKEN
+            --dart-define SENTRY_DSN=$SENTRY_DSN
       - name: Archive Obfuscation Mapping
         uses: actions/upload-artifact@v2
         with:

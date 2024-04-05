@@ -952,14 +952,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.0.0"
-  newrelic_mobile:
-    dependency: "direct main"
-    description:
-      name: newrelic_mobile
-      sha256: "38a7bab1a76e6e1f092028c654d24bb7717c50ded0c3b115d5422cf028745754"
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.0.8"
   octo_image:
     dependency: transitive
     description:
@@ -980,10 +972,10 @@ packages:
     dependency: "direct main"
     description:
       name: package_info_plus
-      sha256: cb44f49b6e690fa766f023d5b22cac6b9affe741dd792b6ac7ad4fabe0d7b097
+      sha256: "7e76fad405b3e4016cd39d08f455a4eb5199723cf594cd1b8916d47140d93017"
       url: "https://pub.dev"
     source: hosted
-    version: "6.0.0"
+    version: "4.2.0"
   package_info_plus_platform_interface:
     dependency: transitive
     description:
@@ -1184,6 +1176,22 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.3.0"
+  sentry:
+    dependency: transitive
+    description:
+      name: sentry
+      sha256: a460aa48568d47140dd0557410b624d344ffb8c05555107ac65035c1097cf1ad
+      url: "https://pub.dev"
+    source: hosted
+    version: "7.18.0"
+  sentry_flutter:
+    dependency: "direct main"
+    description:
+      name: sentry_flutter
+      sha256: "3d0d1d4e0e407d276ae8128d123263ccbc37e988bae906765efd6f37d544f4c6"
+      url: "https://pub.dev"
+    source: hosted
+    version: "7.18.0"
   share_plus:
     dependency: "direct main"
     description:

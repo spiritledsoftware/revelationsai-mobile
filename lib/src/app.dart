@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:newrelic_mobile/newrelic_navigation_observer.dart';
 import 'package:revelationsai/src/constants/colors.dart';
 import 'package:revelationsai/src/constants/theme.dart';
 import 'package:revelationsai/src/providers/chat/current_id.dart';
@@ -37,7 +36,6 @@ class RAIApp extends HookConsumerWidget {
 
     final router = useMemoized(
       () => GoRouter(
-        observers: kDebugMode ? null : [NewRelicNavigationObserver()],
         navigatorKey: rootNavigatorKey.value,
         refreshListenable: routerListenableNotifier,
         debugLogDiagnostics: true,

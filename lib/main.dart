@@ -7,11 +7,10 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:newrelic_mobile/config.dart';
-import 'package:newrelic_mobile/newrelic_mobile.dart';
 import 'package:revelationsai/firebase_options.dart';
 import 'package:revelationsai/src/app.dart';
-import 'package:revelationsai/src/constants/new_relic.dart';
+import 'package:revelationsai/src/constants/sentry.dart';
+import 'package:sentry_flutter/sentry_flutter.dart';
 
 const notificationTopics = {'daily-devo', 'daily-query'};
 
@@ -41,7 +40,8 @@ Future<void> main() async {
   });
 
   await MobileAds.instance.initialize().then((value) async {
-    const testDeviceId = String.fromEnvironment('TEST_DEVICE_ID', defaultValue: "");
+    const testDeviceId =
+        String.fromEnvironment('TEST_DEVICE_ID', defaultValue: "");
     if (testDeviceId.isNotEmpty) {
       await MobileAds.instance.updateRequestConfiguration(
         RequestConfiguration(
@@ -62,7 +62,8 @@ Future<void> main() async {
         break;
       case "chat-query":
         final query = initMessage.data['query'] ?? '';
-        initLocation = '/?redirect=${Uri.encodeComponent('/chat?query=$query')}';
+        initLocation =
+            '/?redirect=${Uri.encodeComponent('/chat?query=$query')}';
         break;
       default:
         break;
@@ -70,35 +71,20 @@ Future<void> main() async {
   }
 
   if (!kDebugMode) {
-    String appToken = '';
-    if (Platform.isIOS) {
-      appToken = RAINewRelic.iosAppToken;
-    } else if (Platform.isAndroid) {
-      appToken = RAINewRelic.androidAppToken;
-    }
-    Config config = Config(
-      accessToken: appToken,
-      analyticsEventEnabled: true,
-      networkErrorRequestEnabled: true,
-      networkRequestEnabled: true,
-      crashReportingEnabled: true,
-      interactionTracingEnabled: true,
-      httpResponseBodyCaptureEnabled: true,
-      loggingEnabled: true,
-      webViewInstrumentation: true,
-      printStatementAsEventsEnabled: true,
-      httpInstrumentationEnabled: true,
-    );
-    NewrelicMobile.instance.start(config, () {
-      debugPrint('Running flutter app with New Relic');
-      runApp(
+    await SentryFlutter.init(
+      (options) {
+        options.dsn = RAISentry.dsn;
+        options.tracesSampleRate = 1.0;
+        options.profilesSampleRate = 1.0;
+      },
+      appRunner: () => runApp(
         ProviderScope(
           child: RAIApp(
             initialLocation: initLocation,
           ),
         ),
-      );
-    });
+      ),
+    );
   } else {
     debugPrint('Running flutter app in debug mode');
     runApp(
