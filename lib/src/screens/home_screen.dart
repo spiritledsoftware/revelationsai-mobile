@@ -33,7 +33,7 @@ const greetings = {
   "Grace to you",
   "Greetings",
   "The Lord be with you",
-  "Joy in Lord to you",
+  "Joy in the Lord to you",
   "Pax Domini",
 };
 
